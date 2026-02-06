@@ -37,6 +37,9 @@ coverage/
 *.temp
 .cache/
 
+# Git worktrees
+.worktrees/
+
 # Logs
 logs/
 *.log
