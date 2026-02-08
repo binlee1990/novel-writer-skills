@@ -73,6 +73,25 @@ resource-loading:
 - 检查清单辅助资源的优先级**低于**宪法和规格
 - 检查清单辅助资源用于**生成更全面的检查项**
 
+### 🆕 Layer 3: 关键词触发（可选）
+
+**触发时机**: 命令参数（如 `/checklist --focus 节奏`）
+
+**配置**: 读取 `specification.md` 的 `resource-loading.keyword-triggers.enabled`
+
+**如果 `enabled: true` 且参数包含关键词**:
+
+检测参数中的关键词，提示加载相关资源：
+
+```markdown
+💡 检测到 "--focus 节奏"，建议加载：
+- craft/pacing.md
+
+是否加载？ [Y/N]
+```
+
+**默认行为**: 如果未配置 keyword-triggers，此步骤不执行。
+
 ## 执行流程
 
 ### 1. 识别检查类型
