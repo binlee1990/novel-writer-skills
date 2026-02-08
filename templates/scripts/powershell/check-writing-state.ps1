@@ -144,6 +144,9 @@ function Generate-LoadReport {
         [string]$StoryDir
     )
 
+    # Phase 3: 性能监控
+    $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+
     $specFile = Join-Path $StoryDir "specification.md"
     $warnings = @()
 
@@ -239,6 +242,13 @@ function Generate-LoadReport {
     # 仅在缓存命中时添加 cache_hint
     if ($cached) {
         $report.cache_hint = $cacheHint
+    }
+
+    # Phase 3: 性能指标
+    $stopwatch.Stop()
+    $report.performance = @{
+        generation_time_ms = $stopwatch.ElapsedMilliseconds
+        cache_hit = $cached
     }
 
     return $report | ConvertTo-Json -Depth 10

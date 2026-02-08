@@ -91,6 +91,28 @@ mark_resource_loaded() {
     fi
 }
 
+# ============================================
+# Phase 3: 缓存文件清理机制
+# ============================================
+#
+# 清理超过 24 小时的旧缓存文件，避免磁盘空间浪费
+# 防御性设计：缓存目录不存在时直接返回
+
+cleanup_old_cache() {
+    local cache_dir="$PROJECT_ROOT/.specify/.cache"
+
+    # 缓存目录不存在，无需清理
+    if [ ! -d "$cache_dir" ]; then
+        return
+    fi
+
+    # 删除超过 24 小时未修改的缓存文件
+    find "$cache_dir" -name "*.json" -type f -mtime +1 -delete 2>/dev/null || true
+
+    # 删除空目录
+    find "$cache_dir" -type d -empty -delete 2>/dev/null || true
+}
+
 # 预加载文件修改时间到缓存
 # 参数: $@ = 文件路径列表
 # 说明: 由于 Bash 命令替换会创建子shell，我们使用预加载策略
@@ -231,6 +253,9 @@ if [ "$PRELOAD_FILES_PENDING" = true ]; then
     preload_file_mtimes "${PRELOAD_FILE_LIST[@]}"
     PRELOAD_FILES_PENDING=false
 fi
+
+# Phase 3: 清理旧缓存（轻量级，不影响性能）
+cleanup_old_cache
 
 # 检查方法论文档
 check_methodology_docs() {
@@ -595,6 +620,14 @@ check_skills_available() {
 
 # 生成资源加载报告（JSON 格式）
 generate_load_report() {
+    # Phase 3: 性能监控
+    local start_time
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        start_time=$(python3 -c 'import time; print(int(time.time() * 1000))' 2>/dev/null || date +%s)
+    else
+        start_time=$(date +%s%3N 2>/dev/null || date +%s)
+    fi
+
     local spec_file="$STORY_DIR/specification.md"
 
     local knowledge_base_files=(
@@ -755,6 +788,21 @@ generate_load_report() {
     echo "    ]"
 
     echo "  },"
+
+    # Phase 3: 性能指标
+    local end_time
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        end_time=$(python3 -c 'import time; print(int(time.time() * 1000))' 2>/dev/null || date +%s)
+    else
+        end_time=$(date +%s%3N 2>/dev/null || date +%s)
+    fi
+    local generation_time=$((end_time - start_time))
+
+    echo "  \"performance\": {"
+    echo "    \"generation_time_ms\": $generation_time,"
+    echo "    \"cache_hit\": $cached"
+    echo "  },"
+
     echo "  \"warnings\": ["
     # 输出 warnings 列表
     first=true
