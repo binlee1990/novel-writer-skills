@@ -498,14 +498,17 @@ test -f spec/presets/rhythm-config.json && echo "found" || echo "not-found"
         {
           "chapter": "chapter-03",
           "description": "发现第一条线索",
-          "importance": "high"
+          "importance": "high",
+          "status": "planned"
         },
         {
           "chapter": "chapter-10",
-          "description": "重大转折：发现内幕",
-          "importance": "critical"
+          "description": "重大转折:发现内幕",
+          "importance": "critical",
+          "status": "planned"
         }
-      ]
+      ],
+      "events": []
     },
     {
       "id": "支线-001",
@@ -514,7 +517,10 @@ test -f spec/presets/rhythm-config.json && echo "found" || echo "not-found"
       "description": "主角与女主的感情线",
       "relatedTo": ["主线-001"],
       "startChapter": "chapter-02",
-      "endChapter": "chapter-18"
+      "endChapter": "chapter-18",
+      "status": "planned",
+      "progress": 0,
+      "events": []
     }
   ],
   "foreshadowing": [
@@ -571,8 +577,9 @@ test -f spec/presets/rhythm-config.json && echo "found" || echo "not-found"
 
 追加更新记录到 `stories/*/spec/tracking/tracking-log.md`：
 
-**日志格式**:
-```markdown
+**日志格式示例**:
+
+```
 ## [时间戳] - /plan 创作计划
 
 ### 命令执行
@@ -585,7 +592,9 @@ test -f spec/presets/rhythm-config.json && echo "found" || echo "not-found"
 ### 自动更新内容
 
 #### plot-tracker.json
-```diff
+
+使用 diff 格式展示更新（示例）:
+
 + {
 +   "plotLines": [
 +     {
@@ -611,7 +620,6 @@ test -f spec/presets/rhythm-config.json && echo "found" || echo "not-found"
 +     }
 +   ]
 + }
-```
 
 ### 更新依据
 - **情节线提取**: 从 creative-plan.md 第 2.3 节提取 5 条情节线定义
