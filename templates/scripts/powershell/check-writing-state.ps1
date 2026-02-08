@@ -18,6 +18,30 @@ param(
 $script:FileMTimeCache = @{}
 $script:PreloadCompleted = $false
 
+# ============================================
+# Phase 2: 资源去重机制
+# ============================================
+#
+# 用于避免在单次脚本执行中重复检查同一资源文件
+
+# Phase 2: 资源去重 HashTable
+$script:loadedResourcesSet = @{}
+
+# Phase 2: 检查资源是否已加载
+# 参数: Path (string) - 资源路径
+# 返回: $true（已加载），$false（未加载）
+function Is-ResourceLoaded {
+    param([string]$path)
+    return $script:loadedResourcesSet.ContainsKey($path)
+}
+
+# Phase 2: 标记资源为已加载
+# 参数: Path (string) - 资源路径
+function Mark-ResourceLoaded {
+    param([string]$path)
+    $script:loadedResourcesSet[$path] = $true
+}
+
 # 预加载文件修改时间到缓存
 # 参数: FilePathList (string[]) - 文件路径列表
 # 说明: 预加载策略避免多次磁盘访问
@@ -150,16 +174,40 @@ function Generate-LoadReport {
         }
     }
 
-    # 检查文件存在性（使用缓存）
+    # 检查文件存在性（使用缓存 + Phase 2: 资源去重）
     foreach ($kb in $knowledgeBaseFiles) {
-        $fullPath = Join-Path $ProjectRoot "templates/knowledge-base/$kb"
+        $kbPath = "templates/knowledge-base/$kb"
+
+        # Phase 2: 资源去重检查
+        if (Is-ResourceLoaded $kbPath) {
+            # 资源已检查过，跳过
+            continue
+        }
+
+        # 标记为已加载
+        Mark-ResourceLoaded $kbPath
+
+        # 检查文件是否存在（使用完整路径）
+        $fullPath = Join-Path $ProjectRoot $kbPath
         if (-not (Test-FileExistsCached $fullPath)) {
             $warnings += "知识库文件不存在: $kb"
         }
     }
 
     foreach ($skill in $skillsFiles) {
-        $fullPath = Join-Path $ProjectRoot "templates/skills/$skill/SKILL.md"
+        $skillPath = "templates/skills/$skill/SKILL.md"
+
+        # Phase 2: 资源去重检查
+        if (Is-ResourceLoaded $skillPath) {
+            # 资源已检查过，跳过
+            continue
+        }
+
+        # 标记为已加载
+        Mark-ResourceLoaded $skillPath
+
+        # 检查文件是否存在（使用完整路径）
+        $fullPath = Join-Path $ProjectRoot $skillPath
         if (-not (Test-FileExistsCached $fullPath)) {
             $warnings += "Skill 文件不存在: $skill/SKILL.md"
         }
