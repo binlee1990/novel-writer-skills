@@ -77,6 +77,63 @@ scripts:
 - 计划文件：`stories/*/creative-plan.md`
 - 任务文件：`stories/*/tasks.md`
 
+### A1.1. 🆕 加载分析辅助资源
+
+**运行脚本** `{SCRIPT}` 检查并加载资源（复用 check-writing-state.sh）：
+
+```bash
+# Bash 环境
+bash .specify/scripts/bash/check-writing-state.sh --json
+
+# PowerShell 环境
+powershell -File .specify/scripts/powershell/check-writing-state.ps1 -Json
+```
+
+**解析资源加载报告**：
+- 检查 `status` 是否为 "ready"
+- 记录 `resources` 列表，用于分析参考
+
+**加载分析辅助资源（基于配置）**：
+
+#### Layer 1: 默认推断
+
+**如果 specification.md 未配置 resource-loading.analysis**，或 `auto-load: true`（默认），自动加载：
+
+**Knowledge-base (craft)**:
+- `templates/knowledge-base/craft/dialogue.md`（对话质量检查）
+- `templates/knowledge-base/craft/scene-structure.md`（场景结构验证）
+- `templates/knowledge-base/craft/character-arc.md`（角色弧线一致性）
+- `templates/knowledge-base/craft/pacing.md`（节奏分析）
+- `templates/knowledge-base/craft/show-not-tell.md`（Show vs Tell 检查）
+
+**Knowledge-base (requirements)**:
+- 根据 `writing-requirements` 字段加载对应的需求文档（如 anti-ai-v4.md）
+
+**Skills (quality-assurance)**:
+- `templates/skills/quality-assurance/consistency-checker/SKILL.md`（如存在）
+- `templates/skills/quality-assurance/workflow-guide/SKILL.md`（如存在）
+
+#### Layer 2: 配置覆盖
+
+如果 `specification.md` 配置了 `resource-loading.analysis`（分析专用配置）：
+
+```yaml
+resource-loading:
+  analysis:  # /analyze 命令专用配置
+    knowledge-base:
+      craft:
+        - dialogue  # 只检查对话质量
+        - pacing    # 只检查节奏
+    skills:
+      quality-assurance:
+        - consistency-checker
+        - "!workflow-guide"  # 分析时不需要工作流引导
+```
+
+**加载优先级**：
+- 分析辅助资源的优先级**低于**宪法和规格
+- 分析辅助资源的优先级**高于**待分析内容
+
 ### A2. 覆盖率分析
 
 检查所有规格需求是否都有对应的计划和任务：
