@@ -94,19 +94,19 @@ $StoryDir = Join-Path "stories" $StoryName
 if (-not $script:PreloadCompleted) {
     $preloadFileList = @(
         # 知识库文件
-        "$ProjectRoot\templates\knowledge-base\craft\dialogue.md"
-        "$ProjectRoot\templates\knowledge-base\craft\scene-structure.md"
-        "$ProjectRoot\templates\knowledge-base\craft\character-arc.md"
-        "$ProjectRoot\templates\knowledge-base\craft\pacing.md"
-        "$ProjectRoot\templates\knowledge-base\craft\show-not-tell.md"
+        (Join-Path $ProjectRoot "templates/knowledge-base/craft/dialogue.md")
+        (Join-Path $ProjectRoot "templates/knowledge-base/craft/scene-structure.md")
+        (Join-Path $ProjectRoot "templates/knowledge-base/craft/character-arc.md")
+        (Join-Path $ProjectRoot "templates/knowledge-base/craft/pacing.md")
+        (Join-Path $ProjectRoot "templates/knowledge-base/craft/show-not-tell.md")
         # Skill 文件
-        "$ProjectRoot\templates\skills\writing-techniques\dialogue-techniques\SKILL.md"
-        "$ProjectRoot\templates\skills\writing-techniques\scene-structure\SKILL.md"
-        "$ProjectRoot\templates\skills\writing-techniques\character-arc\SKILL.md"
-        "$ProjectRoot\templates\skills\writing-techniques\pacing-control\SKILL.md"
-        "$ProjectRoot\templates\skills\quality-assurance\consistency-checker\SKILL.md"
+        (Join-Path $ProjectRoot "templates/skills/writing-techniques/dialogue-techniques/SKILL.md")
+        (Join-Path $ProjectRoot "templates/skills/writing-techniques/scene-structure/SKILL.md")
+        (Join-Path $ProjectRoot "templates/skills/writing-techniques/character-arc/SKILL.md")
+        (Join-Path $ProjectRoot "templates/skills/writing-techniques/pacing-control/SKILL.md")
+        (Join-Path $ProjectRoot "templates/skills/quality-assurance/consistency-checker/SKILL.md")
         # 规格文件
-        "$StoryDir\specification.md"
+        (Join-Path $StoryDir "specification.md")
     )
 
     Preload-FileMTimes -FilePathList $preloadFileList

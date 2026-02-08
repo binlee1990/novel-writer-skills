@@ -8,8 +8,8 @@ Write-Host ""
 
 # 测试 1: 存在的文件
 Write-Host "测试 1: 存在的文件" -ForegroundColor Yellow
-Preload-FileMTimes -FilePathList @("templates\config\keyword-mappings.json")
-if (Test-FileExistsCached "templates\config\keyword-mappings.json") {
+Preload-FileMTimes -FilePathList @("templates/config/keyword-mappings.json")
+if (Test-FileExistsCached "templates/config/keyword-mappings.json") {
     Write-Host "✅ 存在的文件检测正确" -ForegroundColor Green
 } else {
     Write-Host "❌ 存在的文件检测错误" -ForegroundColor Red
@@ -18,8 +18,8 @@ if (Test-FileExistsCached "templates\config\keyword-mappings.json") {
 # 测试 2: 不存在的文件
 Write-Host ""
 Write-Host "测试 2: 不存在的文件" -ForegroundColor Yellow
-Preload-FileMTimes -FilePathList @("templates\nonexistent-file.md")
-if (Test-FileExistsCached "templates\nonexistent-file.md") {
+Preload-FileMTimes -FilePathList @("templates/nonexistent-file.md")
+if (Test-FileExistsCached "templates/nonexistent-file.md") {
     Write-Host "❌ 不存在的文件被误判为存在" -ForegroundColor Red
 } else {
     Write-Host "✅ 不存在的文件检测正确" -ForegroundColor Green
@@ -28,8 +28,8 @@ if (Test-FileExistsCached "templates\nonexistent-file.md") {
 # 测试 3: 检查缓存值
 Write-Host ""
 Write-Host "测试 3: 检查缓存值" -ForegroundColor Yellow
-$mtimeExisting = Get-FileMTimeFromCache "templates\config\keyword-mappings.json"
-$mtimeMissing = Get-FileMTimeFromCache "templates\nonexistent-file.md"
+$mtimeExisting = Get-FileMTimeFromCache "templates/config/keyword-mappings.json"
+$mtimeMissing = Get-FileMTimeFromCache "templates/nonexistent-file.md"
 
 Write-Host "存在文件的 mtime: $mtimeExisting"
 Write-Host "不存在文件的 mtime: $mtimeMissing (应该为 null)"
@@ -44,9 +44,9 @@ if ($null -ne $mtimeExisting -and $null -eq $mtimeMissing) {
 Write-Host ""
 Write-Host "测试 4: 批量预加载混合文件" -ForegroundColor Yellow
 $mixedFiles = @(
-    "templates\config\keyword-mappings.json"   # 存在
-    "templates\nonexistent1.md"                # 不存在
-    "templates\nonexistent2.md"                # 不存在
+    "templates/config/keyword-mappings.json"   # 存在
+    "templates/nonexistent1.md"                # 不存在
+    "templates/nonexistent2.md"                # 不存在
 )
 Preload-FileMTimes -FilePathList $mixedFiles
 
