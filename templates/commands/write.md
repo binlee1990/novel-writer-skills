@@ -182,32 +182,291 @@ resource-loading:
 - 如果配置了 `resource-loading.knowledge-base.styles`，覆盖 `writing-style` 字段
 - 如果配置了 `resource-loading.knowledge-base.requirements`，覆盖 `writing-requirements` 字段
 
-#### Layer 3: 关键词触发（运行时）
+### 🆕 Layer 3: 运行时关键词触发（动态加载）
 
-**如果 keyword-triggers.enabled: true**（默认启用），在写作过程中：
+**触发时机**:
+1. 用户在执行 `/write` 命令时提供的参数中（如 `--focus 节奏控制`）
+2. 读取当前任务描述时（从 `tasks.md` 提取）
+3. 用户在交互过程中的输入中
 
-1. **检测用户输入关键词**
-   - 从用户的写作任务描述、备注中提取关键词
-   - 参考 `templates/config/keyword-mappings.json` 进行匹配
+**检查配置**:
 
-2. **提示加载相关资源**
-   ```markdown
-   💡 检测到关键词："对话"
-   建议加载以下资源：
-   - templates/knowledge-base/craft/dialogue.md
-   - templates/skills/writing-techniques/dialogue-techniques/SKILL.md
+读取 `specification.md` 的 `resource-loading.keyword-triggers` 配置：
 
-   是否加载？[Y/n]
-   ```
+```yaml
+resource-loading:
+  keyword-triggers:
+    enabled: true  # 默认启用，false 则跳过此步骤
+    custom-mappings:
+      "情感节奏": "knowledge-base/craft/pacing.md"
+      "甜度": "knowledge-base/genres/romance.md"
+```
 
-3. **去重检查**
-   - 如果资源已通过 Layer 1 或 Layer 2 加载，不重复提示
-   - 维护已加载资源列表
+**如果 `enabled: false`**，跳过关键词触发机制。
 
-**关键词映射表位置**: `templates/config/keyword-mappings.json`
+**如果 `enabled: true` 或未配置**（默认启用），执行以下流程：
 
-**自定义映射优先级**:
-- specification.md 中的 `custom-mappings` > 默认 `keyword-mappings.json`
+#### 3.1. 收集待扫描文本
+
+**收集以下来源的文本**:
+1. 命令参数中的文本（如 `--focus 对话技巧`）
+2. 当前任务描述（从 `tasks.md` 读取当前任务的 description 字段）
+3. 用户在写作过程中的交互输入（如提示 "这段节奏太慢了"）
+
+**拼接文本**:
+```javascript
+const textToScan = [
+  commandArgs,      // 命令参数
+  currentTaskDesc,  // 任务描述
+  userInput         // 用户输入
+].join('\n');
+```
+
+#### 3.2. 加载关键词映射表
+
+**读取文件**: `templates/config/keyword-mappings.json`
+
+**解析结构**:
+```json
+{
+  "mappings": {
+    "craft-knowledge": {
+      "pacing": {
+        "keywords": ["节奏", "拖沓", "太快", "太慢"],
+        "resources": [
+          "templates/knowledge-base/craft/pacing.md",
+          "templates/skills/writing-techniques/pacing-control/SKILL.md"
+        ],
+        "priority": 1
+      }
+    }
+  },
+  "regex-patterns": {
+    "pacing": "节奏|拖沓|太快|太慢|过快|过慢"
+  }
+}
+```
+
+**合并自定义映射**:
+
+如果 `specification.md` 配置了 `keyword-triggers.custom-mappings`，合并到映射表中：
+
+```javascript
+const customMappings = spec.resourceLoading?.keywordTriggers?.customMappings || {};
+
+// 为每个自定义映射创建条目
+for (const [keyword, resourcePath] of Object.entries(customMappings)) {
+  mappings['custom-' + keyword] = {
+    keywords: [keyword],
+    resources: [resourcePath],
+    priority: 0  // 自定义映射优先级最高
+  };
+}
+```
+
+#### 3.3. 执行关键词匹配
+
+**遍历所有映射条目**:
+
+```javascript
+const matched = [];
+
+for (const [category, items] of Object.entries(mappings)) {
+  for (const [name, config] of Object.entries(items)) {
+    // 使用预定义正则或构建正则
+    const pattern = regexPatterns[name] || config.keywords.join('|');
+    const regex = new RegExp(pattern, 'i');  // 忽略大小写
+
+    if (regex.test(textToScan)) {
+      matched.push({
+        category,
+        name,
+        resources: config.resources,
+        priority: config.priority,
+        matchedKeyword: textToScan.match(regex)[0]
+      });
+    }
+  }
+}
+```
+
+**按优先级排序**:
+```javascript
+matched.sort((a, b) => a.priority - b.priority);  // 数字越小优先级越高
+```
+
+#### 3.4. 资源去重检查
+
+**检查已加载资源**:
+
+维护一个已加载资源列表（从 Layer 1 和 Layer 2 的加载结果中获取）：
+
+```javascript
+const loadedResources = [
+  ...layer1Resources,
+  ...layer2Resources
+];
+
+const newResources = [];
+
+for (const match of matched) {
+  for (const resource of match.resources) {
+    // 规范化路径（去除前缀 templates/）
+    const normalizedPath = resource.replace(/^templates\//, '');
+
+    // 检查是否已加载
+    const isLoaded = loadedResources.some(loaded =>
+      loaded.includes(normalizedPath) || normalizedPath.includes(loaded)
+    );
+
+    if (!isLoaded && !newResources.includes(resource)) {
+      newResources.push({
+        resource,
+        trigger: match.name,
+        keyword: match.matchedKeyword,
+        category: match.category
+      });
+    }
+  }
+}
+```
+
+#### 3.5. 用户提示和确认
+
+**如果有新资源待加载**，显示提示：
+
+```markdown
+---
+🔍 **关键词触发检测**
+
+检测到以下关键词，建议加载相关资源：
+
+1. **"节奏"** → 节奏控制 (pacing)
+   - 知识库: craft/pacing.md
+   - 技巧: writing-techniques/pacing-control
+
+2. **"对话"** → 对话技巧 (dialogue)
+   - 知识库: craft/dialogue.md
+   - 技巧: writing-techniques/dialogue-techniques
+
+是否加载这些资源？
+[Y] 全部加载  [N] 跳过  [S] 选择性加载
+---
+```
+
+**处理用户响应**:
+
+- **Y (全部加载)**: 加载所有建议的资源
+- **N (跳过)**: 不加载任何资源，继续写作流程
+- **S (选择性加载)**: 逐个询问
+
+**选择性加载流程**:
+```markdown
+### 1. 节奏控制 (pacing)
+
+资源：
+- craft/pacing.md
+- writing-techniques/pacing-control
+
+是否加载？ [Y/N]
+```
+
+#### 3.6. 动态资源加载
+
+**对于确认加载的资源**:
+
+```javascript
+for (const item of confirmedResources) {
+  const { resource, trigger, keyword } = item;
+
+  // 加载资源内容
+  const content = await readFile(resource);
+
+  // 添加到上下文
+  context.push({
+    source: resource,
+    content: content,
+    loadedBy: 'keyword-trigger',
+    trigger: trigger,
+    keyword: keyword
+  });
+
+  // 记录到日志
+  console.log(`✓ 动态加载: ${resource} (触发词: "${keyword}")`);
+}
+```
+
+**加载完成提示**:
+```markdown
+✅ 已加载 2 个资源：
+  - craft/pacing.md
+  - writing-techniques/pacing-control
+
+继续写作流程...
+```
+
+#### 3.7. 交互过程中的实时触发
+
+**在写作执行过程中**，每当用户提供新的输入时：
+
+```javascript
+// 用户输入新的指令或反馈
+const userFeedback = getUserInput();
+
+// 重新扫描关键词
+const runtimeMatched = scanKeywords(userFeedback);
+
+// 过滤已加载资源
+const runtimeNew = filterAlreadyLoaded(runtimeMatched, loadedResources);
+
+// 如果有新资源，提示用户
+if (runtimeNew.length > 0) {
+  promptUserToLoad(runtimeNew);
+}
+```
+
+**实时提示示例**:
+```markdown
+💡 **提示**: 检测到关键词 "节奏太慢"，是否加载 pacing-control 技巧？ [Y/N]
+```
+
+---
+
+### 🆕 配置示例
+
+**启用关键词触发（默认）**:
+```yaml
+# specification.md
+---
+resource-loading:
+  keyword-triggers:
+    enabled: true
+---
+```
+
+**禁用关键词触发**:
+```yaml
+---
+resource-loading:
+  keyword-triggers:
+    enabled: false
+---
+```
+
+**添加自定义关键词映射**:
+```yaml
+---
+resource-loading:
+  keyword-triggers:
+    enabled: true
+    custom-mappings:
+      "情感节奏": "knowledge-base/craft/pacing.md"
+      "甜度": "knowledge-base/genres/romance.md"
+      "虐文": "knowledge-base/requirements/romance-angst.md"
+---
+```
+
+**自定义映射优先级最高**（priority: 0），会优先于内置映射表。
 
 #### 资源加载报告集成
 
