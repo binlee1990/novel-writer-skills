@@ -79,14 +79,14 @@ scripts:
 
 ### A1.1. 🆕 加载分析辅助资源
 
-**运行脚本** `{SCRIPT}` 检查并加载资源（复用 check-writing-state.sh）：
+**运行脚本** `{SCRIPT}` 检查分析环境并加载资源：
 
 ```bash
 # Bash 环境
-bash .specify/scripts/bash/check-writing-state.sh --json
+bash {SCRIPT} --json
 
-# PowerShell 环境
-powershell -File .specify/scripts/powershell/check-writing-state.ps1 -Json
+# PowerShell 环境（如果是 .ps1 脚本）
+powershell -File {SCRIPT} -Json
 ```
 
 **解析资源加载报告**：
@@ -94,6 +94,11 @@ powershell -File .specify/scripts/powershell/check-writing-state.ps1 -Json
 - 记录 `resources` 列表，用于分析参考
 
 **加载分析辅助资源（基于配置）**：
+
+**注意**：/analyze 命令的资源加载策略与 /write 命令略有不同：
+- /analyze 需要**所有** craft 知识库用于质量对照检查
+- /analyze 需要 quality-assurance skills 用于一致性验证
+- /write 只需要在写作时用到的 craft 知识库
 
 #### Layer 1: 默认推断
 
