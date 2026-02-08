@@ -117,6 +117,54 @@ test -f spec/presets/rhythm-config.json && echo "found" || echo "not-found"
 - 如果存在未澄清的关键决策，提示先运行 `/clarify`
 - 或接受用户明确指示跳过
 
+### 🆕 Layer 3: 运行时关键词触发
+
+**触发时机**:
+- 用户执行 `/plan` 命令时的参数
+- 读取 `creative-plan.md` 当前内容时
+- 用户在规划过程中的输入
+
+**实现逻辑**: 参考 `/write` 命令的 Layer 3 关键词触发机制
+
+**配置**: 读取 `specification.md` 的 `resource-loading.keyword-triggers`
+
+**扫描文本来源**:
+1. 命令参数（如 `/plan 下一章节奏加快`）
+2. 现有计划内容（`creative-plan.md`）
+3. 用户交互输入
+
+**资源去重**: 跳过 Layer 1/2 已加载的资源
+
+**用户确认**:
+```markdown
+🔍 **关键词触发检测**
+
+检测到 "节奏加快"，建议加载：
+- craft/pacing.md
+- writing-techniques/pacing-control
+
+是否加载？ [Y/N/S]
+```
+
+**加载流程**: 与 `/write` 相同
+
+**配置示例**:
+```yaml
+# specification.md
+resource-loading:
+  keyword-triggers:
+    enabled: true  # 默认启用
+    custom-mappings:
+      节奏: [craft/pacing.md, writing-techniques/pacing-control]
+      角色弧线: [craft/character-arc.md, writing-techniques/character-arc]
+      场景: [craft/scene-structure.md, writing-techniques/scene-transitions]
+```
+
+**注意事项**:
+- 关键词检测在 Layer 1/2 完成后执行
+- 避免重复加载已有资源
+- 用户可选择跳过（S）并记录到 tracking-log.md
+
 ### 2. 制定创作计划
 
 创建 `stories/*/creative-plan.md`，包含以下内容：
