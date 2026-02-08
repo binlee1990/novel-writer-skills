@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # 检查写作状态脚本
 # 用于 /write 命令
@@ -6,6 +7,12 @@
 # ============================================
 # Phase 1: 文件时间戳缓存
 # ============================================
+#
+# 缓存值约定:
+# - mtime > 0: 文件存在，值为修改时间戳
+# - mtime = 0: stat 命令失败（权限问题、文件系统错误等）
+# - mtime = -1: 文件不存在（预加载时已确认）
+# - 未缓存: 键不存在于缓存中
 
 # Bash 版本检测
 BASH_MAJOR_VERSION="${BASH_VERSION%%.*}"
@@ -29,15 +36,21 @@ preload_file_mtimes() {
     local mtime
 
     for file_path in "$@"; do
-        # 跳过不存在的文件
-        [ ! -f "$file_path" ] && continue
+        # 文件不存在：记录为 -1
+        if [ ! -f "$file_path" ]; then
+            if [[ "$BASH_MAJOR_VERSION" -ge 4 ]]; then
+                FILE_MTIME_CACHE[$file_path]="-1"
+            else
+                FILE_MTIME_CACHE_KEYS+=("$file_path")
+                FILE_MTIME_CACHE_VALUES+=("-1")
+            fi
+            continue
+        fi
 
-        # 读取文件时间戳
+        # 读取文件时间戳 (macOS/Linux 兼容)
         if [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS
             mtime=$(stat -f "%m" "$file_path" 2>/dev/null || echo "0")
         else
-            # Linux/WSL
             mtime=$(stat -c "%Y" "$file_path" 2>/dev/null || echo "0")
         fi
 
@@ -88,7 +101,18 @@ is_file_cached() {
     fi
 }
 
-set -e
+# 检查文件是否存在（基于缓存）
+# 参数: $1 = 文件路径
+# 返回: 0 = 文件存在, 1 = 文件不存在或未缓存
+is_file_exists_cached() {
+    local file_path="$1"
+    local mtime=$(get_file_mtime "$file_path")
+
+    # mtime > 0: 文件存在
+    # mtime = 0: stat 失败或未缓存
+    # mtime = -1: 文件不存在
+    [[ "$mtime" != "0" && "$mtime" != "-1" ]]
+}
 
 # Source common functions
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -449,8 +473,8 @@ check_knowledge_base_available() {
 
     for file in "${craft_files[@]}"; do
         local full_path="$PROJECT_ROOT/$file"
-        # 使用缓存检查文件是否存在（mtime > 0 表示文件存在）
-        if is_file_cached "$full_path"; then
+        # 使用缓存检查文件是否存在
+        if is_file_exists_cached "$full_path"; then
             available+=("$file")
         else
             missing+=("$file")
@@ -486,7 +510,7 @@ check_skills_available() {
     for dir in "${skill_dirs[@]}"; do
         local skill_file="$PROJECT_ROOT/$dir/SKILL.md"
         # 使用缓存检查文件是否存在
-        if is_file_cached "$skill_file"; then
+        if is_file_exists_cached "$skill_file"; then
             available+=("$dir")
         else
             missing+=("$dir")
@@ -547,14 +571,14 @@ generate_load_report() {
     local warnings=()
     for kb in "${knowledge_base_files[@]}"; do
         local kb_path="$PROJECT_ROOT/templates/knowledge-base/$kb"
-        if ! is_file_cached "$kb_path"; then
+        if ! is_file_exists_cached "$kb_path"; then
             warnings+=("知识库文件不存在: $kb")
         fi
     done
 
     for skill in "${skills_files[@]}"; do
         local skill_path="$PROJECT_ROOT/templates/skills/$skill/SKILL.md"
-        if ! is_file_cached "$skill_path"; then
+        if ! is_file_exists_cached "$skill_path"; then
             warnings+=("Skill 文件不存在: $skill/SKILL.md")
         fi
     done
