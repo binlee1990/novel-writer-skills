@@ -10,6 +10,26 @@ scripts:
 
 用户输入：$ARGUMENTS
 
+## 资源加载（可选）
+
+本命令用于定义项目创作原则，默认不加载额外资源。
+
+### 可选配置
+
+如果需要参考特定风格或要求模板：
+
+```yaml
+resource-loading:
+  constitution:
+    knowledge-base:
+      styles:
+        - natural-voice  # 自然风格
+      requirements:
+        - anti-ai-v4  # 防AI检测要求
+```
+
+**推荐资源**: styles/* 和 requirements/*（作为参考模板）
+
 ## 目标
 
 建立小说创作的核心原则和价值观，形成创作的"宪法"文件。这些原则将指导后续所有创作决策。

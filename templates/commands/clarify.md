@@ -235,3 +235,23 @@ A. 18-25岁  B. 26-35岁  C. 36-45岁
 - **系列规划**：是否为系列作品会影响整体架构和决策
 
 优先级上下文：{ARGS}
+
+## 资源加载（可选）
+
+本命令用于澄清创作需求和规格细节，默认不加载额外资源。
+
+### 可选配置
+
+如果需要参考特定类型或风格的创作规范：
+
+```yaml
+resource-loading:
+  clarify:
+    knowledge-base:
+      genres:
+        - romance  # 言情类型规范
+      requirements:
+        - anti-ai-v4  # 特定创作要求
+```
+
+**推荐资源**: genres/* 和 requirements/*（根据项目类型）

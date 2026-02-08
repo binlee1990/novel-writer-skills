@@ -10,6 +10,26 @@ scripts:
 
 用户输入：$ARGUMENTS
 
+## 资源加载（可选）
+
+本命令用于定义项目规格，可参考类型和风格模板。
+
+### 可选配置
+
+```yaml
+resource-loading:
+  specify:
+    knowledge-base:
+      genres:
+        - romance  # 类型参考
+      styles:
+        - natural-voice  # 风格参考
+      requirements:
+        - anti-ai-v4  # 要求参考
+```
+
+**推荐资源**: genres/*, styles/*, requirements/*（作为规格模板）
+
 ## 目标
 
 像产品规格书（PRD）一样定义故事，明确"要创造什么"而非"如何创造"。支持**渐进式规格定义**，从一句话到完整规格，循序渐进。输出带有 `[需要澄清]` 标记的规格，为后续澄清步骤留出空间。
