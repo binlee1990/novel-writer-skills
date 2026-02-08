@@ -13,7 +13,38 @@ scripts:
 
 ## 前置检查
 
-1. 运行脚本 `{SCRIPT}` 检查创作状态
+1. **运行脚本** `{SCRIPT}` 检查创作状态
+2. **解析资源加载报告**
+
+运行脚本并获取 JSON 格式的资源加载报告：
+
+```bash
+# Bash 环境
+bash {SCRIPT} --json
+
+# PowerShell 环境
+powershell -File {SCRIPT} -Json
+```
+
+**报告格式**：
+```json
+{
+  "status": "ready",
+  "timestamp": "2026-02-08T...",
+  "has_config": true/false,
+  "resources": {
+    "knowledge-base": ["craft/dialogue.md", ...],
+    "skills": ["writing-techniques/dialogue-techniques", ...],
+    "disabled": []
+  },
+  "warnings": []
+}
+```
+
+**处理逻辑**：
+- 如果 `status` 不是 "ready"，终止执行并显示错误
+- 如果 `warnings` 非空，显示警告但继续执行
+- 记录 `resources` 列表，用于后续资源加载
 
 ### 查询协议（必读顺序）
 
