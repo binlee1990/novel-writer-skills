@@ -3,11 +3,101 @@
 # 检查写作状态脚本
 # 用于 /write 命令
 
+# ============================================
+# Phase 1: 文件时间戳缓存
+# ============================================
+
+# Bash 版本检测
+BASH_MAJOR_VERSION="${BASH_VERSION%%.*}"
+
+# 缓存存储（关联数组或线性数组）
+if [[ "$BASH_MAJOR_VERSION" -ge 4 ]]; then
+    # Bash 4.0+: 使用关联数组
+    declare -A FILE_MTIME_CACHE
+else
+    # Bash 3.x: 使用线性数组模拟
+    FILE_MTIME_CACHE_KEYS=()
+    FILE_MTIME_CACHE_VALUES=()
+fi
+
+# 预加载文件修改时间到缓存
+# 参数: $@ = 文件路径列表
+# 说明: 由于 Bash 命令替换会创建子shell，我们使用预加载策略
+#       在脚本初始化时一次性加载所有文件的 mtime
+preload_file_mtimes() {
+    local file_path
+    local mtime
+
+    for file_path in "$@"; do
+        # 跳过不存在的文件
+        [ ! -f "$file_path" ] && continue
+
+        # 读取文件时间戳
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS
+            mtime=$(stat -f "%m" "$file_path" 2>/dev/null || echo "0")
+        else
+            # Linux/WSL
+            mtime=$(stat -c "%Y" "$file_path" 2>/dev/null || echo "0")
+        fi
+
+        # 存入缓存
+        if [[ "$BASH_MAJOR_VERSION" -ge 4 ]]; then
+            FILE_MTIME_CACHE[$file_path]="$mtime"
+        else
+            FILE_MTIME_CACHE_KEYS+=("$file_path")
+            FILE_MTIME_CACHE_VALUES+=("$mtime")
+        fi
+    done
+}
+
+# 获取文件修改时间（从缓存）
+# 参数: $1 = 文件路径
+# 返回: 修改时间戳（秒），如果未缓存则返回 0
+get_file_mtime() {
+    local file_path="$1"
+
+    if [[ "$BASH_MAJOR_VERSION" -ge 4 ]]; then
+        # Bash 4.0+: 关联数组查找
+        echo "${FILE_MTIME_CACHE[$file_path]:-0}"
+    else
+        # Bash 3.x: 线性数组查找
+        for i in "${!FILE_MTIME_CACHE_KEYS[@]}"; do
+            if [[ "${FILE_MTIME_CACHE_KEYS[$i]}" == "$file_path" ]]; then
+                echo "${FILE_MTIME_CACHE_VALUES[$i]}"
+                return 0
+            fi
+        done
+        echo "0"
+    fi
+}
+
+# 检查文件是否已被缓存
+# 参数: $1 = 文件路径
+# 返回: 0 = 已缓存, 1 = 未缓存
+is_file_cached() {
+    local file_path="$1"
+
+    if [[ "$BASH_MAJOR_VERSION" -ge 4 ]]; then
+        [[ ${FILE_MTIME_CACHE[$file_path]+isset} ]]
+    else
+        for key in "${FILE_MTIME_CACHE_KEYS[@]}"; do
+            [[ "$key" == "$file_path" ]] && return 0
+        done
+        return 1
+    fi
+}
+
 set -e
 
 # Source common functions
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
+
+# 预加载文件时间戳缓存（性能优化）
+# 注意：必须在 get_project_root 之前进行，或者在确定项目根目录后再预加载
+# 这里我们延迟到获取 PROJECT_ROOT 之后
+PRELOAD_FILES_PENDING=true
 
 # 检查是否为 checklist 模式
 CHECKLIST_MODE=false
@@ -28,6 +118,31 @@ cd "$PROJECT_ROOT"
 # 获取当前故事
 STORY_NAME=$(get_active_story)
 STORY_DIR="stories/$STORY_NAME"
+
+# 预加载文件时间戳（性能优化）
+if [ "$PRELOAD_FILES_PENDING" = true ]; then
+    # 构建待预加载的文件列表
+    PRELOAD_FILE_LIST=(
+        # 知识库文件
+        "$PROJECT_ROOT/templates/knowledge-base/craft/dialogue.md"
+        "$PROJECT_ROOT/templates/knowledge-base/craft/scene-structure.md"
+        "$PROJECT_ROOT/templates/knowledge-base/craft/character-arc.md"
+        "$PROJECT_ROOT/templates/knowledge-base/craft/pacing.md"
+        "$PROJECT_ROOT/templates/knowledge-base/craft/show-not-tell.md"
+        # Skill 文件
+        "$PROJECT_ROOT/templates/skills/writing-techniques/dialogue-techniques/SKILL.md"
+        "$PROJECT_ROOT/templates/skills/writing-techniques/scene-structure/SKILL.md"
+        "$PROJECT_ROOT/templates/skills/writing-techniques/character-arc/SKILL.md"
+        "$PROJECT_ROOT/templates/skills/writing-techniques/pacing-control/SKILL.md"
+        "$PROJECT_ROOT/templates/skills/quality-assurance/consistency-checker/SKILL.md"
+        # 规格文件
+        "$STORY_DIR/specification.md"
+    )
+
+    # 执行预加载
+    preload_file_mtimes "${PRELOAD_FILE_LIST[@]}"
+    PRELOAD_FILES_PENDING=false
+fi
 
 # 检查方法论文档
 check_methodology_docs() {
@@ -333,7 +448,9 @@ check_knowledge_base_available() {
     )
 
     for file in "${craft_files[@]}"; do
-        if [ -f "$PROJECT_ROOT/$file" ]; then
+        local full_path="$PROJECT_ROOT/$file"
+        # 使用缓存检查文件是否存在（mtime > 0 表示文件存在）
+        if is_file_cached "$full_path"; then
             available+=("$file")
         else
             missing+=("$file")
@@ -367,7 +484,9 @@ check_skills_available() {
     )
 
     for dir in "${skill_dirs[@]}"; do
-        if [ -f "$PROJECT_ROOT/$dir/SKILL.md" ]; then
+        local skill_file="$PROJECT_ROOT/$dir/SKILL.md"
+        # 使用缓存检查文件是否存在
+        if is_file_cached "$skill_file"; then
             available+=("$dir")
         else
             missing+=("$dir")
@@ -424,16 +543,18 @@ generate_load_report() {
         # 当前简化版本，完整解析需要 yq 或 python
     fi
 
-    # 检查文件是否存在，生成警告
+    # 检查文件是否存在，生成警告（使用缓存）
     local warnings=()
     for kb in "${knowledge_base_files[@]}"; do
-        if [ ! -f "$PROJECT_ROOT/templates/knowledge-base/$kb" ]; then
+        local kb_path="$PROJECT_ROOT/templates/knowledge-base/$kb"
+        if ! is_file_cached "$kb_path"; then
             warnings+=("知识库文件不存在: $kb")
         fi
     done
 
     for skill in "${skills_files[@]}"; do
-        if [ ! -f "$PROJECT_ROOT/templates/skills/$skill/SKILL.md" ]; then
+        local skill_path="$PROJECT_ROOT/templates/skills/$skill/SKILL.md"
+        if ! is_file_cached "$skill_path"; then
             warnings+=("Skill 文件不存在: $skill/SKILL.md")
         fi
     done
