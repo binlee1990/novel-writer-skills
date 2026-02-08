@@ -452,3 +452,201 @@ test -f spec/presets/rhythm-config.json && echo "found" || echo "not-found"
 - 保持版本追踪
 
 记住：**好的计划是成功的一半，但要随时准备调整。黄金开篇是硬规则，其他规划可以灵活。**
+
+---
+
+## 🆕 后置处理：plot-tracker 自动更新
+
+**执行时机**: 创作计划完成后，`creative-plan.md` 已写入
+
+**更新策略**: 核心命令（/plan）自动更新，无需用户确认
+
+### 自动更新 plot-tracker.json
+
+#### 更新内容
+
+**基于 creative-plan.md 提取**:
+1. **情节线定义**
+   - 主线情节
+   - 支线情节
+   - 情节线之间的关系
+
+2. **章节情节分配**
+   - 每个章节对应的情节线
+   - 情节推进目标
+   - 关键转折点
+
+3. **伏笔规划**
+   - 计划埋设的伏笔
+   - 伏笔回收章节
+   - 伏笔重要性
+
+**示例更新**:
+```json
+{
+  "plotLines": [
+    {
+      "id": "主线-001",
+      "name": "寻找真相",
+      "type": "main",
+      "description": "主角追寻失踪案真相的过程",
+      "startChapter": "chapter-01",
+      "endChapter": "chapter-20",
+      "status": "planned",
+      "progress": 0,
+      "milestones": [
+        {
+          "chapter": "chapter-03",
+          "description": "发现第一条线索",
+          "importance": "high"
+        },
+        {
+          "chapter": "chapter-10",
+          "description": "重大转折：发现内幕",
+          "importance": "critical"
+        }
+      ]
+    },
+    {
+      "id": "支线-001",
+      "name": "情感发展",
+      "type": "subplot",
+      "description": "主角与女主的感情线",
+      "relatedTo": ["主线-001"],
+      "startChapter": "chapter-02",
+      "endChapter": "chapter-18"
+    }
+  ],
+  "foreshadowing": [
+    {
+      "chapter": "chapter-02",
+      "content": "神秘人物首次出现",
+      "payoffChapter": "chapter-15",
+      "status": "planned",
+      "importance": "high"
+    }
+  ],
+  "meta": {
+    "lastUpdate": "2026-02-08",
+    "plannedBy": "/plan",
+    "totalPlotLines": 5,
+    "completedPlotLines": 0
+  }
+}
+```
+
+#### 更新执行流程
+
+**Step 1: 解析 creative-plan.md**
+
+```markdown
+从刚创建的 `creative-plan.md` 中提取：
+1. 章节架构（第 2.2 节）
+2. 情节线设计（第 2.3 节）
+3. 关键场景规划（第 2.4 节）
+4. 伏笔设置（如有明确规划）
+```
+
+**Step 2: 生成 plot-tracker 初始化内容**
+
+```markdown
+基于提取的信息，生成 plot-tracker.json 的初始结构：
+- 所有情节线的定义
+- 每个情节线的里程碑（milestones）
+- 计划的伏笔列表
+- 元信息（meta）
+```
+
+**Step 3: 自动应用更新**
+
+```markdown
+**无需用户确认**，直接更新文件：
+1. 检查 `spec/tracking/plot-tracker.json` 是否存在
+2. 如果不存在，创建新文件并写入内容
+3. 如果存在，合并新的情节线定义（保留已有的 progress 信息）
+4. 验证 JSON 格式有效性
+```
+
+**Step 4: 记录到 tracking-log.md**
+
+追加更新记录到 `stories/*/spec/tracking/tracking-log.md`：
+
+**日志格式**:
+```markdown
+## [时间戳] - /plan 创作计划
+
+### 命令执行
+- **命令**: `/plan`
+- **故事**: [故事名称]
+- **总章数**: XX 章
+- **执行者**: AI
+- **状态**: 已自动更新
+
+### 自动更新内容
+
+#### plot-tracker.json
+```diff
++ {
++   "plotLines": [
++     {
++       "id": "主线-001",
++       "name": "寻找真相",
++       "type": "main",
++       "startChapter": "chapter-01",
++       "endChapter": "chapter-20",
++       "milestones": [...]
++     },
++     {
++       "id": "支线-001",
++       "name": "情感发展",
++       "type": "subplot",
++       "relatedTo": ["主线-001"]
++     }
++   ],
++   "foreshadowing": [
++     {
++       "chapter": "chapter-02",
++       "content": "神秘人物首次出现",
++       "payoffChapter": "chapter-15"
++     }
++   ]
++ }
+```
+
+### 更新依据
+- **情节线提取**: 从 creative-plan.md 第 2.3 节提取 5 条情节线定义
+- **里程碑提取**: 从章节架构中识别关键转折点
+- **伏笔规划**: 从关键场景规划中提取预设伏笔
+- **关联关系**: 分析情节线之间的依赖和交织关系
+
+---
+```
+
+#### 错误处理
+
+**如果 creative-plan.md 格式不完整**:
+```markdown
+⚠️ 警告：创作计划格式不完整
+- 缺少章节：[缺少的章节名称]
+- 建议：补充完整后再运行 `/plan`
+- 创建基础的 plot-tracker.json（仅包含元信息）
+```
+
+**如果 plot-tracker.json 已存在且有进度数据**:
+```markdown
+⚠️ 警告：plot-tracker.json 已存在
+- 现有情节线：[列出已有的情节线]
+- 现有进度数据：[显示 progress > 0 的情节线]
+- 操作：合并新情节线，保留现有进度
+- 建议：检查是否需要手动调整
+```
+
+#### 向后兼容
+
+如果项目没有 `spec/tracking/` 目录：
+```markdown
+ℹ️ 提示：tracking 目录不存在
+- 建议：运行 `/track --init` 初始化 tracking 系统
+- 或创建 spec/tracking/ 目录
+- 跳过本次更新
+```
