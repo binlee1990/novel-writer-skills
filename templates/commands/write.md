@@ -68,7 +68,7 @@ powershell -File {SCRIPT} -Json
 
 ⚠️ **资源加载说明**: 上述报告提供配置概览，但文件的实际查询顺序仍需遵循以下协议。报告中列出的 `knowledge-base` 和 `skills` 资源会在第三层（智能资源加载）自动加载。
 
-### 查询协议（必读顺序）
+### 查询协议（必读顺序 + 三层资源加载）
 
 ⚠️ **重要**：请严格按照以下顺序查询文档，确保上下文完整且优先级正确。
 
@@ -112,6 +112,123 @@ powershell -File {SCRIPT} -Json
    - 规范文档（requirements）会**叠加**应用（所有配置的规范都生效）
    - 如果未配置，则使用默认的 spec/presets/ 规范
 
+2.6. **🆕 第三层智能资源加载（三层机制）**
+
+**优先级顺序**: Layer 2 配置覆盖 > Layer 1 默认推断 > Layer 3 关键词触发
+
+#### Layer 1: 默认智能推断
+
+**如果 specification.md 未配置 resource-loading**，或 `auto-load: true`（默认），自动加载：
+
+**Knowledge-base (craft)**:
+- `templates/knowledge-base/craft/dialogue.md`
+- `templates/knowledge-base/craft/scene-structure.md`
+- `templates/knowledge-base/craft/character-arc.md`
+- `templates/knowledge-base/craft/pacing.md`
+- `templates/knowledge-base/craft/show-not-tell.md`
+
+**Skills (writing-techniques)**:
+- `templates/skills/writing-techniques/dialogue-techniques/SKILL.md`
+- `templates/skills/writing-techniques/scene-structure/SKILL.md`
+- `templates/skills/writing-techniques/character-arc/SKILL.md`
+- `templates/skills/writing-techniques/pacing-control/SKILL.md`
+
+**⚠️ 优先级说明**：
+- 这些资源的优先级**低于** 第一层（constitution）和第二层（specification）
+- 这些资源的优先级**高于** 第五层（前文内容）和第六层（写作规范细节）
+- 资源内容用于辅助判断和提升质量，不覆盖核心原则
+
+#### Layer 2: 配置覆盖
+
+**如果 specification.md 配置了 resource-loading**，使用配置覆盖默认推断：
+
+```yaml
+---
+resource-loading:
+  auto-load: true  # 或 false（完全禁用默认推断）
+
+  knowledge-base:
+    craft:
+      - dialogue
+      - pacing
+      - "!character-arc"  # ! 前缀表示排除
+    styles:  # 覆盖 writing-style 字段
+      - natural-voice
+    requirements:  # 覆盖 writing-requirements 字段
+      - anti-ai-v4
+
+  skills:
+    writing-techniques:
+      - dialogue-techniques
+      - pacing-control
+    quality-assurance:
+      - consistency-checker
+
+  keyword-triggers:
+    enabled: true  # 是否启用关键词触发（Layer 3）
+    custom-mappings:  # 自定义关键词映射（覆盖默认）
+      "情感节奏": "templates/knowledge-base/craft/pacing.md"
+---
+```
+
+**配置处理逻辑**：
+1. 如果 `auto-load: false`，清空 Layer 1 的默认推断
+2. 如果配置了具体资源列表，使用配置的列表
+3. 如果未配置某个分类（如 craft），使用 Layer 1 的默认推断
+4. `!` 前缀用于排除特定资源（在默认推断基础上减去）
+
+**向后兼容**：
+- 如果未配置 `resource-loading`，保持原有行为（writing-style, writing-requirements）
+- 如果配置了 `resource-loading.knowledge-base.styles`，覆盖 `writing-style` 字段
+- 如果配置了 `resource-loading.knowledge-base.requirements`，覆盖 `writing-requirements` 字段
+
+#### Layer 3: 关键词触发（运行时）
+
+**如果 keyword-triggers.enabled: true**（默认启用），在写作过程中：
+
+1. **检测用户输入关键词**
+   - 从用户的写作任务描述、备注中提取关键词
+   - 参考 `templates/config/keyword-mappings.json` 进行匹配
+
+2. **提示加载相关资源**
+   ```markdown
+   💡 检测到关键词："对话"
+   建议加载以下资源：
+   - templates/knowledge-base/craft/dialogue.md
+   - templates/skills/writing-techniques/dialogue-techniques/SKILL.md
+
+   是否加载？[Y/n]
+   ```
+
+3. **去重检查**
+   - 如果资源已通过 Layer 1 或 Layer 2 加载，不重复提示
+   - 维护已加载资源列表
+
+**关键词映射表位置**: `templates/config/keyword-mappings.json`
+
+**自定义映射优先级**:
+- specification.md 中的 `custom-mappings` > 默认 `keyword-mappings.json`
+
+#### 资源加载报告集成
+
+从步骤 2 获取的 JSON 报告中，`resources` 字段反映了 Layer 1 和 Layer 2 的加载结果：
+
+```json
+{
+  "resources": {
+    "knowledge-base": ["craft/dialogue.md", "craft/pacing.md"],
+    "skills": ["writing-techniques/dialogue-techniques"],
+    "disabled": ["craft/character-arc"]  // ! 前缀排除的资源
+  }
+}
+```
+
+**加载顺序**：
+1. 加载 `knowledge-base` 列表中的所有文件
+2. 加载 `skills` 列表中的所有 SKILL.md
+3. 记录 `disabled` 列表，确保不加载这些资源
+4. 保持与原有查询协议的优先级关系
+
 3. **再查（状态和数据）**：
    - `spec/tracking/character-state.json`（角色状态）
    - `spec/tracking/relationships.json`（关系网络）
@@ -154,6 +271,15 @@ powershell -File {SCRIPT} -Json
 🎨 写作风格和规范（基于配置）：
 ✓ 写作风格：[style-name]（如配置）或 无配置
 ✓ 写作规范：[requirement-1, requirement-2, ...]（如配置）或 无配置
+
+🆕 **三层资源加载（基于配置）**：
+✓ Layer 1 默认推断：[enabled/disabled]
+✓ Layer 2 配置覆盖：[列出加载的 knowledge-base 和 skills]
+✓ Layer 3 关键词触发：[enabled/disabled]
+✓ 已加载资源清单：
+  - Knowledge-base: [列出文件名]
+  - Skills: [列出技巧名]
+  - 排除资源: [列出被 ! 排除的资源]
 
 📊 上下文加载状态：✅ 完成
 ```
