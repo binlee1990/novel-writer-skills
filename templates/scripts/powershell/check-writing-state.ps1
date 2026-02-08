@@ -1,5 +1,10 @@
-# 检查写作状态脚本
+﻿# 检查写作状态脚本
 # 用于 /write 命令
+
+param(
+    [switch]$Checklist,
+    [switch]$Json
+)
 
 # 导入通用函数
 . "$PSScriptRoot\common.ps1"
@@ -11,6 +16,13 @@ Set-Location $ProjectRoot
 # 获取当前故事
 $StoryName = Get-ActiveStory
 $StoryDir = "stories\$StoryName"
+
+# JSON 模式
+if ($Json) {
+    $report = Generate-LoadReport -StoryDir $StoryDir
+    Write-Output $report
+    exit 0
+}
 
 Write-Host "写作状态检查"
 Write-Host "============"
@@ -121,6 +133,139 @@ function Test-CompletedContent {
         Write-Host ""
         Write-Host "尚未开始写作"
     }
+}
+
+# ==================== 新增：资源加载检查函数 ====================
+
+function Check-KnowledgeBaseAvailable {
+    $missing = @()
+    $available = @()
+
+    $craftFiles = @(
+        "templates/knowledge-base/craft/dialogue.md",
+        "templates/knowledge-base/craft/scene-structure.md",
+        "templates/knowledge-base/craft/character-arc.md",
+        "templates/knowledge-base/craft/pacing.md",
+        "templates/knowledge-base/craft/show-not-tell.md"
+    )
+
+    foreach ($file in $craftFiles) {
+        $fullPath = Join-Path $ProjectRoot $file
+        if (Test-Path $fullPath) {
+            $available += $file
+        } else {
+            $missing += $file
+        }
+    }
+
+    if ($missing.Count -gt 0) {
+        Write-Host "⚠️ 缺少以下 knowledge-base 文件："
+        foreach ($file in $missing) {
+            Write-Host "  - $file"
+        }
+        return $false
+    }
+
+    Write-Host "✅ Knowledge-base 文件完整 ($($available.Count) 个)"
+    return $true
+}
+
+function Check-SkillsAvailable {
+    $missing = @()
+    $available = @()
+
+    $skillDirs = @(
+        "templates/skills/writing-techniques/dialogue-techniques",
+        "templates/skills/writing-techniques/scene-structure",
+        "templates/skills/writing-techniques/character-arc",
+        "templates/skills/writing-techniques/pacing-control"
+    )
+
+    foreach ($dir in $skillDirs) {
+        $skillPath = Join-Path $ProjectRoot "$dir/SKILL.md"
+        if (Test-Path $skillPath) {
+            $available += $dir
+        } else {
+            $missing += $dir
+        }
+    }
+
+    if ($missing.Count -gt 0) {
+        Write-Host "⚠️ 缺少以下 skills："
+        foreach ($dir in $missing) {
+            Write-Host "  - $dir/SKILL.md"
+        }
+        return $false
+    }
+
+    Write-Host "✅ Skills 完整 ($($available.Count) 个)"
+    return $true
+}
+
+function Generate-LoadReport {
+    param (
+        [string]$StoryDir
+    )
+
+    $specFile = Join-Path $StoryDir "specification.md"
+    $warnings = @()
+
+    # 默认加载所有资源
+    $knowledgeBaseFiles = @(
+        "craft/dialogue.md",
+        "craft/scene-structure.md",
+        "craft/character-arc.md",
+        "craft/pacing.md",
+        "craft/show-not-tell.md"
+    )
+
+    $skillsFiles = @(
+        "writing-techniques/dialogue-techniques",
+        "writing-techniques/scene-structure",
+        "writing-techniques/character-arc",
+        "writing-techniques/pacing-control",
+        "quality-assurance/consistency-checker"
+    )
+
+    $disabledResources = @()
+    $hasConfig = $false
+
+    if (Test-Path $specFile) {
+        $content = Get-Content $specFile -Raw
+        if ($content -match "resource-loading:") {
+            $hasConfig = $true
+        }
+    }
+
+    # 检查文件存在性
+    foreach ($kb in $knowledgeBaseFiles) {
+        $fullPath = Join-Path $ProjectRoot "templates/knowledge-base/$kb"
+        if (-not (Test-Path $fullPath)) {
+            $warnings += "知识库文件不存在: $kb"
+        }
+    }
+
+    foreach ($skill in $skillsFiles) {
+        $fullPath = Join-Path $ProjectRoot "templates/skills/$skill/SKILL.md"
+        if (-not (Test-Path $fullPath)) {
+            $warnings += "Skill 文件不存在: $skill/SKILL.md"
+        }
+    }
+
+    # 生成 JSON
+    $report = @{
+        status = "ready"
+        timestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+        has_config = $hasConfig
+        resources = @{
+            "knowledge-base" = $knowledgeBaseFiles
+            skills = $skillsFiles
+            disabled = $disabledResources
+        }
+        warnings = $warnings
+    }
+
+    return $report | ConvertTo-Json -Depth 10
 }
 
 # 主流程
