@@ -87,7 +87,7 @@ check_pending_tasks() {
 # 检查已完成内容
 check_completed_content() {
     local content_dir="$STORY_DIR/content"
-    local validation_rules="spec/tracking/validation-rules.json"
+    local validation_rules="$STORY_DIR/spec/tracking/validation-rules.json"
     local min_words=2000
     local max_words=4000
 
