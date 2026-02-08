@@ -113,6 +113,86 @@ if (-not $script:PreloadCompleted) {
     $script:PreloadCompleted = $true
 }
 
+# ==================== 资源加载报告生成函数 ====================
+
+function Generate-LoadReport {
+    param (
+        [string]$StoryDir
+    )
+
+    $specFile = Join-Path $StoryDir "specification.md"
+    $warnings = @()
+
+    # 默认加载所有资源
+    $knowledgeBaseFiles = @(
+        "craft/dialogue.md",
+        "craft/scene-structure.md",
+        "craft/character-arc.md",
+        "craft/pacing.md",
+        "craft/show-not-tell.md"
+    )
+
+    $skillsFiles = @(
+        "writing-techniques/dialogue-techniques",
+        "writing-techniques/scene-structure",
+        "writing-techniques/character-arc",
+        "writing-techniques/pacing-control",
+        "quality-assurance/consistency-checker"
+    )
+
+    $disabledResources = @()
+    $hasConfig = $false
+
+    if (Test-Path $specFile) {
+        $content = Get-Content $specFile -Raw
+        if ($content -match "resource-loading:") {
+            $hasConfig = $true
+        }
+    }
+
+    # 检查文件存在性（使用缓存）
+    foreach ($kb in $knowledgeBaseFiles) {
+        $fullPath = Join-Path $ProjectRoot "templates/knowledge-base/$kb"
+        if (-not (Test-FileExistsCached $fullPath)) {
+            $warnings += "知识库文件不存在: $kb"
+        }
+    }
+
+    foreach ($skill in $skillsFiles) {
+        $fullPath = Join-Path $ProjectRoot "templates/skills/$skill/SKILL.md"
+        if (-not (Test-FileExistsCached $fullPath)) {
+            $warnings += "Skill 文件不存在: $skill/SKILL.md"
+        }
+    }
+
+    # Phase 2: 检测缓存命中（基于 specification.md 是否已被缓存加载）
+    # 如果 specification.md 在预加载缓存中，表示"缓存命中"
+    $cached = $script:FileMTimeCache.ContainsKey($specFile)
+    $cacheHint = "此报告基于缓存生成（specification.md 未修改）。AI 可复用本次会话中已加载的资源。"
+
+    # 生成 JSON
+    $report = @{
+        status = "ready"
+        timestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+        has_config = $hasConfig
+        cached = $cached
+        session_cache_enabled = $true
+        resources = @{
+            "knowledge-base" = $knowledgeBaseFiles
+            skills = $skillsFiles
+            disabled = $disabledResources
+        }
+        warnings = $warnings
+    }
+
+    # 仅在缓存命中时添加 cache_hint
+    if ($cached) {
+        $report.cache_hint = $cacheHint
+    }
+
+    return $report | ConvertTo-Json -Depth 10
+}
+
 # JSON 模式
 if ($Json) {
     try {
@@ -305,72 +385,6 @@ function Check-SkillsAvailable {
 
     Write-Host "✅ Skills 完整 ($($available.Count) 个)"
     return $true
-}
-
-function Generate-LoadReport {
-    param (
-        [string]$StoryDir
-    )
-
-    $specFile = Join-Path $StoryDir "specification.md"
-    $warnings = @()
-
-    # 默认加载所有资源
-    $knowledgeBaseFiles = @(
-        "craft/dialogue.md",
-        "craft/scene-structure.md",
-        "craft/character-arc.md",
-        "craft/pacing.md",
-        "craft/show-not-tell.md"
-    )
-
-    $skillsFiles = @(
-        "writing-techniques/dialogue-techniques",
-        "writing-techniques/scene-structure",
-        "writing-techniques/character-arc",
-        "writing-techniques/pacing-control",
-        "quality-assurance/consistency-checker"
-    )
-
-    $disabledResources = @()
-    $hasConfig = $false
-
-    if (Test-Path $specFile) {
-        $content = Get-Content $specFile -Raw
-        if ($content -match "resource-loading:") {
-            $hasConfig = $true
-        }
-    }
-
-    # 检查文件存在性（使用缓存）
-    foreach ($kb in $knowledgeBaseFiles) {
-        $fullPath = Join-Path $ProjectRoot "templates/knowledge-base/$kb"
-        if (-not (Test-FileExistsCached $fullPath)) {
-            $warnings += "知识库文件不存在: $kb"
-        }
-    }
-
-    foreach ($skill in $skillsFiles) {
-        $fullPath = Join-Path $ProjectRoot "templates/skills/$skill/SKILL.md"
-        if (-not (Test-FileExistsCached $fullPath)) {
-            $warnings += "Skill 文件不存在: $skill/SKILL.md"
-        }
-    }
-
-    # 生成 JSON
-    $report = @{
-        status = "ready"
-        timestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-        has_config = $hasConfig
-        resources = @{
-            "knowledge-base" = $knowledgeBaseFiles
-            skills = $skillsFiles
-            disabled = $disabledResources
-        }
-        warnings = $warnings
-    }
-
-    return $report | ConvertTo-Json -Depth 10
 }
 
 # 主流程

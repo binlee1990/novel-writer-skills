@@ -583,6 +583,15 @@ generate_load_report() {
         fi
     done
 
+    # Phase 2: 检测缓存命中（基于 specification.md 是否已被缓存加载）
+    # 如果 specification.md 在预加载缓存中，表示"缓存命中"
+    local cached=false
+    local cache_hint=""
+    if is_file_cached "$spec_file"; then
+        cached=true
+        cache_hint="此报告基于缓存生成（specification.md 未修改）。AI 可复用本次会话中已加载的资源。"
+    fi
+
     # 生成 JSON 报告（使用 echo 逐行输出，处理空数组）
     echo "{"
     echo "  \"status\": \"ready\","
@@ -598,6 +607,14 @@ generate_load_report() {
     fi
 
     echo "  \"has_config\": $has_config,"
+
+    # Phase 2: 添加缓存标记字段
+    echo "  \"cached\": $cached,"
+    echo "  \"session_cache_enabled\": true,"
+    if [ "$cached" = true ]; then
+        echo "  \"cache_hint\": \"$(json_escape "$cache_hint")\","
+    fi
+
     echo "  \"resources\": {"
     echo "    \"knowledge-base\": ["
 
