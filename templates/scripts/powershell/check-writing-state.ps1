@@ -165,9 +165,12 @@ function Generate-LoadReport {
         }
     }
 
-    # Phase 2: 检测缓存命中（基于 specification.md 是否已被缓存加载）
-    # 如果 specification.md 在预加载缓存中，表示"缓存命中"
-    $cached = $script:FileMTimeCache.ContainsKey($specFile)
+    # Phase 2: 检测缓存命中（基于 specification.md 是否已被缓存加载且有效）
+    # 仅当文件在缓存中且成功读取时，才视为"缓存命中"
+    # 缓存语义: $null = 文件不存在, MinValue = stat 失败, DateTime = 成功读取
+    $cached = $script:FileMTimeCache.ContainsKey($specFile) -and
+              $script:FileMTimeCache[$specFile] -ne $null -and
+              $script:FileMTimeCache[$specFile] -ne [DateTime]::MinValue
     $cacheHint = "此报告基于缓存生成（specification.md 未修改）。AI 可复用本次会话中已加载的资源。"
 
     # 生成 JSON
