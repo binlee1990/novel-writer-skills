@@ -65,7 +65,7 @@ bash .specify/templates/scripts/bash/track-progress.sh
 
 1. **主 README**: `/README.md` - 新增"命令行脚本"章节
 2. **脚本说明**: `/templates/scripts/README.md` - 详细使用指南
-3. **适配报告**: `/SCRIPT_ADAPTATION_REPORT.md` - 完整技术报告
+3. **适配报告**: `/docs/reports/script-adaptation-report.md` - 完整技术报告
 
 ## 结论
 
