@@ -13,6 +13,25 @@ scripts:
 
 维护故事的时间轴，确保时间逻辑的一致性。
 
+## 资源加载（可选）
+
+本命令用于管理故事时间线，默认读取 `tracking/timeline.json`。
+
+### 可选配置
+
+```yaml
+resource-loading:
+  timeline:
+    knowledge-base:
+      craft:
+        - pacing  # 时间节奏控制
+    skills:
+      quality-assurance:
+        - consistency-checker  # 时间线一致性检查
+```
+
+**推荐资源**: pacing.md（时间节奏控制）
+
 ## 功能
 
 1. **时间记录** - 追踪每个章节的时间点

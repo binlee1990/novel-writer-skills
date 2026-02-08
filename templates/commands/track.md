@@ -13,6 +13,22 @@ scripts:
 
 全面展示小说创作的各项进度和状态。
 
+## 资源加载（可选）
+
+本命令用于管理 tracking 文件，默认不加载额外资源。
+
+### 可选配置
+
+```yaml
+resource-loading:
+  track:
+    skills:
+      quality-assurance:
+        - consistency-checker  # 追踪数据一致性检查
+```
+
+**推荐资源**: consistency-checker（验证追踪数据一致性）
+
 ## 追踪维度
 
 1. **写作进度** - 字数、章节、完成率

@@ -13,6 +13,25 @@ scripts:
 
 追踪和管理角色之间的关系动态，确保关系发展的合理性。
 
+## 资源加载（可选）
+
+本命令用于管理角色关系，默认读取 `tracking/relationships.json`。
+
+### 可选配置
+
+```yaml
+resource-loading:
+  relations:
+    knowledge-base:
+      craft:
+        - character-arc  # 角色弧线知识
+    skills:
+      quality-assurance:
+        - consistency-checker  # 关系一致性检查
+```
+
+**推荐资源**: character-arc.md（理解关系演变）
+
 ## 功能
 
 1. **关系网络** - 维护角色之间的关系图谱

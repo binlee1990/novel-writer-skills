@@ -9,6 +9,25 @@ scripts:
 
 基于创作计划生成具体的、可执行的任务列表。
 
+## 资源加载（可选）
+
+本命令用于管理创作任务，默认不加载额外资源。
+
+### 可选配置
+
+如果需要在任务规划时参考写作技巧：
+
+```yaml
+resource-loading:
+  tasks:
+    knowledge-base:
+      craft:
+        - scene-structure  # 场景结构规划
+        - pacing  # 节奏规划
+```
+
+**推荐资源**: scene-structure.md, pacing.md（辅助任务规划）
+
 ## 目标
 
 将宏观计划转化为微观任务，让创作变得可管理、可追踪。
