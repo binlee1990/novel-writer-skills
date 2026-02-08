@@ -139,6 +139,37 @@ resource-loading:
 - 分析辅助资源的优先级**低于**宪法和规格
 - 分析辅助资源的优先级**高于**待分析内容
 
+### 🆕 Layer 3: 关键词触发（分析专用）
+
+**触发时机**:
+- 命令参数（如 `/analyze --check 对话质量`）
+- 待分析内容中的问题关键词
+
+**配置**: 读取 `specification.md` 的 `resource-loading.keyword-triggers.enabled`
+
+**如果 `enabled: false`**，跳过此步骤。
+
+**扫描策略**:
+
+1. **参数扫描**: 检查 `--check` 参数值
+   - 如 `--check 对话` → 加载 craft/dialogue.md
+   - 如 `--check 节奏` → 加载 craft/pacing.md
+
+2. **问题检测扫描** (可选，执行分析后)：
+   - 分析发现对话问题 → 提示加载 dialogue-techniques
+   - 分析发现节奏问题 → 提示加载 pacing-control
+
+**用户确认**:
+```markdown
+💡 检测到 "--check 对话"，建议加载：
+- craft/dialogue.md
+- writing-techniques/dialogue-techniques
+
+是否加载？ [Y/N]
+```
+
+**注意**: /analyze 通常在 Layer 1 已加载所有 craft knowledge，此机制主要用于动态加载 skills。
+
 ### A2. 覆盖率分析
 
 检查所有规格需求是否都有对应的计划和任务：
