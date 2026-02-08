@@ -1,4 +1,4 @@
-#!/usr/bin/env pwsh
+﻿#!/usr/bin/env pwsh
 # 公用函数（PowerShell）
 
 Set-StrictMode -Version Latest
