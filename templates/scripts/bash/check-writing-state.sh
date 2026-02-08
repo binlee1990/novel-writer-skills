@@ -583,11 +583,17 @@ generate_load_report() {
         fi
     done
 
-    # Phase 2: 检测缓存命中（基于 specification.md 是否已被缓存加载）
-    # 如果 specification.md 在预加载缓存中，表示"缓存命中"
+    # Phase 2: 检测缓存命中（基于 specification.md 是否已被缓存加载且有效）
+    # 仅当文件在缓存中且成功读取时，才视为"缓存命中"
+    # 缓存语义: -1 = 文件不存在, 0 = stat 失败或未缓存, >0 = 成功读取
     local cached=false
     local cache_hint=""
-    if is_file_cached "$spec_file"; then
+
+    # 获取缓存的 mtime
+    local spec_mtime=$(get_file_mtime "$spec_file")
+
+    # 仅当 mtime > 0 时才视为缓存命中
+    if [[ "$spec_mtime" != "0" && "$spec_mtime" != "-1" ]]; then
         cached=true
         cache_hint="此报告基于缓存生成（specification.md 未修改）。AI 可复用本次会话中已加载的资源。"
     fi
