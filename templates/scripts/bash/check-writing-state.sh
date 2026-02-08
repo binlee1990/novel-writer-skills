@@ -278,6 +278,142 @@ EOF
 EOF
 }
 
+# ==================== 新增：资源加载检查函数 ====================
+
+# 解析 specification.md 的 resource-loading 配置
+parse_resource_loading_config() {
+    local spec_file="$STORY_DIR/specification.md"
+
+    if [ ! -f "$spec_file" ]; then
+        echo "{}" # 返回空 JSON
+        return
+    fi
+
+    # 提取 YAML frontmatter 中的 resource-loading 配置
+    # 这里简化处理，实际应该用 yq 或 python 解析 YAML
+    # 当前版本：检测是否存在 resource-loading 配置
+
+    if grep -q "resource-loading:" "$spec_file"; then
+        echo '{"configured": true}'
+    else
+        echo '{"configured": false}'
+    fi
+}
+
+# 检查 knowledge-base 文件是否存在
+check_knowledge_base_available() {
+    local missing=()
+    local available=()
+
+    # 检查所有 craft knowledge-base
+    local craft_files=(
+        "templates/knowledge-base/craft/dialogue.md"
+        "templates/knowledge-base/craft/scene-structure.md"
+        "templates/knowledge-base/craft/character-arc.md"
+        "templates/knowledge-base/craft/pacing.md"
+        "templates/knowledge-base/craft/show-not-tell.md"
+    )
+
+    for file in "${craft_files[@]}"; do
+        if [ -f "$PROJECT_ROOT/$file" ]; then
+            available+=("$file")
+        else
+            missing+=("$file")
+        fi
+    done
+
+    # 输出结果（JSON 格式将在后续步骤实现）
+    if [ ${#missing[@]} -gt 0 ]; then
+        echo "⚠️ 缺少以下 knowledge-base 文件："
+        for file in "${missing[@]}"; do
+            echo "  - $file"
+        done
+        return 1
+    fi
+
+    echo "✅ Knowledge-base 文件完整 (${#available[@]} 个)"
+    return 0
+}
+
+# 检查 skills 是否存在
+check_skills_available() {
+    local missing=()
+    local available=()
+
+    # 检查 writing-techniques skills
+    local skill_dirs=(
+        "templates/skills/writing-techniques/dialogue-techniques"
+        "templates/skills/writing-techniques/scene-structure"
+        "templates/skills/writing-techniques/character-arc"
+        "templates/skills/writing-techniques/pacing-control"
+    )
+
+    for dir in "${skill_dirs[@]}"; do
+        if [ -f "$PROJECT_ROOT/$dir/SKILL.md" ]; then
+            available+=("$dir")
+        else
+            missing+=("$dir")
+        fi
+    done
+
+    if [ ${#missing[@]} -gt 0 ]; then
+        echo "⚠️ 缺少以下 skills："
+        for dir in "${missing[@]}"; do
+            echo "  - $dir/SKILL.md"
+        done
+        return 1
+    fi
+
+    echo "✅ Skills 完整 (${#available[@]} 个)"
+    return 0
+}
+
+# 生成资源加载报告（JSON 格式）
+generate_load_report() {
+    local spec_file="$STORY_DIR/specification.md"
+
+    # 默认加载所有资源
+    local knowledge_base_files=(
+        "craft/dialogue.md"
+        "craft/scene-structure.md"
+        "craft/character-arc.md"
+        "craft/pacing.md"
+        "craft/show-not-tell.md"
+    )
+
+    local skills_files=(
+        "writing-techniques/dialogue-techniques"
+        "writing-techniques/scene-structure"
+        "writing-techniques/character-arc"
+        "writing-techniques/pacing-control"
+        "quality-assurance/consistency-checker"
+    )
+
+    # 检查配置文件
+    local has_config=false
+    if [ -f "$spec_file" ] && grep -q "resource-loading:" "$spec_file"; then
+        has_config=true
+    fi
+
+    # 生成 JSON 报告（简化版本，完整版本在 Part 2）
+    cat <<EOF
+{
+  "status": "ready",
+  "has_config": $has_config,
+  "resources": {
+    "knowledge-base": [
+$(printf '      "%s",\n' "${knowledge_base_files[@]}" | sed '$ s/,$//')
+    ],
+    "skills": [
+$(printf '      "%s",\n' "${skills_files[@]}" | sed '$ s/,$//')
+    ],
+    "disabled": []
+  },
+  "warnings": []
+}
+EOF
+}
+
 # 主流程
 main() {
     # Checklist 模式直接输出并退出
