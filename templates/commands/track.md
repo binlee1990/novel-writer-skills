@@ -41,6 +41,250 @@ scripts:
 - `spec/tracking/character-state.json` - 角色状态
 - `spec/tracking/validation-rules.json` - **[新增]** 验证规则（用于--check和--fix）
 
+---
+
+## 🆕 Tracking 历史查看
+
+**新增功能**: 查看 tracking-log.md 中记录的所有历史更新
+
+### 使用方法
+
+**查看所有历史更新**:
+```bash
+/track --log
+```
+
+**查看特定命令的历史**:
+```bash
+/track --log --command=write
+/track --log --command=analyze
+/track --log --command=plan
+```
+
+**查看特定时间范围的历史**:
+```bash
+/track --log --since=2026-02-01
+/track --log --until=2026-02-08
+/track --log --since=2026-02-01 --until=2026-02-08
+```
+
+**查看特定文件的更新历史**:
+```bash
+/track --log --file=character-state.json
+/track --log --file=relationships.json
+/track --log --file=plot-tracker.json
+/track --log --file=timeline.json
+```
+
+### 输出格式
+
+#### 完整历史列表
+
+```markdown
+📜 Tracking 更新历史
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+## 2026-02-08 14:30:25 - /write chapter-05
+
+**状态**: 已自动更新
+**更新文件**: character-state.json, relationships.json, plot-tracker.json, timeline.json
+
+**摘要**:
+- 林晓情绪变化：平静 → 焦虑
+- 新增关系：林晓 → 队长（信任）
+- 情节推进：主线 +10%
+- 时间线事件：Day 15 - 首次合作任务
+
+[查看详情]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+## 2026-02-08 15:45:10 - /analyze chapter-01-05
+
+**状态**: 用户确认后更新（选择：全部应用）
+**更新文件**: character-state.json, relationships.json, timeline.json, plot-tracker.json
+
+**摘要**:
+- 角色分析：Ch.5 林晓焦虑情绪
+- 关系分析：林晓与队长建立信任
+- 时间线：第 15 天事件补充
+- 情节推进：主线 +10%
+
+[查看详情]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+## 2026-02-07 10:20:00 - /plan 创作计划
+
+**状态**: 已自动更新
+**更新文件**: plot-tracker.json
+
+**摘要**:
+- 初始化 5 条情节线定义
+- 设置里程碑和伏笔规划
+
+[查看详情]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+总计：23 次更新记录
+```
+
+#### 详细查看单条记录
+
+当用户选择"[查看详情]"时，显示完整的 diff 和更新依据：
+
+```markdown
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 更新记录详情
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+## 2026-02-08 14:30:25 - /write chapter-05
+
+### 命令执行
+- **命令**: `/write chapter-05 --focus emotion`
+- **执行者**: AI
+- **状态**: 已自动更新
+
+### 更新内容
+
+#### character-state.json
+```diff
+  "林晓": {
+    "lastAppearance": "chapter-04",
++   "lastAppearance": "chapter-05",
+    "emotion": "平静",
++   "emotion": "焦虑",
+    "location": "训练场"
+  }
+```
+
+#### relationships.json
+```diff
++ {
++   "from": "林晓",
++   "to": "队长",
++   "type": "信任",
++   "strength": 0.6,
++   "evidence": "Ch.5 首次合作任务",
++   "lastUpdate": "chapter-05"
++ }
+```
+
+#### plot-tracker.json
+```diff
+  "plotLines": [
+    {
+      "id": "主线-001",
+      "progress": 0.2,
++     "progress": 0.3,
+      "lastUpdate": "chapter-04",
++     "lastUpdate": "chapter-05"
+    }
+  ]
+```
+
+#### timeline.json
+```diff
++ {
++   "day": 15,
++   "time": "14:00",
++   "chapter": "chapter-05",
++   "event": "首次合作任务"
++ }
+```
+
+### 更新依据
+- **角色分析**: Ch.5 林晓的对话和行为显示焦虑情绪
+- **关系分析**: Ch.5 林晓与队长首次合作，建立初步信任
+- **情节推进**: 主线进展 10%，发现第一条线索
+- **时间线**: Ch.5 情节推进到第 15 天
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+#### 过滤查看示例
+
+**按命令过滤**:
+```markdown
+📜 /write 命令的更新历史（12 条记录）
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+## 2026-02-08 14:30:25 - /write chapter-05
+[摘要...]
+
+## 2026-02-07 16:15:00 - /write chapter-04
+[摘要...]
+
+[继续列出其他 /write 记录...]
+```
+
+**按文件过滤**:
+```markdown
+📜 character-state.json 的更新历史（8 条记录）
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+## 2026-02-08 14:30:25 - /write chapter-05
+**变更**: 林晓情绪 平静 → 焦虑
+
+## 2026-02-07 16:15:00 - /write chapter-04
+**变更**: 林晓位置更新
+
+[继续列出其他记录...]
+```
+
+**按时间范围过滤**:
+```markdown
+📜 2026-02-01 至 2026-02-08 的更新历史（15 条记录）
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[列出时间范围内的所有记录...]
+```
+
+### 实现逻辑
+
+**读取 tracking-log.md**:
+1. 读取 `stories/*/spec/tracking/tracking-log.md`
+2. 解析日志格式，提取所有更新记录
+3. 根据过滤条件筛选记录
+4. 按时间倒序排列（最新的在前）
+
+**解析日志条目**:
+- 提取时间戳、命令类型、更新状态
+- 提取更新文件列表
+- 提取摘要信息（从 diff 中生成）
+- 保留完整的 diff 和更新依据
+
+**性能考虑**:
+- 默认仅加载摘要信息（轻量级）
+- 用户选择"查看详情"时才加载完整 diff
+- 对于大型日志文件（>1000 条记录），分页显示
+
+### 错误处理
+
+#### 如果 tracking-log.md 不存在
+
+```markdown
+ℹ️ 提示：tracking-log.md 不存在
+- 位置：stories/*/spec/tracking/tracking-log.md
+- 原因：尚未执行过任何 tracking 更新命令
+- 建议：执行 /write 或 /plan 命令后会自动创建
+```
+
+#### 如果日志格式无法解析
+
+```markdown
+⚠️ 警告：日志文件格式异常
+- 文件：tracking-log.md
+- 问题：无法解析部分日志条目
+- 影响：部分历史记录可能无法显示
+- 建议：检查日志文件格式是否被手动修改
+```
+
 ## 输出示例
 
 ```
