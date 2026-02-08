@@ -53,14 +53,16 @@
 | 目录 | 内容 | 用途 |
 |------|------|------|
 | `references/china-1920s/` | 1920年代中国 | 军阀混战、社会风貌、日常生活 |
+| └─ `overview.md` | 时代概览 | 历史事件、社会分层、城乡对比 |
 | └─ `warlords.md` | 军阀体系 | 派系关系、军队编制、权力结构 |
-| └─ `society.md` | 社会结构 | 阶层分化、城乡对比、教育状况 |
+| └─ `society.md` | 社会结构 | 阶层分化、家族制度、婚姻制度 |
 | └─ `daily-life.md` | 日常生活 | 衣食住行、货币物价、娱乐文化 |
+| └─ `culture.md` | 文化娱乐 | 新文化运动、文学流派、女性解放 |
 
 **未来扩展**：
-- `references/ancient-china/` - 古代中国各朝代
+- `references/tang-dynasty/` - 唐朝（仙侠、宫斗题材）
 - `references/modern-workplace/` - 现代职场
-- `references/mythology/` - 神话体系
+- `references/cultivation-world/` - 修仙世界
 - ...（可无限扩展）
 
 ---
@@ -121,11 +123,13 @@ show-not-tell:
 
 ```yaml
 china-1920s:
-  keywords: [1920, 民国, 军阀, 北洋, 穿越民国, 二十年代]
+  keywords: [1920, 民国, 军阀, 北洋, 穿越民国, 二十年代, 上海滩, 十里洋场]
   auto_load:
+    - references/china-1920s/overview.md
     - references/china-1920s/warlords.md
     - references/china-1920s/society.md
     - references/china-1920s/daily-life.md
+    - references/china-1920s/culture.md
 ```
 
 ---
