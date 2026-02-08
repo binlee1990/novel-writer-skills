@@ -2,7 +2,6 @@
 # 用于 /write 命令
 
 param(
-    [switch]$Checklist,
     [switch]$Json
 )
 
@@ -15,13 +14,18 @@ Set-Location $ProjectRoot
 
 # 获取当前故事
 $StoryName = Get-ActiveStory
-$StoryDir = "stories\$StoryName"
+$StoryDir = Join-Path "stories" $StoryName
 
 # JSON 模式
 if ($Json) {
-    $report = Generate-LoadReport -StoryDir $StoryDir
-    Write-Output $report
-    exit 0
+    try {
+        $report = Generate-LoadReport -StoryDir $StoryDir
+        Write-Output $report
+        exit 0
+    } catch {
+        Write-Error "生成资源加载报告失败: $_"
+        exit 1
+    }
 }
 
 Write-Host "写作状态检查"
