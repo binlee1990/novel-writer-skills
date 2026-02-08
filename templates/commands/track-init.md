@@ -12,6 +12,24 @@ scripts:
 
 基于已创建的故事大纲和章节规划，初始化所有追踪数据文件。
 
+## 资源加载（可选）
+
+本命令用于初始化 tracking 系统，默认不加载额外资源。
+
+### 可选配置
+
+初始化时可参考项目类型的默认追踪配置：
+
+```yaml
+resource-loading:
+  track-init:
+    knowledge-base:
+      genres:
+        - romance  # 类型默认配置
+```
+
+**推荐资源**: genres/*（获取类型默认配置）
+
 ## 使用时机
 
 在完成 `/story` 和 `/outline` 之后，开始写作之前执行此命令。

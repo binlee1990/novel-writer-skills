@@ -12,6 +12,36 @@ scripts:
 
 根据用户输入执行相应操作：
 
+## 资源加载（可选）
+
+本命令提供写作技巧咨询，可根据咨询主题动态加载资源。
+
+### 可选配置
+
+```yaml
+resource-loading:
+  expert:
+    knowledge-base:
+      craft:
+        - dialogue
+        - pacing
+        - character-arc
+    skills:
+      writing-techniques:
+        - dialogue-techniques
+        - pacing-control
+```
+
+### 关键词触发
+
+本命令特别适合使用关键词触发。当用户提问包含特定关键词时，自动建议加载相关资源：
+
+- "对话" → dialogue.md + dialogue-techniques
+- "节奏" → pacing.md + pacing-control
+- "角色" → character-arc.md + character-arc skill
+
+**推荐资源**: craft/* 和 writing-techniques/*（根据咨询主题）
+
 ## 1. 列出可用专家（无参数时）
 
 如果用户输入 `/expert` 不带参数，显示所有可用专家：
