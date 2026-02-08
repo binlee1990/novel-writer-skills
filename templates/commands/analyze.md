@@ -1059,4 +1059,305 @@ AI：执行风格专项分析...
 
 ---
 
+## 🆕 后置处理：询问式 Tracking 更新
+
+**执行时机**: 内容分析完成后，发现可更新的 tracking 信息
+
+**更新策略**: 辅助命令（/analyze）生成建议，**需用户确认后**才更新
+
+### 生成 Tracking 更新建议
+
+基于分析结果，生成 tracking 文件的更新建议。
+
+#### 更新建议内容
+
+**从分析结果中提取**:
+1. **角色状态变化**
+   - 分析发现的角色情绪、状态变化
+   - 角色最后出场位置更新
+
+2. **关系网络变化**
+   - 分析发现的角色关系建立或变化
+   - 关系强度评估
+
+3. **情节推进**
+   - 分析发现的情节线进度变化
+   - 新的情节事件
+
+4. **时间线补充**
+   - 分析发现的时间线事件
+   - 时间线一致性修正
+
+**建议格式示例**:
+
+```markdown
+## 📝 Tracking 更新建议
+
+基于对 chapter-01 到 chapter-05 的分析，发现以下可更新内容：
+
+### character-state.json
+
+建议更新：
+```diff
+  "林晓": {
+-   "lastAppearance": "chapter-01",
++   "lastAppearance": "chapter-05",
+-   "emotion": "平静",
++   "emotion": "焦虑",
+    "location": "训练场"
+  }
+```
+
+**依据**: Ch.5 中林晓的对话和行为分析
+
+---
+
+### relationships.json
+
+建议添加：
+```diff
++ {
++   "from": "林晓",
++   "to": "队长",
++   "type": "信任",
++   "strength": 0.6,
++   "evidence": "Ch.5 首次合作任务",
++   "lastUpdate": "chapter-05"
++ }
+```
+
+**依据**: Ch.5 对话分析显示林晓对队长建立初步信任
+
+---
+
+### timeline.json
+
+建议添加：
+```diff
++ {
++   "day": 15,
++   "time": "14:00",
++   "chapter": "chapter-05",
++   "event": "首次合作任务",
++   "participants": ["林晓", "队长"]
++ }
+```
+
+**依据**: Ch.5 情节推进分析
+
+---
+
+### plot-tracker.json
+
+建议更新：
+```diff
+  "plotLines": [
+    {
+      "id": "主线-001",
+-     "progress": 0.2,
++     "progress": 0.3,
+-     "lastUpdate": "chapter-04",
++     "lastUpdate": "chapter-05"
+    }
+  ]
+```
+
+**依据**: 主线情节推进 10%，发现第一条线索
+
+---
+
+## 🔍 用户确认
+
+是否应用这些 tracking 更新？
+
+**选项**:
+- **[Y]** 全部应用 - 应用所有建议的更新
+- **[N]** 跳过更新 - 不更新任何 tracking 文件
+- **[S]** 选择性应用 - 逐项确认每个更新
+
+请输入选择：
+```
+
+### 用户选择处理
+
+#### 选项 Y: 全部应用
+
+**执行步骤**:
+1. 应用所有建议的更新到对应的 tracking 文件
+2. 验证 JSON 格式有效性
+3. 追加更新记录到 tracking-log.md
+
+**日志格式**:
+```markdown
+## [时间戳] - /analyze chapter-01-05
+
+### 命令执行
+- **命令**: `/analyze 内容分析 chapter-01-05`
+- **分析范围**: 第 1-5 章
+- **执行者**: AI
+- **状态**: 用户确认后更新（选择：全部应用）
+
+### 用户确认更新内容
+
+#### character-state.json
+```diff
+  "林晓": {
+-   "emotion": "平静",
++   "emotion": "焦虑",
+  }
+```
+
+#### relationships.json
+```diff
++ {
++   "from": "林晓",
++   "to": "队长",
++   "type": "信任",
++   "strength": 0.6
++ }
+```
+
+#### timeline.json
+```diff
++ {
++   "day": 15,
++   "event": "首次合作任务"
++ }
+```
+
+#### plot-tracker.json
+```diff
+- "progress": 0.2,
++ "progress": 0.3,
+```
+
+### 更新依据
+- **角色分析**: Ch.5 林晓的对话和行为显示焦虑情绪
+- **关系分析**: Ch.5 林晓与队长首次合作，建立初步信任
+- **时间线**: Ch.5 情节推进到第 15 天
+- **情节推进**: 主线进展 10%，发现第一条线索
+
+---
+```
+
+#### 选项 N: 跳过更新
+
+**执行步骤**:
+1. 不修改任何 tracking 文件
+2. 在 tracking-log.md 记录用户选择
+
+**日志格式**:
+```markdown
+## [时间戳] - /analyze chapter-01-05
+
+### 命令执行
+- **命令**: `/analyze 内容分析 chapter-01-05`
+- **分析范围**: 第 1-5 章
+- **执行者**: AI
+- **状态**: 用户选择跳过更新
+
+### 用户选择
+- **选择**: [N] 跳过更新
+- **原因**: 用户未确认建议的更新
+
+---
+```
+
+#### 选项 S: 选择性应用
+
+**执行步骤**:
+1. 逐项询问用户确认每个建议的更新
+2. 仅应用用户确认的更新
+3. 记录用户的具体选择到 tracking-log.md
+
+**交互流程**:
+```markdown
+## 逐项确认更新
+
+### 1. character-state.json - 林晓情绪变化
+
+建议更新：
+- emotion: "平静" → "焦虑"
+
+是否应用此更新？ [Y/n]
+
+---
+
+### 2. relationships.json - 新增信任关系
+
+建议添加：
+- 林晓 → 队长：信任关系（强度 0.6）
+
+是否应用此更新？ [Y/n]
+
+---
+
+[继续其他更新...]
+```
+
+**日志格式**:
+```markdown
+## [时间戳] - /analyze chapter-01-05
+
+### 命令执行
+- **命令**: `/analyze 内容分析 chapter-01-05`
+- **分析范围**: 第 1-5 章
+- **执行者**: AI
+- **状态**: 用户选择性应用更新
+
+### 用户选择详情
+- **character-state.json**: ✅ 已应用
+- **relationships.json**: ✅ 已应用
+- **timeline.json**: ❌ 用户跳过
+- **plot-tracker.json**: ✅ 已应用
+
+### 实际应用的更新内容
+
+#### character-state.json
+[显示实际应用的 diff...]
+
+#### relationships.json
+[显示实际应用的 diff...]
+
+#### plot-tracker.json
+[显示实际应用的 diff...]
+
+### 更新依据
+[仅列出实际应用的更新的依据...]
+
+---
+```
+
+### 错误处理
+
+#### 如果 tracking 文件不存在
+
+```markdown
+⚠️ 警告：部分 tracking 文件不存在
+- 文件：character-state.json
+- 建议：运行 `/track --init` 初始化 tracking 文件
+- 跳过该文件的更新
+```
+
+#### 如果 JSON 格式错误
+
+```markdown
+❌ 错误：tracking 文件格式错误
+- 文件：relationships.json
+- 错误：Unexpected token } in JSON at position 58
+- 建议：手动修复文件格式后重试
+- 更新建议已记录到 tracking-log.md，可稍后手动应用
+```
+
+#### 如果 tracking 目录不存在
+
+```markdown
+ℹ️ 提示：tracking 目录不存在
+- 建议：运行 `/track --init` 初始化 tracking 系统
+- 或创建 spec/tracking/ 目录
+- 跳过本次更新
+```
+
+---
+
 **记住**：**一个命令，三种模式（框架/内容/专项），智能而精准。analyze 的目的是让作品更好，无论是在写作前、写作后，还是针对特定维度。**
