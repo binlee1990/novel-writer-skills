@@ -18,10 +18,56 @@ scripts:
 
 ### 1. 加载前置文档
 
-运行 `{SCRIPT}` 检查并加载：
+**运行脚本** `{SCRIPT}` 检查并加载：
 - 宪法文件：`memory/constitution.md`
 - 规格文件：`stories/*/specification.md`
 - 澄清记录（如果已运行 `/clarify`）
+
+**🆕 解析资源加载报告**：
+
+```bash
+# Bash 环境
+bash {SCRIPT} --json
+
+# PowerShell 环境
+powershell -File {SCRIPT} -Json
+```
+
+**报告处理**：
+- 检查 `status` 是否为 "ready"
+- 记录 `resources` 列表，用于后续规划
+- 如果配置了 `resource-loading.knowledge-base.craft`，加载对应资源用于规划参考
+
+**🆕 加载规划辅助资源（基于配置）**：
+
+#### Layer 1: 默认推断
+
+**如果 specification.md 未配置 resource-loading**，或 `auto-load: true`（默认），自动加载：
+
+- `templates/knowledge-base/craft/scene-structure.md`（场景结构）
+- `templates/knowledge-base/craft/character-arc.md`（角色弧线）
+- `templates/knowledge-base/craft/pacing.md`（节奏控制）
+- `templates/skills/planning/story-structure/SKILL.md`（如存在）
+
+#### Layer 2: 配置覆盖
+
+如果 `specification.md` 配置了 `resource-loading.planning`（规划专用配置）：
+
+```yaml
+resource-loading:
+  planning:  # /plan 命令专用配置
+    knowledge-base:
+      craft:
+        - scene-structure
+        - character-arc
+    skills:
+      planning:
+        - story-structure
+```
+
+**加载优先级**：
+- 规划辅助资源的优先级**低于**宪法和规格
+- 规划辅助资源的优先级**高于**类型知识库（genre-knowledge）
 
 <!-- PLUGIN_HOOK: genre-knowledge-plan -->
 <!-- 插件增强区：知识搜索
