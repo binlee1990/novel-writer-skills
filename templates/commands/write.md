@@ -26,15 +26,22 @@ bash {SCRIPT} --json
 powershell -File {SCRIPT} -Json
 ```
 
-**报告格式**：
+**报告格式**（JSON）：
 ```json
 {
   "status": "ready",
-  "timestamp": "2026-02-08T...",
-  "has_config": true/false,
+  "timestamp": "2026-02-08T09:15:30Z",
+  "has_config": true,
   "resources": {
-    "knowledge-base": ["craft/dialogue.md", ...],
-    "skills": ["writing-techniques/dialogue-techniques", ...],
+    "knowledge-base": [
+      "craft/dialogue.md",
+      "craft/pacing.md",
+      "craft/show-not-tell.md"
+    ],
+    "skills": [
+      "writing-techniques/dialogue-techniques",
+      "writing-techniques/pacing-control"
+    ],
     "disabled": []
   },
   "warnings": []
@@ -42,9 +49,24 @@ powershell -File {SCRIPT} -Json
 ```
 
 **处理逻辑**：
-- 如果 `status` 不是 "ready"，终止执行并显示错误
-- 如果 `warnings` 非空，显示警告但继续执行
-- 记录 `resources` 列表，用于后续资源加载
+
+1. **状态检查**：
+   - 如果 `status` 不是 "ready"，终止执行并显示错误消息
+
+2. **警告处理**：
+   - 如果 `warnings` 非空，在控制台显示警告但继续执行
+   - 建议用户检查 specification.md 配置或资源文件完整性
+
+3. **资源加载**：
+   - 按顺序加载 `resources.knowledge-base` 和 `resources.skills` 中的文件
+   - **跳过** `resources.disabled` 中明确禁用的资源
+   - 如果某个资源文件不存在，记录警告但不阻断流程
+
+4. **降级策略**（向后兼容）：
+   - 如果脚本不支持 `--json` 参数，回退到传统的检查模式
+   - 使用默认的智能推断规则（Layer 1 默认推断）
+
+⚠️ **资源加载说明**: 上述报告提供配置概览，但文件的实际查询顺序仍需遵循以下协议。报告中列出的 `knowledge-base` 和 `skills` 资源会在第三层（智能资源加载）自动加载。
 
 ### 查询协议（必读顺序）
 
