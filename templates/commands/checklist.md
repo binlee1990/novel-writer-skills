@@ -38,6 +38,41 @@ scripts:
 $ARGUMENTS
 ```
 
+## 🆕 前置资源加载
+
+**运行脚本** `{SCRIPT}` 检查创作状态（如果配置了 scripts）
+
+**加载检查清单辅助资源**：
+
+### 默认加载
+
+自动加载以下资源用于生成检查清单：
+- `memory/constitution.md`（创作宪法）
+- `stories/*/specification.md`（故事规格）
+- `stories/*/tasks.md`（当前任务）
+- `spec/tracking/plot-tracker.json`（情节追踪）
+- `spec/tracking/character-state.json`（角色状态）
+
+### 可选加载
+
+如果 `specification.md` 配置了 `resource-loading.checklist`：
+
+```yaml
+resource-loading:
+  checklist:  # /checklist 命令专用配置
+    knowledge-base:
+      craft:
+        - scene-structure  # 场景结构检查清单
+        - pacing           # 节奏检查清单
+    skills:
+      quality-assurance:
+        - consistency-checker  # 一致性检查项
+```
+
+**加载优先级**：
+- 检查清单辅助资源的优先级**低于**宪法和规格
+- 检查清单辅助资源用于**生成更全面的检查项**
+
 ## 执行流程
 
 ### 1. 识别检查类型
