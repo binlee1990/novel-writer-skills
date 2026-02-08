@@ -286,6 +286,18 @@ EOF
 
 # ==================== 新增：资源加载检查函数 ====================
 
+# JSON 字符串转义辅助函数
+json_escape() {
+    local str="$1"
+    # 按顺序转义：反斜杠 -> 引号 -> 控制字符
+    str="${str//\\/\\\\}"    # \ -> \\
+    str="${str//\"/\\\"}"    # " -> \"
+    str="${str//$'\t'/\\t}"  # tab -> \t
+    str="${str//$'\n'/\\n}"  # newline -> \n
+    str="${str//$'\r'/\\r}"  # carriage return -> \r
+    echo "$str"
+}
+
 # 解析 specification.md 的 resource-loading 配置
 parse_resource_loading_config() {
     local spec_file="$STORY_DIR/specification.md"
@@ -429,7 +441,17 @@ generate_load_report() {
     # 生成 JSON 报告（使用 echo 逐行输出，处理空数组）
     echo "{"
     echo "  \"status\": \"ready\","
-    echo "  \"timestamp\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\","
+
+    # 生成时间戳，带错误处理和回退
+    local timestamp
+    if timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null); then
+        echo "  \"timestamp\": \"$timestamp\","
+    elif timestamp=$(date +"%Y-%m-%dT%H:%M:%S%z" 2>/dev/null); then
+        echo "  \"timestamp\": \"$timestamp\","
+    else
+        echo "  \"timestamp\": \"unknown\","
+    fi
+
     echo "  \"has_config\": $has_config,"
     echo "  \"resources\": {"
     echo "    \"knowledge-base\": ["
@@ -438,11 +460,11 @@ generate_load_report() {
     local first=true
     for kb in "${knowledge_base_files[@]}"; do
         if [ "$first" = true ]; then
-            echo -n "      \"$kb\""
+            echo -n "      \"$(json_escape "$kb")\""
             first=false
         else
             echo ","
-            echo -n "      \"$kb\""
+            echo -n "      \"$(json_escape "$kb")\""
         fi
     done
     echo ""
@@ -453,11 +475,11 @@ generate_load_report() {
     first=true
     for skill in "${skills_files[@]}"; do
         if [ "$first" = true ]; then
-            echo -n "      \"$skill\""
+            echo -n "      \"$(json_escape "$skill")\""
             first=false
         else
             echo ","
-            echo -n "      \"$skill\""
+            echo -n "      \"$(json_escape "$skill")\""
         fi
     done
     echo ""
@@ -468,11 +490,11 @@ generate_load_report() {
     first=true
     for res in "${disabled_resources[@]}"; do
         if [ "$first" = true ]; then
-            echo -n "      \"$res\""
+            echo -n "      \"$(json_escape "$res")\""
             first=false
         else
             echo ","
-            echo -n "      \"$res\""
+            echo -n "      \"$(json_escape "$res")\""
         fi
     done
     echo ""
@@ -484,11 +506,11 @@ generate_load_report() {
     first=true
     for warn in "${warnings[@]}"; do
         if [ "$first" = true ]; then
-            echo -n "      \"$warn\""
+            echo -n "      \"$(json_escape "$warn")\""
             first=false
         else
             echo ","
-            echo -n "      \"$warn\""
+            echo -n "      \"$(json_escape "$warn")\""
         fi
     done
     echo ""
