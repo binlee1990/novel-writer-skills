@@ -27,6 +27,70 @@ else
     FILE_MTIME_CACHE_VALUES=()
 fi
 
+# ============================================
+# Phase 2: 资源去重机制
+# ============================================
+#
+# 用于避免在单次脚本执行中重复检查同一资源文件
+
+# Phase 2: 资源去重 - 检测 Bash 版本并选择实现
+if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
+    # Bash 4.0+: 使用关联数组（O(1) 查找）
+    USE_ASSOCIATIVE_ARRAY=true
+    declare -A loaded_resources_set
+else
+    # Bash 3.x: 降级到线性数组（O(n) 查找）
+    USE_ASSOCIATIVE_ARRAY=false
+    loaded_resources_array=()
+    echo "警告: Bash 版本低于 4.0，资源去重使用降级方案（性能稍差）" >&2
+fi
+
+# 检查资源是否已加载（Bash 4.0+）
+is_resource_loaded_assoc() {
+    local path=$1
+    [[ ${loaded_resources_set["$path"]+_} ]]
+}
+
+# 标记资源为已加载（Bash 4.0+）
+mark_resource_loaded_assoc() {
+    local path=$1
+    loaded_resources_set["$path"]=1
+}
+
+# 检查资源是否已加载（Bash 3.x 降级）
+is_resource_loaded_array() {
+    local path=$1
+    for loaded in "${loaded_resources_array[@]}"; do
+        if [ "$loaded" = "$path" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+# 标记资源为已加载（Bash 3.x 降级）
+mark_resource_loaded_array() {
+    local path=$1
+    loaded_resources_array+=("$path")
+}
+
+# 统一接口（自动选择实现）
+is_resource_loaded() {
+    if [ "$USE_ASSOCIATIVE_ARRAY" = true ]; then
+        is_resource_loaded_assoc "$@"
+    else
+        is_resource_loaded_array "$@"
+    fi
+}
+
+mark_resource_loaded() {
+    if [ "$USE_ASSOCIATIVE_ARRAY" = true ]; then
+        mark_resource_loaded_assoc "$@"
+    else
+        mark_resource_loaded_array "$@"
+    fi
+}
+
 # 预加载文件修改时间到缓存
 # 参数: $@ = 文件路径列表
 # 说明: 由于 Bash 命令替换会创建子shell，我们使用预加载策略
@@ -567,18 +631,40 @@ generate_load_report() {
         # 当前简化版本，完整解析需要 yq 或 python
     fi
 
-    # 检查文件是否存在，生成警告（使用缓存）
+    # 检查文件是否存在，生成警告（使用缓存 + Phase 2 去重）
     local warnings=()
     for kb in "${knowledge_base_files[@]}"; do
-        local kb_path="$PROJECT_ROOT/templates/knowledge-base/$kb"
-        if ! is_file_exists_cached "$kb_path"; then
+        local kb_path="templates/knowledge-base/$kb"
+
+        # Phase 2: 资源去重检查
+        if is_resource_loaded "$kb_path"; then
+            # 资源已检查过，跳过
+            continue
+        fi
+
+        # 标记为已加载
+        mark_resource_loaded "$kb_path"
+
+        # 检查文件是否存在（使用完整路径）
+        if ! is_file_exists_cached "$PROJECT_ROOT/$kb_path"; then
             warnings+=("知识库文件不存在: $kb")
         fi
     done
 
     for skill in "${skills_files[@]}"; do
-        local skill_path="$PROJECT_ROOT/templates/skills/$skill/SKILL.md"
-        if ! is_file_exists_cached "$skill_path"; then
+        local skill_path="templates/skills/$skill/SKILL.md"
+
+        # Phase 2: 资源去重检查
+        if is_resource_loaded "$skill_path"; then
+            # 资源已检查过，跳过
+            continue
+        fi
+
+        # 标记为已加载
+        mark_resource_loaded "$skill_path"
+
+        # 检查文件是否存在（使用完整路径）
+        if ! is_file_exists_cached "$PROJECT_ROOT/$skill_path"; then
             warnings+=("Skill 文件不存在: $skill/SKILL.md")
         fi
     done
