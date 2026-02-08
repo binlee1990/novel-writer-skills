@@ -59,14 +59,6 @@
           "templates/skills/genre-knowledge/mystery/SKILL.md"
         ],
         "priority": 2
-      },
-      "fantasy": {
-        "keywords": ["奇幻", "魔法", "世界观", "fantasy", "magic", "worldbuilding"],
-        "resources": [
-          "templates/knowledge-base/genres/fantasy.md",
-          "templates/skills/genre-knowledge/fantasy/SKILL.md"
-        ],
-        "priority": 2
       }
     },
     "quality-assurance": {
@@ -86,8 +78,7 @@
     "pacing": "节奏|拖沓|太快|太慢|过快|过慢",
     "show-tell": "展示|描写|tell|show",
     "romance": "言情|恋爱|感情|爱情",
-    "mystery": "悬疑|推理|线索",
-    "fantasy": "奇幻|魔法|世界观"
+    "mystery": "悬疑|推理|线索"
   },
   "notes": {
     "priority": "优先级数字越小越高（1 最高）",
