@@ -15,6 +15,12 @@ if [ "$1" = "--checklist" ]; then
     CHECKLIST_MODE=true
 fi
 
+# 检查是否为 JSON 输出模式
+JSON_MODE=false
+if [ "$1" = "--json" ] || [ "$2" = "--json" ]; then
+    JSON_MODE=true
+fi
+
 # Get project root
 PROJECT_ROOT=$(get_project_root)
 cd "$PROJECT_ROOT"
@@ -372,7 +378,6 @@ check_skills_available() {
 generate_load_report() {
     local spec_file="$STORY_DIR/specification.md"
 
-    # 默认加载所有资源
     local knowledge_base_files=(
         "craft/dialogue.md"
         "craft/scene-structure.md"
@@ -389,33 +394,116 @@ generate_load_report() {
         "quality-assurance/consistency-checker"
     )
 
+    local disabled_resources=()
+
     # 检查配置文件
     local has_config=false
     if [ -f "$spec_file" ] && grep -q "resource-loading:" "$spec_file"; then
         has_config=true
+
+        # 检查是否禁用了 auto-load
+        if grep -A 1 "resource-loading:" "$spec_file" | grep -q "auto-load: false"; then
+            # 如果禁用自动加载，清空默认列表
+            knowledge_base_files=()
+            skills_files=()
+        fi
+
+        # TODO: 解析配置文件中的具体资源列表
+        # 当前简化版本，完整解析需要 yq 或 python
     fi
 
-    # 生成 JSON 报告（简化版本，完整版本在 Part 2）
-    cat <<EOF
-{
-  "status": "ready",
-  "has_config": $has_config,
-  "resources": {
-    "knowledge-base": [
-$(printf '      "%s",\n' "${knowledge_base_files[@]}" | sed '$ s/,$//')
-    ],
-    "skills": [
-$(printf '      "%s",\n' "${skills_files[@]}" | sed '$ s/,$//')
-    ],
-    "disabled": []
-  },
-  "warnings": []
-}
-EOF
+    # 检查文件是否存在，生成警告
+    local warnings=()
+    for kb in "${knowledge_base_files[@]}"; do
+        if [ ! -f "$PROJECT_ROOT/templates/knowledge-base/$kb" ]; then
+            warnings+=("知识库文件不存在: $kb")
+        fi
+    done
+
+    for skill in "${skills_files[@]}"; do
+        if [ ! -f "$PROJECT_ROOT/templates/skills/$skill/SKILL.md" ]; then
+            warnings+=("Skill 文件不存在: $skill/SKILL.md")
+        fi
+    done
+
+    # 生成 JSON 报告（使用 echo 逐行输出，处理空数组）
+    echo "{"
+    echo "  \"status\": \"ready\","
+    echo "  \"timestamp\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\","
+    echo "  \"has_config\": $has_config,"
+    echo "  \"resources\": {"
+    echo "    \"knowledge-base\": ["
+
+    # 输出 knowledge-base 列表
+    local first=true
+    for kb in "${knowledge_base_files[@]}"; do
+        if [ "$first" = true ]; then
+            echo -n "      \"$kb\""
+            first=false
+        else
+            echo ","
+            echo -n "      \"$kb\""
+        fi
+    done
+    echo ""
+    echo "    ],"
+
+    echo "    \"skills\": ["
+    # 输出 skills 列表
+    first=true
+    for skill in "${skills_files[@]}"; do
+        if [ "$first" = true ]; then
+            echo -n "      \"$skill\""
+            first=false
+        else
+            echo ","
+            echo -n "      \"$skill\""
+        fi
+    done
+    echo ""
+    echo "    ],"
+
+    echo "    \"disabled\": ["
+    # 输出 disabled 列表
+    first=true
+    for res in "${disabled_resources[@]}"; do
+        if [ "$first" = true ]; then
+            echo -n "      \"$res\""
+            first=false
+        else
+            echo ","
+            echo -n "      \"$res\""
+        fi
+    done
+    echo ""
+    echo "    ]"
+
+    echo "  },"
+    echo "  \"warnings\": ["
+    # 输出 warnings 列表
+    first=true
+    for warn in "${warnings[@]}"; do
+        if [ "$first" = true ]; then
+            echo -n "      \"$warn\""
+            first=false
+        else
+            echo ","
+            echo -n "      \"$warn\""
+        fi
+    done
+    echo ""
+    echo "    ]"
+    echo "}"
 }
 
 # 主流程
 main() {
+    # JSON 模式优先处理
+    if [ "$JSON_MODE" = true ]; then
+        generate_load_report
+        exit 0
+    fi
+
     # Checklist 模式直接输出并退出
     if [ "$CHECKLIST_MODE" = true ]; then
         output_checklist
