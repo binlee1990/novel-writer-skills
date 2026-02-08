@@ -5,6 +5,80 @@ param(
     [switch]$Json
 )
 
+# ============================================
+# Phase 1: 文件时间戳缓存
+# ============================================
+#
+# 缓存值约定:
+# - LastWriteTime 对象: 文件存在，值为修改时间
+# - $null: 文件不存在（预加载时已确认）
+# - 未缓存: 键不存在于 HashTable 中
+
+# 缓存存储（HashTable）
+$script:FileMTimeCache = @{}
+$script:PreloadCompleted = $false
+
+# 预加载文件修改时间到缓存
+# 参数: FilePathList (string[]) - 文件路径列表
+# 说明: 预加载策略避免多次磁盘访问
+function Preload-FileMTimes {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string[]]$FilePathList
+    )
+
+    foreach ($filePath in $FilePathList) {
+        # 文件不存在：记录为 $null
+        if (-not (Test-Path $filePath -PathType Leaf)) {
+            $script:FileMTimeCache[$filePath] = $null
+            continue
+        }
+
+        # 读取文件时间戳
+        try {
+            $fileInfo = Get-Item $filePath -ErrorAction Stop
+            $script:FileMTimeCache[$filePath] = $fileInfo.LastWriteTime
+        } catch {
+            # Get-Item 失败：记录为空 DateTime
+            $script:FileMTimeCache[$filePath] = [DateTime]::MinValue
+        }
+    }
+}
+
+# 获取文件修改时间（从缓存）
+# 参数: FilePath (string) - 文件路径
+# 返回: DateTime 对象，或 $null（文件不存在），或 MinValue（读取失败）
+function Get-FileMTimeFromCache {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$FilePath
+    )
+
+    if ($script:FileMTimeCache.ContainsKey($FilePath)) {
+        return $script:FileMTimeCache[$FilePath]
+    }
+
+    # 未缓存：返回 MinValue
+    return [DateTime]::MinValue
+}
+
+# 检查文件是否存在（基于缓存）
+# 参数: FilePath (string) - 文件路径
+# 返回: $true（文件存在），$false（文件不存在或未缓存）
+function Test-FileExistsCached {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$FilePath
+    )
+
+    $mtime = Get-FileMTimeFromCache $FilePath
+
+    # $null: 文件不存在
+    # MinValue: Get-Item 失败或未缓存
+    # 其他 DateTime: 文件存在
+    return ($null -ne $mtime -and $mtime -ne [DateTime]::MinValue)
+}
+
 # 导入通用函数
 . "$PSScriptRoot\common.ps1"
 
@@ -15,6 +89,29 @@ Set-Location $ProjectRoot
 # 获取当前故事
 $StoryName = Get-ActiveStory
 $StoryDir = Join-Path "stories" $StoryName
+
+# 预加载文件时间戳（性能优化）
+if (-not $script:PreloadCompleted) {
+    $preloadFileList = @(
+        # 知识库文件
+        "$ProjectRoot\templates\knowledge-base\craft\dialogue.md"
+        "$ProjectRoot\templates\knowledge-base\craft\scene-structure.md"
+        "$ProjectRoot\templates\knowledge-base\craft\character-arc.md"
+        "$ProjectRoot\templates\knowledge-base\craft\pacing.md"
+        "$ProjectRoot\templates\knowledge-base\craft\show-not-tell.md"
+        # Skill 文件
+        "$ProjectRoot\templates\skills\writing-techniques\dialogue-techniques\SKILL.md"
+        "$ProjectRoot\templates\skills\writing-techniques\scene-structure\SKILL.md"
+        "$ProjectRoot\templates\skills\writing-techniques\character-arc\SKILL.md"
+        "$ProjectRoot\templates\skills\writing-techniques\pacing-control\SKILL.md"
+        "$ProjectRoot\templates\skills\quality-assurance\consistency-checker\SKILL.md"
+        # 规格文件
+        "$StoryDir\specification.md"
+    )
+
+    Preload-FileMTimes -FilePathList $preloadFileList
+    $script:PreloadCompleted = $true
+}
 
 # JSON 模式
 if ($Json) {
@@ -155,7 +252,9 @@ function Check-KnowledgeBaseAvailable {
 
     foreach ($file in $craftFiles) {
         $fullPath = Join-Path $ProjectRoot $file
-        if (Test-Path $fullPath) {
+
+        # 使用缓存检查文件是否存在
+        if (Test-FileExistsCached $fullPath) {
             $available += $file
         } else {
             $missing += $file
@@ -187,7 +286,9 @@ function Check-SkillsAvailable {
 
     foreach ($dir in $skillDirs) {
         $skillPath = Join-Path $ProjectRoot "$dir/SKILL.md"
-        if (Test-Path $skillPath) {
+
+        # 使用缓存检查文件是否存在
+        if (Test-FileExistsCached $skillPath) {
             $available += $dir
         } else {
             $missing += $dir
@@ -241,17 +342,17 @@ function Generate-LoadReport {
         }
     }
 
-    # 检查文件存在性
+    # 检查文件存在性（使用缓存）
     foreach ($kb in $knowledgeBaseFiles) {
         $fullPath = Join-Path $ProjectRoot "templates/knowledge-base/$kb"
-        if (-not (Test-Path $fullPath)) {
+        if (-not (Test-FileExistsCached $fullPath)) {
             $warnings += "知识库文件不存在: $kb"
         }
     }
 
     foreach ($skill in $skillsFiles) {
         $fullPath = Join-Path $ProjectRoot "templates/skills/$skill/SKILL.md"
-        if (-not (Test-Path $fullPath)) {
+        if (-not (Test-FileExistsCached $fullPath)) {
             $warnings += "Skill 文件不存在: $skill/SKILL.md"
         }
     }
