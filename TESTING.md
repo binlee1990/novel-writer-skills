@@ -10,26 +10,26 @@
 ### 测试脚本
 
 #### 功能测试
-- `test-regex-precompile.sh` - 预编译正则表达式功能测试
-- `test-phase1-bash.sh` - Bash 缓存集成测试
-- `test-phase1-ps.ps1` - PowerShell 缓存集成测试
+- `templates/scripts/bash/tests/test-regex-precompile.sh` - 预编译正则表达式功能测试
+- `templates/scripts/bash/tests/test-phase1-bash.sh` - Bash 缓存集成测试
+- `templates/scripts/powershell/tests/test-phase1-ps.ps1` - PowerShell 缓存集成测试
 
 #### 边界情况测试
-- `test-edge-cases-bash.sh` - Bash 边界情况测试
-- `test-edge-cases-ps.ps1` - PowerShell 边界情况测试
+- `templates/scripts/bash/tests/test-edge-cases-bash.sh` - Bash 边界情况测试
+- `templates/scripts/powershell/tests/test-edge-cases-ps.ps1` - PowerShell 边界情况测试
 
 #### 兼容性测试
-- `test-cross-platform.sh` - Bash 跨平台兼容性测试
-- `test-cross-platform.ps1` - PowerShell 跨平台兼容性测试
+- `templates/scripts/bash/tests/test-cross-platform.sh` - Bash 跨平台兼容性测试
+- `templates/scripts/powershell/tests/test-cross-platform.ps1` - PowerShell 跨平台兼容性测试
 
 #### 回归测试
-- `test-regression-bash.sh` - Bash 回归测试
-- `test-regression-ps.ps1` - PowerShell 回归测试
+- `templates/scripts/bash/tests/test-regression-bash.sh` - Bash 回归测试
+- `templates/scripts/powershell/tests/test-regression-ps.ps1` - PowerShell 回归测试
 
 #### 性能基准测试
-- `run-all-benchmarks.sh` - 完整性能基准测试套件
-- `bench-preload-cache.sh` - Bash 缓存性能基准
-- `bench-ps-cache.ps1` - PowerShell 缓存性能基准
+- `templates/scripts/bash/tests/run-all-benchmarks.sh` - 完整性能基准测试套件
+- `templates/scripts/bash/tests/bench-preload-cache.sh` - Bash 缓存性能基准
+- `templates/scripts/powershell/tests/bench-ps-cache.ps1` - PowerShell 缓存性能基准
 
 ## 快速开始
 
@@ -37,47 +37,47 @@
 
 ```bash
 # 1. 正则表达式测试（需要 jq）
-bash test-regex-precompile.sh
+bash templates/scripts/bash/tests/test-regex-precompile.sh
 
 # 2. Bash 缓存测试
-bash test-phase1-bash.sh
+bash templates/scripts/bash/tests/test-phase1-bash.sh
 
 # 3. 边界情况测试
-bash test-edge-cases-bash.sh
+bash templates/scripts/bash/tests/test-edge-cases-bash.sh
 
 # 4. 跨平台兼容性测试
-bash test-cross-platform.sh
+bash templates/scripts/bash/tests/test-cross-platform.sh
 
 # 5. 回归测试
-bash test-regression-bash.sh
+bash templates/scripts/bash/tests/test-regression-bash.sh
 
 # 6. 性能基准测试
-bash bench-preload-cache.sh
+bash templates/scripts/bash/tests/bench-preload-cache.sh
 ```
 
 ### 运行所有 PowerShell 测试
 
 ```powershell
 # 1. PowerShell 缓存测试
-pwsh test-phase1-ps.ps1
+pwsh templates/scripts/powershell/tests/test-phase1-ps.ps1
 
 # 2. 边界情况测试
-pwsh test-edge-cases-ps.ps1
+pwsh templates/scripts/powershell/tests/test-edge-cases-ps.ps1
 
 # 3. 跨平台兼容性测试
-pwsh test-cross-platform.ps1
+pwsh templates/scripts/powershell/tests/test-cross-platform.ps1
 
 # 4. 回归测试
-pwsh test-regression-ps.ps1
+pwsh templates/scripts/powershell/tests/test-regression-ps.ps1
 
 # 5. 性能基准测试
-pwsh bench-ps-cache.ps1
+pwsh templates/scripts/powershell/tests/bench-ps-cache.ps1
 ```
 
 ### 运行完整性能基准测试
 
 ```bash
-bash run-all-benchmarks.sh
+bash templates/scripts/bash/tests/run-all-benchmarks.sh
 ```
 
 ## 测试要求
