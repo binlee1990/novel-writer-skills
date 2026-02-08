@@ -42,6 +42,33 @@ function Mark-ResourceLoaded {
     $script:loadedResourcesSet[$path] = $true
 }
 
+# ============================================
+# Phase 3: 缓存文件清理机制
+# ============================================
+#
+# 清理超过 24 小时的旧缓存文件，避免磁盘空间浪费
+# 防御性设计：缓存目录不存在时直接返回
+
+function Cleanup-OldCache {
+    $cacheDir = Join-Path $ProjectRoot ".specify" ".cache"
+
+    # 缓存目录不存在，无需清理
+    if (-not (Test-Path $cacheDir)) {
+        return
+    }
+
+    # 删除超过 24 小时的缓存文件
+    $cutoffTime = (Get-Date).AddDays(-1)
+    Get-ChildItem -Path $cacheDir -Filter "*.json" -File -ErrorAction SilentlyContinue |
+        Where-Object { $_.LastWriteTime -lt $cutoffTime } |
+        Remove-Item -Force -ErrorAction SilentlyContinue
+
+    # 删除空目录
+    Get-ChildItem -Path $cacheDir -Directory -ErrorAction SilentlyContinue |
+        Where-Object { (Get-ChildItem $_.FullName -ErrorAction SilentlyContinue).Count -eq 0 } |
+        Remove-Item -Force -ErrorAction SilentlyContinue
+}
+
 # 预加载文件修改时间到缓存
 # 参数: FilePathList (string[]) - 文件路径列表
 # 说明: 预加载策略避免多次磁盘访问
@@ -136,6 +163,9 @@ if (-not $script:PreloadCompleted) {
     Preload-FileMTimes -FilePathList $preloadFileList
     $script:PreloadCompleted = $true
 }
+
+# Phase 3: 清理旧缓存（轻量级，不影响性能）
+Cleanup-OldCache
 
 # ==================== 资源加载报告生成函数 ====================
 
