@@ -1,0 +1,47 @@
+name: export
+version: 1.0.0
+description: 小说导出插件 - 支持 EPUB/PDF/网文平台格式，自动目录和封面
+type: feature
+author: Novel Writer Community
+
+commands:
+  - id: export
+    file: commands/export.md
+    description: 导出小说为可发布格式（EPUB/PDF/网文平台）
+  - id: generate-cover
+    file: commands/generate-cover.md
+    description: 生成或上传封面图片
+  - id: metadata
+    file: commands/metadata.md
+    description: 编辑小说元数据（书名、作者、简介等）
+
+experts:
+  - id: publishing-expert
+    file: experts/publishing-expert.md
+    title: 出版格式专家
+    description: 精通 EPUB/PDF 格式规范与网文平台要求
+
+dependencies:
+  core: ">=1.0.0"
+  external:
+    pandoc: ">=2.0 (可选，用于高级 PDF 导出)"
+
+installation:
+  message: |
+    export 导出插件安装成功！
+
+    支持格式：
+    - EPUB 3.0（Kindle, Apple Books, Google Play Books）
+    - PDF（打印 / 阅读）
+    - 网文平台（起点、番茄、晋江）
+    - Markdown 合集（单文件备份）
+
+    快速开始：
+    1. /metadata edit                  编辑元数据（书名、作者、简介）
+    2. /generate-cover                 生成或上传封面
+    3. /export --format epub           导出 EPUB
+    4. /export --format pdf            导出 PDF
+    5. /export --format qidian         导出起点格式
+
+    可选依赖（高级 PDF）：
+    - Pandoc: https://pandoc.org/installing.html

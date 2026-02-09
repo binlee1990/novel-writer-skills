@@ -1,0 +1,179 @@
+/* PDF 打印样式 - A5 实体书 */
+
+@charset "UTF-8";
+
+/* ========== 页面设置 ========== */
+
+@page {
+  size: A5;
+  margin: 2cm 1.5cm;
+
+  @top-center {
+    content: "{{book_title}}";
+    font-size: 9pt;
+    color: #999;
+  }
+
+  @bottom-center {
+    content: counter(page);
+    font-size: 10pt;
+  }
+}
+
+/* 首页无页眉页脚 */
+@page :first {
+  @top-center { content: none; }
+  @bottom-center { content: none; }
+}
+
+/* 章节首页无页眉 */
+@page chapter-first {
+  @top-center { content: none; }
+}
+
+/* ========== 基础排版 ========== */
+
+body {
+  font-family: "Source Han Serif SC", "Noto Serif CJK SC",
+               "Songti SC", "SimSun", serif;
+  font-size: 11pt;
+  line-height: 1.5;
+  color: #000;
+}
+
+/* ========== 章节标题 ========== */
+
+h1.chapter-title {
+  page-break-before: always;
+  page: chapter-first;
+  text-align: center;
+  font-size: 16pt;
+  font-weight: bold;
+  margin-top: 3cm;
+  margin-bottom: 2cm;
+}
+
+/* ========== 正文段落 ========== */
+
+p {
+  text-indent: 2em;
+  margin: 0;
+  orphans: 2;
+  widows: 2;
+  text-align: justify;
+}
+
+/* ========== 场景分隔 ========== */
+
+hr.scene-break {
+  border: none;
+  text-align: center;
+  margin: 1.5em 0;
+  page-break-after: avoid;
+}
+
+hr.scene-break::after {
+  content: "\2217\2003\2217\2003\2217";
+  color: #666;
+}
+
+/* ========== 封面页 ========== */
+
+.cover-page {
+  page-break-after: always;
+  text-align: center;
+  padding-top: 25%;
+}
+
+.cover-page .title {
+  font-size: 24pt;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.cover-page .subtitle {
+  font-size: 14pt;
+  color: #666;
+  margin-bottom: 2em;
+}
+
+.cover-page .author {
+  font-size: 14pt;
+  color: #333;
+}
+
+.cover-page .separator {
+  display: block;
+  width: 4cm;
+  height: 0.5pt;
+  background: #999;
+  margin: 1.5em auto;
+}
+
+/* ========== 目录页 ========== */
+
+.toc-page {
+  page-break-before: always;
+  page-break-after: always;
+}
+
+.toc-page h1 {
+  text-align: center;
+  font-size: 16pt;
+  margin-bottom: 2cm;
+}
+
+.toc-page ul {
+  list-style: none;
+  padding: 0;
+}
+
+.toc-page li {
+  margin: 0.5em 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.toc-page li .dots {
+  flex: 1;
+  border-bottom: 1px dotted #ccc;
+  margin: 0 0.5em;
+}
+
+/* ========== 版权页 ========== */
+
+.copyright-page {
+  page-break-before: always;
+  font-size: 9pt;
+  color: #666;
+  text-align: center;
+  padding-top: 60%;
+}
+
+.copyright-page p {
+  text-indent: 0;
+  margin: 0.3em 0;
+}
+
+/* ========== 附录 ========== */
+
+.appendix {
+  page-break-before: always;
+}
+
+.appendix table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10pt;
+}
+
+.appendix table th,
+.appendix table td {
+  border: 0.5pt solid #999;
+  padding: 4pt 6pt;
+}
+
+.appendix table th {
+  background: #f0f0f0;
+  font-weight: bold;
+}

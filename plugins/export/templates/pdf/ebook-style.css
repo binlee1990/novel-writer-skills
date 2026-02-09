@@ -1,0 +1,137 @@
+/* PDF 电子阅读样式 - A4 屏幕阅读 */
+
+@charset "UTF-8";
+
+/* ========== 页面设置 ========== */
+
+@page {
+  size: A4;
+  margin: 2.5cm 3cm;
+
+  @bottom-center {
+    content: counter(page);
+    font-size: 10pt;
+    color: #999;
+  }
+}
+
+@page :first {
+  @bottom-center { content: none; }
+}
+
+/* ========== 基础排版 ========== */
+
+body {
+  font-family: "Source Han Sans SC", "Noto Sans CJK SC",
+               "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12pt;
+  line-height: 1.6;
+  color: #333;
+}
+
+/* ========== 章节标题 ========== */
+
+h1.chapter-title {
+  page-break-before: always;
+  text-align: center;
+  font-size: 18pt;
+  font-weight: bold;
+  margin-top: 4cm;
+  margin-bottom: 2cm;
+  color: #1a1a1a;
+}
+
+/* ========== 正文段落 ========== */
+
+p {
+  text-indent: 2em;
+  margin: 0.2em 0;
+  orphans: 2;
+  widows: 2;
+  text-align: justify;
+}
+
+/* ========== 场景分隔 ========== */
+
+hr.scene-break {
+  border: none;
+  text-align: center;
+  margin: 2em 0;
+}
+
+hr.scene-break::after {
+  content: "\2217\2003\2217\2003\2217";
+  color: #999;
+}
+
+/* ========== 封面页 ========== */
+
+.cover-page {
+  page-break-after: always;
+  text-align: center;
+  padding-top: 20%;
+}
+
+.cover-page .title {
+  font-size: 28pt;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  color: #1a1a1a;
+}
+
+.cover-page .subtitle {
+  font-size: 16pt;
+  color: #666;
+  margin-bottom: 2em;
+}
+
+.cover-page .author {
+  font-size: 16pt;
+  color: #444;
+}
+
+.cover-page .separator {
+  display: block;
+  width: 5cm;
+  height: 0.5pt;
+  background: #ccc;
+  margin: 1.5em auto;
+}
+
+/* ========== 目录页 ========== */
+
+.toc-page {
+  page-break-before: always;
+  page-break-after: always;
+}
+
+.toc-page h1 {
+  text-align: center;
+  font-size: 18pt;
+  margin-bottom: 2cm;
+}
+
+.toc-page ul {
+  list-style: none;
+  padding: 0;
+}
+
+.toc-page li {
+  margin: 0.6em 0;
+  font-size: 11pt;
+}
+
+/* ========== 版权页 ========== */
+
+.copyright-page {
+  page-break-before: always;
+  font-size: 10pt;
+  color: #999;
+  text-align: center;
+  padding-top: 50%;
+}
+
+.copyright-page p {
+  text-indent: 0;
+  margin: 0.3em 0;
+}
