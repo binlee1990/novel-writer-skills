@@ -479,6 +479,7 @@ resource-loading:
 - **输入**：来自 `/specify` 的规格 + `/clarify` 的澄清
 - **输出**：为 `/tasks` 提供任务生成依据
 - **验证**：被 `/analyze` 用于检查实现符合度
+- **期待管理**：规划章节时参考 `reader-expectation` Skill，在大纲阶段识别期待并安排满足时间点，确保每个情节承诺、谜题悬念都有明确的 payoff 章节
 
 ## 注意事项
 
