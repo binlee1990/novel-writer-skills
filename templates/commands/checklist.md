@@ -339,9 +339,55 @@ bash scripts/bash/check-timeline.sh check --checklist
 
 ##### 2.9 写作状态检查
 
-执行命令：
+**目标**：检查写作准备度，确保所有必要资源就绪。
+
+**检查项**：
+
+**风格指南状态**：
+- [ ] personal-voice.md 是否存在？
+- [ ] 如果不存在且已写 3+ 章，是否需要执行风格学习？
+- [ ] 风格指南是否过时（最后更新 > 10 章前）？
+
+**规格文档状态**：
+- [ ] specification.md 是否存在且完整？
+- [ ] outline.md 是否存在？
+- [ ] 角色设定是否完整？
+
+**追踪数据状态**：
+- [ ] plot-tracker.json 是否存在？
+- [ ] character-state.json 是否存在？
+- [ ] 追踪数据是否与已写章节同步？
+
+**任务状态**：
+- [ ] tasks.md 是否存在？
+- [ ] 当前任务是否明确？
+- [ ] 是否有阻塞任务？
+
+**实现方式**：
+
+如果存在脚本，执行：
 ```bash
 bash scripts/bash/check-writing-state.sh --checklist
+```
+
+否则，手动检查上述项目并生成报告。
+
+**风格学习集成**：
+
+如果检测到 personal-voice.md 不存在且已写 3+ 章：
+```markdown
+⚠️ 风格指南缺失
+
+检测到：
+- 已写章节：5 章
+- personal-voice.md：不存在
+
+建议：
+执行风格学习生成个性化风格指南：
+  /style-learning
+
+或手动创建：
+  .specify/memory/personal-voice.md
 ```
 
 ### 3. 输出 Checklist

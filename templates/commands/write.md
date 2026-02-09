@@ -91,12 +91,43 @@ powershell -File {SCRIPT} -Json
 **查询顺序**：
 1. **先查（最高优先级）**：
    - `memory/constitution.md`（创作宪法 - 最高原则）
+   - `memory/personal-voice.md`（个人风格指南 - 如果通过风格学习生成）
    - `memory/style-reference.md`（风格参考 - 如果通过 `/book-internalize` 生成）
 
 2. **再查（规格和计划）**：
    - `stories/*/specification.md`（故事规格）
    - `stories/*/creative-plan.md`（创作计划）
    - `stories/*/tasks.md`（当前任务）
+
+2.1. **🆕 风格学习前置检查**：
+
+   **检查 personal-voice.md 状态**：
+   - 如果 `memory/personal-voice.md` 不存在
+   - 且检测到已写章节 ≥ 3 章
+   - 提示用户：
+
+   ```
+   💡 风格学习建议
+
+   检测到：
+   - 已写章节：5 章
+   - personal-voice.md：不存在
+
+   建议执行风格学习生成个性化风格指南，提升 AI 续写一致性：
+
+   执行命令：
+     /style-learning
+
+   或跳过此步骤继续写作（输入 'skip'）
+   ```
+
+   **如果用户选择跳过**：继续执行写作流程
+
+   **如果用户执行风格学习**：
+   - 暂停当前写作流程
+   - 等待风格学习完成
+   - 重新加载 personal-voice.md
+   - 继续写作流程
 
 2.5. **自动加载写作风格和规范（基于配置）**：
    - 读取 `specification.md` 的 YAML frontmatter
