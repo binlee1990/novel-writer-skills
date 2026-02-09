@@ -38,8 +38,6 @@ coverage/
 .cache/
 *.backup
 
-# Draft plans
-docs/p*-plans/
 
 # Git worktrees
 .worktrees/
