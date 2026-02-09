@@ -346,9 +346,9 @@ bash .specify/templates/scripts/bash/track-progress.sh
 
 ## 📚 文档
 
-- [入门指南](docs/getting-started.md) - 详细安装和使用教程
-- [命令详解](docs/commands.md) - 所有命令的完整说明
-- [Skills 指南](docs/skills-guide.md) - Agent Skills 工作原理
+- [入门指南](docs/guides/getting-started.md) - 详细安装和使用教程
+- [命令详解](docs/guides/commands.md) - 所有命令的完整说明
+- [Skills 指南](docs/guides/skills-guide.md) - Agent Skills 工作原理
 - [脚本工具集](templates/scripts/README.md) - 命令行脚本使用指南
 - [插件开发](docs/plugin-development.md) - 如何开发自己的插件
 

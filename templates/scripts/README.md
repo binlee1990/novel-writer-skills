@@ -172,8 +172,8 @@ bash analyze-story.sh
 ## 🔗 相关文档
 
 - [Novel Writer Skills 主文档](../../README.md)
-- [命令详解](../../docs/commands.md)
-- [入门指南](../../docs/getting-started.md)
+- [命令详解](../../docs/guides/commands.md)
+- [入门指南](../../docs/guides/getting-started.md)
 
 ## 💡 提示
 

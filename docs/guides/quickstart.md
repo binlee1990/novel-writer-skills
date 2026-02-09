@@ -71,9 +71,9 @@ A: 可以，但 `/write` 会更有效如果有 `/plan` 指导
 
 ## 需要帮助？
 
-- 📖 [完整入门指南](docs/getting-started.md)
-- 📚 [命令详解](docs/commands.md)
-- 🎨 [Skills 指南](docs/skills-guide.md)
+- 📖 [完整入门指南](getting-started.md)
+- 📚 [命令详解](commands.md)
+- 🎨 [Skills 指南](skills-guide.md)
 
 ---
 

@@ -292,7 +292,7 @@ Task 1: /recap 命令 (7-9h)
 
 - [P0 计划文档](../plans/README.md)
 - [项目总体分析](../../README.md)
-- [PRD 文档](../novel-writer-skills-prd.md)
+- [PRD 文档](../../novel-writer-skills-prd.md)
 
 ---
 

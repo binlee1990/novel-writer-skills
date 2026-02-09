@@ -274,9 +274,9 @@ templates/knowledge-base/craft/family-saga.md
 
 ## 🔗 相关文档
 
-- **Skills指南**：`docs/skills-guide.md` - 了解 setting-detector Skill 如何使用本知识库
+- **Skills指南**：`docs/guides/skills-guide.md` - 了解 setting-detector Skill 如何使用本知识库
 - **插件开发**：`docs/plugin-development.md` - 如何开发知识库插件
-- **命令详解**：`docs/commands.md` - 知识库如何增强各个命令
+- **命令详解**：`docs/guides/commands.md` - 知识库如何增强各个命令
 
 ---
 
