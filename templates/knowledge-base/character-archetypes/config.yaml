@@ -1,0 +1,28 @@
+name: character-archetypes
+version: 1.0.0
+description: 角色原型知识库，提供12种经典原型的设计模板
+type: knowledge-base
+
+activation:
+  keywords:
+    - 角色设计
+    - 角色原型
+    - archetype
+    - 英雄
+    - 导师
+    - 反派
+    - 角色功能
+    - 角色类型
+  auto_activate: true
+  confidence_threshold: 0.7
+
+integration:
+  works_with:
+    - character-arc
+    - character-tracking
+    - /specify
+
+metadata:
+  word_count: 8000+
+  estimated_reading_time: "25分钟"
+  complexity: intermediate
