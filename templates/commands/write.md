@@ -1,6 +1,6 @@
 ---
 description: 基于任务清单执行章节写作，自动加载上下文和验证规则
-argument-hint: [章节编号或任务ID]
+argument-hint: [章节编号或任务ID] [--fast]
 allowed-tools: Read(//**), Write(//stories/**/content/**), Bash(ls:*), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
 model: claude-sonnet-4-5-20250929
 scripts:
@@ -643,6 +643,73 @@ resource-loading:
      如果你安装了 genre-knowledge 插件，请在此处插入风格应用增强提示词
      参考：plugins/genre-knowledge/README.md 的"2.3 增强 /write 命令"章节
 -->
+
+---
+
+## 🚀 快写模式（`--fast`）
+
+**触发条件**：用户参数 `$ARGUMENTS` 包含 `--fast`
+
+**适用场景**：
+- 灵感爆发，想快速开写
+- 短暂离开后续写，不需要完整上下文重建
+- 已经很熟悉当前剧情，不需要提醒
+
+**快写模式流程**：
+
+### Fast-1. 最小资源加载
+
+**仅加载以下 3 项**（跳过三层资源加载机制和查询协议）：
+
+1. **当前任务**：读取 `stories/*/tasks.md`，找到当前 `pending` 或 `in_progress` 的写作任务
+2. **上一章内容**：读取最近完成的章节文件（最后 500 字即可）
+3. **角色状态**：读取 `stories/*/spec/tracking/character-state.json`（仅当前活跃角色）
+
+**不加载**：
+- ❌ 宪法文件
+- ❌ 规格文件
+- ❌ 创作计划
+- ❌ knowledge-base 资源
+- ❌ skills 资源
+- ❌ 关系网络
+- ❌ 时间线
+- ❌ 情节追踪
+
+### Fast-2. 极简写作提醒
+
+输出一个简短的写作提醒卡片：
+
+```
+📍 快写模式
+━━━━━━━━━━━━━━━━━━━━
+📋 任务：[从 tasks.md 提取的当前任务标题]
+📖 上章结尾：[最后一段的一句话概括]
+👤 在场角色：[从 character-state.json 提取]
+━━━━━━━━━━━━━━━━━━━━
+⚡ 直接开始写作，跳过详细检查
+💡 如需完整上下文，请使用 /write（不带 --fast）
+```
+
+### Fast-3. 直接进入写作
+
+跳过「写作前提醒」「分段格式规范」等详细提醒，直接进入内容创作。
+
+**但仍然遵守**：
+- ✅ 段落结构规范（单句成段 30%-50%，每段 50-100 字）
+- ✅ 反 AI 规范（禁用词、替换策略）
+- ✅ 自然化写作原则
+
+### Fast-4. 完整后置处理
+
+写作完成后，**仍然执行完整的后置处理**（与正常模式相同）：
+- ✅ 字数验证
+- ✅ 进度更新
+- ✅ 自动 Tracking 更新（character-state.json, relationships.json, plot-tracker.json, timeline.json）
+- ✅ 下一步建议
+
+---
+
+> ⚠️ **以下为正常模式流程**（`--fast` 模式跳过以下内容，直接执行 Fast-1 到 Fast-4）
 
 ## 写作执行流程
 
