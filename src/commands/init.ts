@@ -112,11 +112,6 @@ export function registerInitCommand(program: Command): void {
           await fs.copy(templates.knowledge, paths.knowledge);
         }
 
-        // 复制通用知识库系统
-        if (await fs.pathExists(templates.knowledgeBase)) {
-          await fs.copy(templates.knowledgeBase, paths.knowledgeBase);
-          spinner.text = '已安装知识库系统...';
-        }
 
         // 如果指定了 --plugins，安装插件
         if (options.plugins) {

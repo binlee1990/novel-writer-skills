@@ -17,7 +17,6 @@ export function registerUpgradeCommand(program: Command): void {
     .command('upgrade')
     .option('--commands', '更新命令文件')
     .option('--skills', '更新 Skills 文件')
-    .option('--knowledge-base', '更新知识库系统')
     .option('--all', '更新所有内容')
     .option('-y, --yes', '跳过确认提示')
     .description('升级现有项目到最新版本')
@@ -41,12 +40,10 @@ export function registerUpgradeCommand(program: Command): void {
 
         let updateCommands = options.all || options.commands || false;
         let updateSkills = options.all || options.skills || false;
-        let updateKnowledgeBase = options.all || options.knowledgeBase || false;
 
-        if (!updateCommands && !updateSkills && !updateKnowledgeBase) {
+        if (!updateCommands && !updateSkills) {
           updateCommands = true;
           updateSkills = true;
-          updateKnowledgeBase = true;
         }
 
         if (!options.yes) {
@@ -82,12 +79,6 @@ export function registerUpgradeCommand(program: Command): void {
           }
         }
 
-        if (updateKnowledgeBase) {
-          spinner.text = '更新知识库系统...';
-          if (await fs.pathExists(templates.knowledgeBase)) {
-            await fs.copy(templates.knowledgeBase, paths.knowledgeBase, { overwrite: true });
-          }
-        }
 
         config.version = getVersion();
         await fs.writeJson(paths.specifyConfig, config, { spaces: 2 });
@@ -97,7 +88,6 @@ export function registerUpgradeCommand(program: Command): void {
         console.log(chalk.cyan('✨ 升级内容:'));
         if (updateCommands) console.log('  • Slash Commands 已更新');
         if (updateSkills) console.log('  • Agent Skills 已更新');
-        if (updateKnowledgeBase) console.log('  • 知识库系统 已更新（包括 styles/ 和 requirements/）');
         console.log(`  • 版本号: ${projectVersion} → ${getVersion()}`);
       } catch (error) {
         console.error(chalk.red('\n❌ 升级失败:'), error);

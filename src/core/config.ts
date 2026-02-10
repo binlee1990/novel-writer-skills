@@ -121,7 +121,6 @@ export function getProjectPaths(projectRoot: string) {
     claude: path.join(projectRoot, DIRS.CLAUDE),
     commands: path.join(projectRoot, DIRS.CLAUDE, DIRS.COMMANDS),
     skills: path.join(projectRoot, DIRS.CLAUDE, DIRS.SKILLS),
-    knowledgeBase: path.join(projectRoot, DIRS.CLAUDE, DIRS.KNOWLEDGE_BASE),
     stories: path.join(projectRoot, DIRS.STORIES),
     spec: path.join(projectRoot, DIRS.SPEC),
     tracking: path.join(projectRoot, DIRS.SPEC, DIRS.TRACKING),
@@ -138,7 +137,6 @@ export function getTemplateSourcePaths() {
   return {
     commands: path.join(templatesDir, DIRS.COMMANDS),
     skills: path.join(templatesDir, DIRS.SKILLS),
-    knowledgeBase: path.join(templatesDir, DIRS.KNOWLEDGE_BASE),
     memory: path.join(templatesDir, DIRS.MEMORY),
     tracking: path.join(templatesDir, DIRS.TRACKING),
     knowledge: path.join(templatesDir, DIRS.KNOWLEDGE),
