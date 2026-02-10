@@ -27,10 +27,26 @@ function findPackageRoot(startDir: string): string {
   }
 }
 
-// 使用当前工作目录或 __dirname（CJS 环境）作为起点
-const _packageRoot = findPackageRoot(
-  typeof __dirname !== 'undefined' ? __dirname : process.cwd()
-);
+/**
+ * 获取当前模块所在目录
+ * CJS: 使用 __dirname（Jest 环境）
+ * ESM: 使用 process.argv[1]（入口脚本路径，如 dist/cli.js）
+ * 最终回退: process.cwd()
+ */
+function getCurrentDir(): string {
+  // CJS 环境（Jest）
+  if (typeof __dirname !== 'undefined') {
+    return __dirname;
+  }
+  // ESM 环境：从入口脚本路径推断
+  if (process.argv[1]) {
+    return path.dirname(path.resolve(process.argv[1]));
+  }
+  return process.cwd();
+}
+
+// 从当前模块位置向上查找包根目录
+const _packageRoot = findPackageRoot(getCurrentDir());
 
 /** 目录名常量 */
 export const DIRS = {
