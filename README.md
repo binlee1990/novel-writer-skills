@@ -1,6 +1,6 @@
 # Novel Writer Skills - Claude Code 专用小说创作工具
 
-[![npm version](https://badge.fury.io/js/novel-writer-skills.svg)](https://www.npmjs.com/package/novel-writer-skills)
+[![npm version](https://badge.fury.io/js/novelws.svg)](https://www.npmjs.com/package/novelws)
 [![Tests](https://github.com/binlee1990/novel-writer-skills/actions/workflows/test.yml/badge.svg)](https://github.com/binlee1990/novel-writer-skills/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -22,7 +22,7 @@
 ### 1. 安装
 
 ```bash
-npm install -g novel-writer-skills
+npm install -g novelws
 ```
 
 ### 2. 初始化项目
