@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "关键词触发机制的映射表（含预编译正则）",
   "mappings": {
     "craft-knowledge": {
@@ -67,6 +67,15 @@
         "regex_flags": "i",
         "resources": [
           "templates/knowledge-base/craft/power-system.md"
+        ],
+        "priority": 1
+      },
+      "tension-management": {
+        "keywords": ["紧张感", "张力", "信息差", "时间压力", "两难", "tension", "dilemma"],
+        "regex": "紧张感|张力|信息差|时间压力|两难|tension|dilemma",
+        "regex_flags": "i",
+        "resources": [
+          "templates/knowledge-base/craft/tension-management.md"
         ],
         "priority": 1
       }
@@ -145,6 +154,33 @@
           "templates/knowledge-base/genres/xuanhuan.md"
         ],
         "priority": 2
+      },
+      "urban": {
+        "keywords": ["都市", "现代", "城市", "职场", "urban", "modern", "city"],
+        "regex": "都市|现代|城市|职场|urban|modern|city",
+        "regex_flags": "i",
+        "resources": [
+          "templates/knowledge-base/genres/urban.md"
+        ],
+        "priority": 2
+      },
+      "game-lit": {
+        "keywords": ["游戏", "系统", "面板", "副本", "game", "system", "dungeon"],
+        "regex": "游戏|系统|面板|副本|game|system|dungeon",
+        "regex_flags": "i",
+        "resources": [
+          "templates/knowledge-base/genres/game-lit.md"
+        ],
+        "priority": 2
+      },
+      "rebirth": {
+        "keywords": ["重生", "穿越", "回到过去", "前世", "rebirth", "reincarnation", "transmigration"],
+        "regex": "重生|穿越|回到过去|前世|rebirth|reincarnation|transmigration",
+        "regex_flags": "i",
+        "resources": [
+          "templates/knowledge-base/genres/rebirth.md"
+        ],
+        "priority": 2
       }
     },
     "quality-assurance": {
@@ -175,7 +211,11 @@
     "thriller": "惊悚|恐怖|紧张",
     "revenge": "复仇|报仇|仇恨",
     "xuanhuan": "玄幻|修仙|修炼|境界|灵气|宗门",
-    "consistency": "一致性|矛盾|冲突"
+    "consistency": "一致性|矛盾|冲突",
+    "tension-management": "紧张感|张力|信息差|时间压力|两难",
+    "urban": "都市|现代|城市|职场",
+    "game-lit": "游戏|系统|面板|副本",
+    "rebirth": "重生|穿越|回到过去|前世"
   },
   "notes": {
     "priority": "优先级数字越小越高（1 最高）",
