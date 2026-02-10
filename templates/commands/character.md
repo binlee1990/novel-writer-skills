@@ -390,3 +390,16 @@ allowed-tools: Read, Write, Glob, Grep, Edit
 ### 向后兼容
 
 如果 `character-state.json` 中的角色条目缺少新增字段（如 `voice`），自动补充默认值而非报错。
+
+---
+
+## 🔗 命令链式提示
+
+**命令执行完成后，自动附加下一步建议**：
+
+```
+💡 下一步建议：
+1️⃣ `/character voice [角色名]` — 设定角色对话风格（如刚创建角色）
+2️⃣ `/character relate [角色A] [角色B]` — 建立角色关系
+3️⃣ `/write [章节号]` — 角色就绪，开始写作
+```

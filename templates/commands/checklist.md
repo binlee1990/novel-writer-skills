@@ -432,3 +432,16 @@ bash scripts/bash/check-writing-state.sh --checklist
 ## 向后兼容说明
 
 旧命令 `/world-check` 和 `/plot-check` 仍然可用，但推荐使用统一的 `/checklist` 命令。
+
+---
+
+## 🔗 命令链式提示
+
+**命令执行完成后，自动附加下一步建议**：
+
+```
+💡 下一步建议：
+1️⃣ `/revise` — 基于检查清单结果修复发现的问题
+2️⃣ `/analyze` — 执行更深入的内容质量分析
+3️⃣ `/write [章节号]` — 检查通过后继续写作
+```
