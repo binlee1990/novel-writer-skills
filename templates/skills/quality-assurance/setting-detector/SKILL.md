@@ -67,6 +67,22 @@ allowed-tools: Read
 激活：templates/knowledge-base/genres/wuxia.md
 ```
 
+**科幻小说**（sci-fi）：
+```
+触发词：科幻、sci-fi、未来、太空、宇宙、星际、赛博朋克、
+       人工智能、AI、机器人、末日、后末日、时间旅行
+
+激活：templates/knowledge-base/genres/sci-fi.md
+```
+
+**惊悚小说**（thriller）：
+```
+触发词：惊悚、thriller、紧张、追杀、逃亡、绑架、暗杀、
+       阴谋、倒计时、生存、威胁、危机
+
+激活：templates/knowledge-base/genres/thriller.md
+```
+
 #### 参考资料库（References）
 
 **1920年代中国**（china-1920s）：
@@ -353,7 +369,7 @@ Token消耗：约1650 tokens
 
 | 类别 | 已完成 | 计划中 |
 |------|--------|--------|
-| 类型知识 | 5个 | 10+ |
+| 类型知识 | 7个 | 10+ |
 | 参考资料 | 4个 | 20+ |
 
 **已完成**（v1.0）：
@@ -369,9 +385,11 @@ Token消耗：约1650 tokens
 - references/modern-workplace/（现代职场）
 - references/cultivation-world/（修仙世界）
 
-**计划中**（v1.2+）：
+**已完成**（v1.2）：
 - genres/sci-fi.md（科幻）
 - genres/thriller.md（惊悚）
+
+**计划中**（v1.3+）：
 - genres/horror.md（恐怖）
 
 ### 添加新知识库
