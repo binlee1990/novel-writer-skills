@@ -712,6 +712,133 @@ resource-loading:
 
 > ⚠️ **以下为正常模式流程**（`--fast` 模式跳过以下内容，直接执行 Fast-1 到 Fast-4）
 
+## 断点续写机制
+
+### 恢复检测
+
+在开始写作前，检查是否存在未完成的 checkpoint：
+
+1. 读取 `stories/*/spec/tracking/write-checkpoint.json`
+2. 如果文件存在且 `status` 为 `in_progress`：
+   - 检查 `expiresAt` 是否已过期（超过 24 小时视为过期）
+   - 如果未过期，向用户提示：
+
+```
+📍 发现未完成的写作进度
+━━━━━━━━━━━━━━━━━━━━
+📖 章节：第 [N] 章 — [标题]
+📊 进度：[已写字数]/[目标字数]（[X]%）
+⏰ 上次写作：[时间]
+
+选择操作：
+1. 继续写作（从断点恢复）
+2. 重新开始（丢弃已有进度）
+3. 查看已写内容
+```
+
+   - 如果用户选择「继续写作」→ 跳转到「断点恢复流程」
+   - 如果用户选择「重新开始」→ 删除 checkpoint，执行正常流程
+   - 如果已过期 → 提示过期，询问是否仍要恢复
+
+3. 如果文件不存在 → 执行正常写作流程
+
+### 断点恢复流程
+
+当用户选择从断点恢复时：
+
+1. **跳过资源加载**：使用 checkpoint 中记录的 `loadedResources` 列表，仅重新加载这些资源（而非执行完整的三层资源加载）
+2. **恢复上下文**：
+   - 读取已写的章节内容（从 `content.filePath`）
+   - 验证内容 hash 是否匹配（检测外部修改）
+   - 如果 hash 不匹配，提示用户内容已被外部修改，询问是否以当前文件内容为准
+3. **显示恢复摘要**：
+
+```
+✅ 已恢复写作进度
+━━━━━━━━━━━━━━━━━━━━
+📖 第 [N] 章 — [标题]
+📊 已写：[X] 字 / [Y] 字
+📝 上次写到：[最后一段摘要]
+
+⚡ 继续写作...
+```
+
+4. **从断点继续**：从已写内容的末尾继续创作
+
+### 断点保存时机
+
+在写作过程中，以下时机自动保存 checkpoint：
+
+1. **每完成一个场景/段落组**后（约 500-1000 字）
+2. **用户主动中断时**（如果检测到对话中断）
+3. **写作完成时**：将 `status` 更新为 `completed`
+
+**保存操作**：
+- 更新 `write-checkpoint.json` 中的 `progress` 和 `content` 字段
+- 更新 `timestamps.updatedAt`
+- 不阻塞写作流程（保存操作应快速完成）
+
+### Checkpoint 数据结构
+
+```json
+{
+  "version": "1.0",
+  "storyDir": "[故事目录名]",
+  "chapter": {
+    "number": "[章节编号]",
+    "title": "[章节标题]",
+    "taskId": "[对应的 tasks.md 任务ID]"
+  },
+  "progress": {
+    "status": "in_progress",
+    "wordsWritten": 0,
+    "targetWords": 3000,
+    "sectionsCompleted": 0,
+    "totalSections": 3,
+    "lastSectionSummary": ""
+  },
+  "context": {
+    "loadedResources": ["[已加载的资源文件路径列表]"],
+    "charactersFocused": ["[当前章节涉及的角色]"],
+    "previousChapterEnding": "[上一章最后一段摘要]",
+    "currentTask": "[当前写作任务描述]"
+  },
+  "content": {
+    "filePath": "[当前章节文件路径]",
+    "lastWrittenLine": 0,
+    "contentHash": "[已写内容的 hash，用于检测外部修改]"
+  },
+  "timestamps": {
+    "createdAt": "[ISO日期]",
+    "updatedAt": "[ISO日期]",
+    "expiresAt": "[ISO日期，24小时后过期]"
+  }
+}
+```
+
+### Checkpoint 清理
+
+- 写作正常完成后：将 `status` 设为 `completed`，保留文件供参考
+- 下次 `/write` 新章节时：如果上一个 checkpoint 的 `status` 为 `completed`，自动删除
+- 过期的 checkpoint（超过 24 小时）：在下次 `/write` 时提示并清理
+
+### 与快写模式的兼容
+
+断点续写机制在 `--fast` 模式下同样生效：
+
+```
+/write 开始
+  → 断点恢复检测（最先执行）
+    → 如有 checkpoint → 恢复流程
+    → 如无 checkpoint：
+      → 检测 --fast → 快写模式
+      → 否则 → 正常模式
+```
+
+恢复时使用快写模式的最小资源加载（而非完整加载）。
+
+---
+
 ## 写作执行流程
 
 ### 1. 选择写作任务
@@ -1298,6 +1425,26 @@ count_chinese_words "stories/*/content/第X章.md"
 
 ---
 ```
+
+### Checkpoint 完成标记
+
+写作正常完成后，更新 checkpoint 状态：
+
+```json
+{
+  "progress": {
+    "status": "completed",
+    "wordsWritten": "[最终字数]"
+  },
+  "timestamps": {
+    "updatedAt": "[当前时间]"
+  }
+}
+```
+
+如果不需要保留 checkpoint 记录，可直接删除 `write-checkpoint.json`。
+
+---
 
 ### 错误处理
 
