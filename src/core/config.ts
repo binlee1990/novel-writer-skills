@@ -126,6 +126,7 @@ export function getProjectPaths(projectRoot: string) {
     tracking: path.join(projectRoot, DIRS.SPEC, DIRS.TRACKING),
     knowledge: path.join(projectRoot, DIRS.SPEC, DIRS.KNOWLEDGE),
     plugins: path.join(projectRoot, DIRS.PLUGINS),
+    knowledgeBase: path.join(projectRoot, DIRS.CLAUDE, DIRS.KNOWLEDGE_BASE),
   };
 }
 
@@ -140,6 +141,7 @@ export function getTemplateSourcePaths() {
     memory: path.join(templatesDir, DIRS.MEMORY),
     tracking: path.join(templatesDir, DIRS.TRACKING),
     knowledge: path.join(templatesDir, DIRS.KNOWLEDGE),
+    knowledgeBase: path.join(templatesDir, DIRS.KNOWLEDGE_BASE),
     all: templatesDir,
   };
 }
