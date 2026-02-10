@@ -60,6 +60,15 @@
           "templates/knowledge-base/craft/hook-design.md"
         ],
         "priority": 1
+      },
+      "power-system": {
+        "keywords": ["力量体系", "战力", "境界", "等级", "power system", "combat"],
+        "regex": "力量体系|战力|境界|等级|power\\s*system|combat",
+        "regex_flags": "i",
+        "resources": [
+          "templates/knowledge-base/craft/power-system.md"
+        ],
+        "priority": 1
       }
     },
     "genre-knowledge": {
@@ -157,6 +166,7 @@
     "pacing": "节奏|拖沓|太快|太慢|过快|过慢",
     "show-tell": "展示|描写|tell|show",
     "hook-design": "钩子|悬念|章末|hook|cliffhanger|结尾",
+    "power-system": "力量体系|战力|境界|等级",
     "romance": "言情|恋爱|感情|爱情",
     "mystery": "悬疑|推理|线索",
     "wuxia": "武侠|江湖|侠客|武功",
