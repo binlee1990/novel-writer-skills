@@ -51,6 +51,15 @@
           "templates/knowledge-base/craft/show-not-tell.md"
         ],
         "priority": 1
+      },
+      "hook-design": {
+        "keywords": ["钩子", "悬念", "章末", "hook", "cliffhanger", "结尾"],
+        "regex": "钩子|悬念|章末|hook|cliffhanger|结尾",
+        "regex_flags": "i",
+        "resources": [
+          "templates/knowledge-base/craft/hook-design.md"
+        ],
+        "priority": 1
       }
     },
     "genre-knowledge": {
@@ -73,6 +82,60 @@
           "templates/skills/genre-knowledge/mystery/SKILL.md"
         ],
         "priority": 2
+      },
+      "wuxia": {
+        "keywords": ["武侠", "江湖", "侠客", "武功", "wuxia", "martial arts"],
+        "regex": "武侠|江湖|侠客|武功|wuxia|martial\\s*arts",
+        "regex_flags": "i",
+        "resources": [
+          "templates/knowledge-base/genres/wuxia.md"
+        ],
+        "priority": 2
+      },
+      "historical": {
+        "keywords": ["历史", "古代", "朝代", "宫廷", "historical", "dynasty"],
+        "regex": "历史|古代|朝代|宫廷|historical|dynasty",
+        "regex_flags": "i",
+        "resources": [
+          "templates/knowledge-base/genres/historical.md"
+        ],
+        "priority": 2
+      },
+      "sci-fi": {
+        "keywords": ["科幻", "未来", "太空", "星际", "sci-fi", "science fiction"],
+        "regex": "科幻|未来|太空|星际|sci-fi|science\\s*fiction",
+        "regex_flags": "i",
+        "resources": [
+          "templates/knowledge-base/genres/sci-fi.md"
+        ],
+        "priority": 2
+      },
+      "thriller": {
+        "keywords": ["惊悚", "恐怖", "紧张", "thriller", "horror", "suspense"],
+        "regex": "惊悚|恐怖|紧张|thriller|horror|suspense",
+        "regex_flags": "i",
+        "resources": [
+          "templates/knowledge-base/genres/thriller.md"
+        ],
+        "priority": 2
+      },
+      "revenge": {
+        "keywords": ["复仇", "报仇", "仇恨", "revenge", "vengeance"],
+        "regex": "复仇|报仇|仇恨|revenge|vengeance",
+        "regex_flags": "i",
+        "resources": [
+          "templates/knowledge-base/genres/revenge.md"
+        ],
+        "priority": 2
+      },
+      "xuanhuan": {
+        "keywords": ["玄幻", "修仙", "修炼", "境界", "灵气", "宗门", "xuanhuan", "cultivation"],
+        "regex": "玄幻|修仙|修炼|境界|灵气|宗门|xuanhuan|cultivation",
+        "regex_flags": "i",
+        "resources": [
+          "templates/knowledge-base/genres/xuanhuan.md"
+        ],
+        "priority": 2
       }
     },
     "quality-assurance": {
@@ -93,8 +156,15 @@
     "character-arc": "角色成长|角色弧线|弧线|转变|成长",
     "pacing": "节奏|拖沓|太快|太慢|过快|过慢",
     "show-tell": "展示|描写|tell|show",
+    "hook-design": "钩子|悬念|章末|hook|cliffhanger|结尾",
     "romance": "言情|恋爱|感情|爱情",
     "mystery": "悬疑|推理|线索",
+    "wuxia": "武侠|江湖|侠客|武功",
+    "historical": "历史|古代|朝代|宫廷",
+    "sci-fi": "科幻|未来|太空|星际",
+    "thriller": "惊悚|恐怖|紧张",
+    "revenge": "复仇|报仇|仇恨",
+    "xuanhuan": "玄幻|修仙|修炼|境界|灵气|宗门",
     "consistency": "一致性|矛盾|冲突"
   },
   "notes": {
