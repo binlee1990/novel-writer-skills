@@ -33,7 +33,7 @@ describe('PluginValidator', () => {
 
     const result = await PluginValidator.validate(pluginDir);
     expect(result.valid).toBe(false);
-    expect(result.errors).toContain('config.yaml not found');
+    expect(result.errors).toContain('config.yaml 未找到');
   });
 
   it('should fail when config.yaml has invalid YAML', async () => {
@@ -58,7 +58,7 @@ describe('PluginValidator', () => {
 
     const result = await PluginValidator.validate(pluginDir);
     expect(result.valid).toBe(false);
-    expect(result.errors).toContain('config.yaml missing required field: name');
+    expect(result.errors).toContain('config.yaml 缺少必填字段: name');
   });
 
   it('should warn when version is missing', async () => {
@@ -71,7 +71,7 @@ describe('PluginValidator', () => {
 
     const result = await PluginValidator.validate(pluginDir);
     expect(result.valid).toBe(true);
-    expect(result.warnings).toContain('config.yaml missing version field');
+    expect(result.warnings).toContain('config.yaml 缺少 version 字段');
   });
 
   it('should warn when description is missing', async () => {
@@ -84,6 +84,6 @@ describe('PluginValidator', () => {
 
     const result = await PluginValidator.validate(pluginDir);
     expect(result.valid).toBe(true);
-    expect(result.warnings).toContain('config.yaml missing description field');
+    expect(result.warnings).toContain('config.yaml 缺少 description 字段');
   });
 });

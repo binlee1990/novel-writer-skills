@@ -1,15 +1,17 @@
 import { readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
 import path from 'path';
+import { getPackageRoot } from './core/config.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+let _cachedVersion: string | null = null;
 
 export function getVersion(): string {
+  if (_cachedVersion) return _cachedVersion;
+
   try {
-    const packagePath = path.resolve(__dirname, '../package.json');
+    const packagePath = path.join(getPackageRoot(), 'package.json');
     const packageJson = JSON.parse(readFileSync(packagePath, 'utf-8'));
-    return packageJson.version;
+    _cachedVersion = packageJson.version;
+    return _cachedVersion!;
   } catch {
     return '1.0.0';
   }
@@ -18,4 +20,3 @@ export function getVersion(): string {
 export function getVersionInfo(): string {
   return `v${getVersion()}`;
 }
-

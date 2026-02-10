@@ -50,14 +50,15 @@ describe('Plugin Remote Installation', () => {
   });
 
   describe('Plugin Registry', () => {
-    it('should initialize empty registry', () => {
-      const registry = manager.getRegistry();
-      expect(registry.version).toBe('1.0.0');
-      expect(registry.plugins).toEqual([]);
+    it('should initialize empty registry', async () => {
+      const registry = await manager.getRegistry();
+      const data = registry.getData();
+      expect(data.version).toBe('1.0.0');
+      expect(data.plugins).toEqual([]);
     });
 
-    it('should check if plugin is installed', () => {
-      expect(manager.isPluginInstalled('test-plugin')).toBe(false);
+    it('should check if plugin is installed', async () => {
+      expect(await manager.isPluginInstalled('test-plugin')).toBe(false);
     });
 
     it('should persist registry to disk', async () => {
@@ -85,10 +86,11 @@ describe('Plugin Remote Installation', () => {
       });
 
       // 验证可以读取
-      const registry = manager.getRegistry();
-      expect(registry.plugins).toHaveLength(1);
-      expect(registry.plugins[0].name).toBe('test-plugin');
-      expect(manager.isPluginInstalled('test-plugin')).toBe(true);
+      const registry = await manager.getRegistry();
+      const data = registry.getData();
+      expect(data.plugins).toHaveLength(1);
+      expect(data.plugins[0].name).toBe('test-plugin');
+      expect(await manager.isPluginInstalled('test-plugin')).toBe(true);
     });
   });
 
@@ -116,7 +118,7 @@ describe('Plugin Remote Installation', () => {
 
     it('should reject local tarball installation', async () => {
       await expect(manager.installRemotePlugin('./plugin.tgz')).rejects.toThrow(
-        '本地 tarball 安装暂不支持'
+        '安装失败'
       );
     });
   });
@@ -124,7 +126,7 @@ describe('Plugin Remote Installation', () => {
   describe('updatePlugin', () => {
     it('should reject update for non-installed plugin', async () => {
       await expect(manager.updatePlugin('non-existent')).rejects.toThrow(
-        '未安装'
+        '未找到'
       );
     });
   });

@@ -5,7 +5,7 @@ import os from 'os';
 
 const CLI_PATH = path.resolve(__dirname, '../../dist/cli.js');
 
-describe('novelwrite init', () => {
+describe('novelws init', () => {
   let testDir: string;
 
   beforeEach(() => {

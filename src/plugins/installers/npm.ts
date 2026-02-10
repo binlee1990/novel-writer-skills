@@ -1,25 +1,42 @@
+/**
+ * NPM 安装器
+ *
+ * 从 npm registry 下载并安装插件。
+ * 继承 BaseInstaller，复用公共 tar 解压逻辑。
+ */
+
 import fs from 'fs-extra';
 import path from 'path';
-import os from 'os';
 import { pipeline } from 'stream/promises';
 import { createWriteStream } from 'fs';
-import { execSync } from 'child_process';
-import { PluginIdentifier } from '../types.js';
+import { PluginIdentifier, InstallResult, InstallerOptions } from '../types.js';
+import { BaseInstaller } from './base.js';
+import { NetworkError, PluginInstallError } from '../../core/errors.js';
 import { logger } from '../../utils/logger.js';
 
-export class NpmInstaller {
+export class NpmInstaller extends BaseInstaller {
   private registry: string;
 
-  constructor(registry = 'https://registry.npmjs.org') {
-    this.registry = registry;
+  constructor(options?: InstallerOptions) {
+    super();
+    this.registry = options?.registryUrl || 'https://registry.npmjs.org';
   }
 
   async getPackageInfo(name: string): Promise<any> {
     const url = `${this.registry}/${encodeURIComponent(name).replace('%40', '@')}`;
-    const response = await fetch(url);
+
+    let response: Response;
+    try {
+      response = await fetch(url);
+    } catch (error) {
+      throw new NetworkError(url, undefined, error instanceof Error ? error.message : '网络连接失败');
+    }
 
     if (!response.ok) {
-      throw new Error(`Package ${name} not found in npm registry`);
+      if (response.status === 404) {
+        throw new PluginInstallError(name, 'npm', `包 ${name} 在 npm registry 中未找到`);
+      }
+      throw new NetworkError(url, response.status);
     }
 
     return await response.json();
@@ -30,12 +47,12 @@ export class NpmInstaller {
     const targetVersion = version || info['dist-tags']?.latest;
 
     if (!targetVersion) {
-      throw new Error(`No version found for ${name}`);
+      throw new PluginInstallError(name, 'npm', '未找到可用版本');
     }
 
     const versionInfo = info.versions?.[targetVersion];
     if (!versionInfo) {
-      throw new Error(`Version ${targetVersion} not found for ${name}`);
+      throw new PluginInstallError(name, 'npm', `版本 ${targetVersion} 不存在`);
     }
 
     return {
@@ -45,10 +62,15 @@ export class NpmInstaller {
   }
 
   async downloadTarball(url: string, destPath: string): Promise<void> {
-    const response = await fetch(url);
+    let response: Response;
+    try {
+      response = await fetch(url);
+    } catch (error) {
+      throw new NetworkError(url, undefined, error instanceof Error ? error.message : '下载失败');
+    }
 
     if (!response.ok || !response.body) {
-      throw new Error(`Failed to download: ${url}`);
+      throw new NetworkError(url, response.status, '下载 tarball 失败');
     }
 
     const fileStream = createWriteStream(destPath);
@@ -56,52 +78,31 @@ export class NpmInstaller {
     await pipeline(response.body, fileStream);
   }
 
-  async extractTarball(tarballPath: string, extractPath: string): Promise<void> {
-    await fs.ensureDir(extractPath);
-
-    // 使用系统 tar 命令解压（跨平台兼容）
-    try {
-      execSync(`tar -xzf "${tarballPath}" -C "${extractPath}" --strip-components=1`, {
-        stdio: 'pipe',
-      });
-    } catch {
-      // Windows 可能没有 tar，尝试 PowerShell
-      try {
-        execSync(
-          `powershell -Command "tar -xzf '${tarballPath}' -C '${extractPath}' --strip-components=1"`,
-          { stdio: 'pipe' }
-        );
-      } catch {
-        throw new Error('Failed to extract tarball. Please ensure tar is available on your system.');
-      }
-    }
-  }
-
-  async install(identifier: PluginIdentifier, destDir: string): Promise<string> {
+  async install(identifier: PluginIdentifier, destDir: string): Promise<InstallResult> {
     const { name, version } = identifier;
 
-    logger.info(`Fetching ${name} from npm registry...`);
+    logger.info(`从 npm registry 获取 ${name}...`);
 
     // 1. 获取 tarball URL
     const tarball = await this.getTarballUrl(name, version);
 
     // 2. 创建临时目录
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nws-npm-'));
+    const tmpDir = await this.createTempDir('nws-npm-');
     const tarballPath = path.join(tmpDir, 'package.tgz');
 
     try {
       // 3. 下载
-      logger.info(`Downloading ${name}@${tarball.version}...`);
+      logger.info(`下载 ${name}@${tarball.version}...`);
       await this.downloadTarball(tarball.url, tarballPath);
 
-      // 4. 解压
+      // 4. 解压（npm tarball 有一层 package/ 包装）
       const extractPath = path.join(tmpDir, 'extracted');
-      await this.extractTarball(tarballPath, extractPath);
+      await this.extractTarball(tarballPath, extractPath, 1);
 
       // 5. 验证 config.yaml
       const configPath = path.join(extractPath, 'config.yaml');
       if (!await fs.pathExists(configPath)) {
-        throw new Error(`Invalid plugin: config.yaml not found in ${name}`);
+        throw new PluginInstallError(name, 'npm', `包 ${name} 中未找到 config.yaml`);
       }
 
       // 6. 移动到目标
@@ -110,10 +111,9 @@ export class NpmInstaller {
       await fs.ensureDir(path.dirname(pluginDir));
       await fs.move(extractPath, pluginDir, { overwrite: true });
 
-      return tarball.version;
+      return { version: tarball.version, pluginPath: pluginDir };
     } finally {
-      // 清理临时目录
-      await fs.remove(tmpDir).catch(() => {});
+      await this.cleanup(tmpDir);
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "novel-writer-skills",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "type": "module",
   "description": "Claude Code 专用的 AI 小说创作工具 - 深度集成 Slash Commands 和 Agent Skills",
   "keywords": [
@@ -20,11 +20,11 @@
   "license": "MIT",
   "main": "dist/cli.js",
   "bin": {
-    "novelwrite": "dist/cli.js"
+    "novelws": "dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
-    "postbuild": "chmod +x dist/cli.js",
+    "postbuild": "node -e \"try{require('fs').chmodSync('dist/cli.js',0o755)}catch{}\"",
     "dev": "tsx src/cli.ts",
     "start": "node dist/cli.js",
     "clean": "rm -rf dist",
@@ -58,24 +58,19 @@
     "dist",
     "templates",
     "plugins",
-    "src",
     "README.md",
     "LICENSE",
-    "CHANGELOG.md",
-    "QUICKSTART.md",
-    "VERIFICATION_SUMMARY.md",
-    "docs",
-    "tsconfig.json"
+    "CHANGELOG.md"
   ],
   "engines": {
     "node": ">=18.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wordflowlab/novel-writer-skills.git"
+    "url": "git+https://github.com/binlee1990/novel-writer-skills.git"
   },
-  "homepage": "https://github.com/wordflowlab/novel-writer-skills#readme",
+  "homepage": "https://github.com/binlee1990/novel-writer-skills#readme",
   "bugs": {
-    "url": "https://github.com/wordflowlab/novel-writer-skills/issues"
+    "url": "https://github.com/binlee1990/novel-writer-skills/issues"
   }
 }

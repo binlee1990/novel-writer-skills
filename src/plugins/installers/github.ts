@@ -1,24 +1,57 @@
+/**
+ * GitHub 安装器
+ *
+ * 从 GitHub 仓库下载并安装插件。
+ * 继承 BaseInstaller，复用公共 tar 解压逻辑。
+ * 支持 GITHUB_TOKEN 环境变量用于私有仓库。
+ */
+
 import fs from 'fs-extra';
 import path from 'path';
-import os from 'os';
 import { pipeline } from 'stream/promises';
 import { createWriteStream } from 'fs';
-import { execSync } from 'child_process';
-import { PluginIdentifier } from '../types.js';
+import { PluginIdentifier, InstallResult, InstallerOptions } from '../types.js';
+import { BaseInstaller } from './base.js';
+import { NetworkError, PluginInstallError } from '../../core/errors.js';
 import { logger } from '../../utils/logger.js';
 
-export class GitHubInstaller {
+/** config.yaml 搜索最大深度 */
+const MAX_SEARCH_DEPTH = 3;
+
+export class GitHubInstaller extends BaseInstaller {
+  private token?: string;
+
+  constructor(options?: InstallerOptions) {
+    super();
+    this.token = options?.githubToken || process.env.GITHUB_TOKEN;
+  }
+
+  private getHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+      'User-Agent': 'novel-writer-skills',
+      'Accept': 'application/vnd.github.v3+json',
+    };
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`;
+    }
+    return headers;
+  }
+
   async getRepoInfo(repository: string): Promise<any> {
     const url = `https://api.github.com/repos/${repository}`;
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'novel-writer-skills',
-        'Accept': 'application/vnd.github.v3+json',
-      },
-    });
+
+    let response: Response;
+    try {
+      response = await fetch(url, { headers: this.getHeaders() });
+    } catch (error) {
+      throw new NetworkError(url, undefined, error instanceof Error ? error.message : '网络连接失败');
+    }
 
     if (!response.ok) {
-      throw new Error(`Repository ${repository} not found on GitHub`);
+      if (response.status === 404) {
+        throw new PluginInstallError(repository, 'github', `仓库 ${repository} 在 GitHub 上未找到`);
+      }
+      throw new NetworkError(url, response.status);
     }
 
     return await response.json();
@@ -29,17 +62,20 @@ export class GitHubInstaller {
     ref: string,
     destPath: string
   ): Promise<void> {
-    // 使用 GitHub tarball API（无需 token 即可下载公开仓库）
     const url = `https://api.github.com/repos/${repository}/tarball/${ref}`;
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'novel-writer-skills',
-      },
-      redirect: 'follow',
-    });
+
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        headers: { ...this.getHeaders(), 'Accept': '*/*' },
+        redirect: 'follow',
+      });
+    } catch (error) {
+      throw new NetworkError(url, undefined, error instanceof Error ? error.message : '下载失败');
+    }
 
     if (!response.ok || !response.body) {
-      throw new Error(`Failed to download from GitHub: ${repository}@${ref}`);
+      throw new NetworkError(url, response.status, `从 GitHub 下载失败: ${repository}@${ref}`);
     }
 
     const fileStream = createWriteStream(destPath);
@@ -47,48 +83,27 @@ export class GitHubInstaller {
     await pipeline(response.body, fileStream);
   }
 
-  async extractTarball(tarballPath: string, extractPath: string): Promise<string> {
-    await fs.ensureDir(extractPath);
-
-    // GitHub tarball 有一层包装目录（repo-name-commit-sha/）
-    try {
-      execSync(`tar -xzf "${tarballPath}" -C "${extractPath}"`, {
-        stdio: 'pipe',
-      });
-    } catch {
-      try {
-        execSync(
-          `powershell -Command "tar -xzf '${tarballPath}' -C '${extractPath}'"`,
-          { stdio: 'pipe' }
-        );
-      } catch {
-        throw new Error('Failed to extract archive. Please ensure tar is available.');
-      }
+  /**
+   * 在目录中查找 config.yaml，限制搜索深度
+   */
+  private async findConfigYaml(dir: string, depth: number = 0): Promise<string | null> {
+    if (depth > MAX_SEARCH_DEPTH) {
+      return null;
     }
 
-    // 找到解压后的顶层目录
-    const entries = await fs.readdir(extractPath, { withFileTypes: true });
-    const topDir = entries.find(e => e.isDirectory());
-
-    if (!topDir) {
-      throw new Error('Invalid archive structure');
-    }
-
-    return path.join(extractPath, topDir.name);
-  }
-
-  private async findConfigYaml(dir: string): Promise<string | null> {
     const files = await fs.readdir(dir, { withFileTypes: true });
 
+    // 先检查当前目录
     for (const file of files) {
-      const fullPath = path.join(dir, file.name);
-
       if (file.isFile() && file.name === 'config.yaml') {
-        return fullPath;
+        return path.join(dir, file.name);
       }
+    }
 
-      if (file.isDirectory()) {
-        const result = await this.findConfigYaml(fullPath);
+    // 再递归子目录
+    for (const file of files) {
+      if (file.isDirectory() && !file.name.startsWith('.') && file.name !== 'node_modules') {
+        const result = await this.findConfigYaml(path.join(dir, file.name), depth + 1);
         if (result) return result;
       }
     }
@@ -96,33 +111,43 @@ export class GitHubInstaller {
     return null;
   }
 
-  async install(identifier: PluginIdentifier, destDir: string): Promise<string> {
+  async install(identifier: PluginIdentifier, destDir: string): Promise<InstallResult> {
     const { repository, version, name } = identifier;
 
     if (!repository) {
-      throw new Error('GitHub repository is required');
+      throw new PluginInstallError(name, 'github', '缺少 GitHub 仓库地址');
     }
 
-    logger.info(`Fetching ${repository} from GitHub...`);
+    logger.info(`从 GitHub 获取 ${repository}...`);
 
     // 1. 创建临时目录
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nws-gh-'));
+    const tmpDir = await this.createTempDir('nws-gh-');
     const tarballPath = path.join(tmpDir, 'repo.tar.gz');
 
     try {
       // 2. 下载 tarball
       const ref = version || 'main';
-      logger.info(`Downloading ${repository}@${ref}...`);
+      logger.info(`下载 ${repository}@${ref}...`);
       await this.downloadArchive(repository, ref, tarballPath);
 
-      // 3. 解压
+      // 3. 解压（GitHub tarball 有一层 repo-name-sha/ 包装）
       const extractPath = path.join(tmpDir, 'extracted');
-      const repoDir = await this.extractTarball(tarballPath, extractPath);
+      await this.extractTarball(tarballPath, extractPath, 0);
+
+      // 找到解压后的顶层目录
+      const entries = await fs.readdir(extractPath, { withFileTypes: true });
+      const topDir = entries.find(e => e.isDirectory());
+
+      if (!topDir) {
+        throw new PluginInstallError(name, 'github', '无效的归档结构');
+      }
+
+      const repoDir = path.join(extractPath, topDir.name);
 
       // 4. 查找 config.yaml
       const configPath = await this.findConfigYaml(repoDir);
       if (!configPath) {
-        throw new Error(`Invalid plugin: config.yaml not found in ${repository}`);
+        throw new PluginInstallError(name, 'github', `仓库 ${repository} 中未找到 config.yaml`);
       }
 
       const pluginRoot = path.dirname(configPath);
@@ -131,9 +156,9 @@ export class GitHubInstaller {
       const pluginDir = path.join(destDir, name);
       await fs.move(pluginRoot, pluginDir, { overwrite: true });
 
-      return ref;
+      return { version: ref, pluginPath: pluginDir };
     } finally {
-      await fs.remove(tmpDir).catch(() => {});
+      await this.cleanup(tmpDir);
     }
   }
 }

@@ -5,10 +5,12 @@ describe('utils/logger.ts', () => {
 
   beforeEach(() => {
     consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    logger.setLevel('info');
   });
 
   afterEach(() => {
     consoleSpy.mockRestore();
+    delete process.env.DEBUG;
   });
 
   describe('info()', () => {
@@ -53,16 +55,59 @@ describe('utils/logger.ts', () => {
   describe('debug()', () => {
     it('should not log when DEBUG is not set', () => {
       delete process.env.DEBUG;
+      logger.setLevel('debug');
       logger.debug('Debug message');
       expect(consoleSpy).not.toHaveBeenCalled();
     });
 
-    it('should log when DEBUG is set', () => {
+    it('should log when DEBUG is set and level is debug', () => {
       process.env.DEBUG = '1';
+      logger.setLevel('debug');
       logger.debug('Debug message');
       expect(consoleSpy).toHaveBeenCalledTimes(1);
       expect(consoleSpy.mock.calls[0][1]).toBe('Debug message');
-      delete process.env.DEBUG;
+    });
+  });
+
+  describe('setLevel() / getLevel()', () => {
+    it('should default to info level', () => {
+      expect(logger.getLevel()).toBe('info');
+    });
+
+    it('should change the log level', () => {
+      logger.setLevel('warn');
+      expect(logger.getLevel()).toBe('warn');
+    });
+
+    it('should suppress info when level is warn', () => {
+      logger.setLevel('warn');
+      logger.info('should not appear');
+      expect(consoleSpy).not.toHaveBeenCalled();
+    });
+
+    it('should suppress info and warn when level is error', () => {
+      logger.setLevel('error');
+      logger.info('no');
+      logger.warn('no');
+      expect(consoleSpy).not.toHaveBeenCalled();
+      logger.error('yes');
+      expect(consoleSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should suppress all output when level is silent', () => {
+      logger.setLevel('silent');
+      logger.info('no');
+      logger.warn('no');
+      logger.error('no');
+      expect(consoleSpy).not.toHaveBeenCalled();
+    });
+
+    it('should allow all levels when set to debug', () => {
+      logger.setLevel('debug');
+      logger.info('info');
+      logger.warn('warn');
+      logger.error('error');
+      expect(consoleSpy).toHaveBeenCalledTimes(3);
     });
   });
 });

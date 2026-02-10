@@ -85,11 +85,11 @@ describe('parsePluginIdentifier', () => {
 
   describe('invalid identifiers', () => {
     it('should throw on empty string', () => {
-      expect(() => parsePluginIdentifier('')).toThrow('Invalid plugin identifier');
+      expect(() => parsePluginIdentifier('')).toThrow('插件标识符不能为空');
     });
 
     it('should throw on invalid format', () => {
-      expect(() => parsePluginIdentifier('!@#$%')).toThrow('Invalid plugin identifier');
+      expect(() => parsePluginIdentifier('!@#$%')).toThrow('无法识别的插件格式');
     });
   });
 });

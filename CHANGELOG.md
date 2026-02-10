@@ -5,6 +5,64 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-02-10
+
+### Added
+
+#### 核心架构重构
+- 🛠️ 新增 `src/core/` 核心层
+  - `config.ts` - 统一配置管理，集中路径常量和默认值
+  - `errors.ts` - 自定义错误类型层级（NovelWriterError 及子类）
+  - `platform.ts` - 跨平台工具（tar 解压、临时目录）
+
+#### 插件系统重构
+- 🔌 新增抽象安装器架构
+  - `installers/base.ts` - 安装器基类
+  - `installers/npm.ts` - npm/scoped npm 包安装器
+  - `installers/github.ts` - GitHub 仓库安装器
+  - `installers/local.ts` - 本地 tarball 安装器
+- 🔌 新增 `plugins/registry.ts` - 独立的插件注册表管理
+- 🔌 新增 `plugins/identifier.ts` - 插件标识符解析器
+
+#### CLI 命令模块化
+- 📦 CLI 拆分为独立命令模块
+  - `commands/init.ts` - 项目初始化命令
+  - `commands/check.ts` - 环境检查命令
+  - `commands/upgrade.ts` - 项目升级命令
+  - `commands/plugin.ts` - 插件管理命令组
+
+#### 工具层增强
+- 🛠️ `logger.ts` - 新增日志级别过滤（debug/info/warn/error/silent）
+- 🛠️ `version.ts` - 版本号缓存，移除 `import.meta.url` 依赖
+- 🛠️ `project.ts` - 使用配置常量替代硬编码路径，抛出类型化错误
+
+### Changed
+
+- `cli.ts` 从 ~520 行精简为 ~58 行入口文件
+- 插件系统从单文件重构为多模块架构
+- 所有硬编码路径替换为 `core/config.ts` 常量
+- `ensureProjectRoot()` 抛出 `ProjectNotFoundError` 替代通用 Error
+- `postbuild` 脚本改为跨平台兼容
+- `package.json` files 字段清理，移除不必要的源码和文档
+
+### Technical
+
+- 🛠️ 92 个测试全部通过（新增 6 个日志级别测试）
+- 🛠️ ESM（生产）+ CJS（Jest）双模式兼容
+- 🛠️ 消除所有 `import.meta.url` 在 CJS 环境下的兼容问题
+
+---
+
+## [1.1.1] - 2026-02-09
+
+### Added
+
+- 🤖 新增科幻和惊悚类型知识库及 Skills
+- 🤖 新增 POV Validator、Continuity Tracker、Pacing Monitor Skills
+- 📚 扩展参考资料库（唐朝、现代职场、修仙世界）
+
+---
+
 ## [1.0.0] - 2025-10-18
 
 ### Added
@@ -44,14 +102,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### CLI 工具
 - 📦 项目管理
-  - `novel-skills init` - 初始化项目
-  - `novel-skills check` - 检查环境
-  - `novel-skills upgrade` - 升级项目
+  - `novelws init` - 初始化项目
+  - `novelws check` - 检查环境
+  - `novelws upgrade` - 升级项目
 
 - 🔌 插件系统
-  - `novel-skills plugin:list` - 列出已安装插件
-  - `novel-skills plugin:add` - 安装插件
-  - `novel-skills plugin:remove` - 移除插件
+  - `novelws plugin:list` - 列出已安装插件
+  - `novelws plugin:add` - 安装插件
+  - `novelws plugin:remove` - 移除插件
 
 #### 文档
 - 📚 完整文档体系

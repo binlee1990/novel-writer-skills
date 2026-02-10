@@ -1,6 +1,7 @@
 # Novel Writer Skills - Claude Code 专用小说创作工具
 
 [![npm version](https://badge.fury.io/js/novel-writer-skills.svg)](https://www.npmjs.com/package/novel-writer-skills)
+[![Tests](https://github.com/binlee1990/novel-writer-skills/actions/workflows/test.yml/badge.svg)](https://github.com/binlee1990/novel-writer-skills/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > 🚀 专为 Claude Code 设计的 AI 智能小说创作助手
@@ -28,13 +29,13 @@ npm install -g novel-writer-skills
 
 ```bash
 # 基本用法
-novelwrite init my-novel
+novelws init my-novel
 
 # 在当前目录初始化
-novelwrite init --here
+novelws init --here
 
 # 预装插件
-novelwrite init my-novel --plugins authentic-voice
+novelws init my-novel --plugins authentic-voice
 ```
 
 ### 3. 在 Claude Code 中开始创作
@@ -169,13 +170,13 @@ AI: 🔍 检测到关键词触发：
 
 ```bash
 # 列出可用插件
-novelwrite plugin:list
+novelws plugin:list
 
 # 安装插件
-novelwrite plugin:add authentic-voice
+novelws plugin:add authentic-voice
 
 # 移除插件
-novelwrite plugin:remove authentic-voice
+novelws plugin:remove authentic-voice
 ```
 
 ### 官方插件
@@ -249,26 +250,26 @@ my-novel/
 
 ```bash
 # 初始化项目
-novelwrite init <project-name>
+novelws init <project-name>
 
 # 检查环境
-novelwrite check
+novelws check
 
 # 升级项目
-novelwrite upgrade
+novelws upgrade
 ```
 
 ### 插件管理
 
 ```bash
 # 列出已安装插件
-novelwrite plugin:list
+novelws plugin:list
 
 # 安装插件
-novelwrite plugin:add <plugin-name>
+novelws plugin:add <plugin-name>
 
 # 移除插件
-novelwrite plugin:remove <plugin-name>
+novelws plugin:remove <plugin-name>
 ```
 
 ## 🔧 命令行脚本（可选）
@@ -356,7 +357,7 @@ bash .specify/templates/scripts/bash/track-progress.sh
 
 欢迎提交 Issue 和 Pull Request！
 
-项目地址：[https://github.com/wordflowlab/novel-writer-skills](https://github.com/wordflowlab/novel-writer-skills)
+项目地址：[https://github.com/binlee1990/novel-writer-skills](https://github.com/binlee1990/novel-writer-skills)
 
 ## 📄 许可证
 
