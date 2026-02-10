@@ -77,6 +77,30 @@ allowed-tools: Read
 激活：templates/knowledge-base/references/china-1920s/
 ```
 
+**唐朝**（tang-dynasty）：
+```
+触发词：唐朝、唐代、长安、大唐、贞观、开元、安史之乱、
+       科举、盛唐、李世民、武则天、唐诗
+
+激活：templates/knowledge-base/references/tang-dynasty/
+```
+
+**现代职场**（modern-workplace）：
+```
+触发词：职场、公司、互联网、大厂、996、办公室、同事、
+       上班、KPI、OKR、跳槽、内卷
+
+激活：templates/knowledge-base/references/modern-workplace/
+```
+
+**修仙世界**（cultivation-world）：
+```
+触发词：修仙、修真、炼气、筑基、金丹、元婴、宗门、
+       灵根、渡劫、飞升、法宝、灵石
+
+激活：templates/knowledge-base/references/cultivation-world/
+```
+
 ---
 
 ## 自动激活流程
@@ -330,7 +354,7 @@ Token消耗：约1650 tokens
 | 类别 | 已完成 | 计划中 |
 |------|--------|--------|
 | 类型知识 | 5个 | 10+ |
-| 参考资料 | 1个 | 20+ |
+| 参考资料 | 4个 | 20+ |
 
 **已完成**（v1.0）：
 - genres/romance.md
@@ -340,12 +364,15 @@ Token消耗：约1650 tokens
 - genres/wuxia.md
 - references/china-1920s/
 
-**计划中**（v1.1+）：
-- genres/fantasy.md（奇幻）
-- genres/sci-fi.md（科幻）
-- genres/horror.md（恐怖）
-- references/ancient-china/（各朝代）
+**已完成**（v1.1）：
+- references/tang-dynasty/（唐朝）
 - references/modern-workplace/（现代职场）
+- references/cultivation-world/（修仙世界）
+
+**计划中**（v1.2+）：
+- genres/sci-fi.md（科幻）
+- genres/thriller.md（惊悚）
+- genres/horror.md（恐怖）
 
 ### 添加新知识库
 
