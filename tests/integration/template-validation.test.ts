@@ -42,6 +42,13 @@ describe('Template Files Validation', () => {
         .filter(f => f.endsWith('.md') && !f.endsWith('.backup'));
       expect(commands.length).toBeGreaterThanOrEqual(10);
     });
+
+    it('should reference narrative-threads.json in track command', () => {
+      const trackFile = path.join(commandsDir, 'track.md');
+      const content = fs.readFileSync(trackFile, 'utf-8');
+      expect(content).toContain('narrative-threads.json');
+      expect(content).toContain('叙事线同步');
+    });
   });
 
   describe('Skill Templates', () => {
