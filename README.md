@@ -17,6 +17,9 @@
 - **智能资源加载** - 三层架构（推断 + 配置 + 关键词触发），按需加载
 - **批量操作** - 多章节分析、多卷规划、批量同步追踪数据
 - **命令链式提示** - 每个命令执行后自动推荐下一步操作
+- **高级创作引擎** - 多线叙事管理、声纹指纹、伏笔健康度、风格一致性、智能推荐、反馈循环
+- **创作数据统计** - 字数详情、角色出场频率、内容构成、伏笔状态、情节线进度
+- **灵感管理** - 灵感扫描、灵感分配、灵感快速捕捉
 - **插件系统** - 可扩展功能，如真实人声、翻译等
 
 ## 快速开始
@@ -61,37 +64,37 @@ novelws init my-novel --plugins authentic-voice
 | 命令 | 功能 | 说明 |
 |------|------|------|
 | `/constitution` | 创建创作宪法 | 定义最高创作原则 |
-| `/specify` | 定义故事规格 | 支持 `--world` 世界观构建子模式 |
+| `/specify` | 定义故事规格 | 支持 `--world` 世界观构建、`--feedback` 反馈接收 |
 | `/clarify` | 澄清关键决策 | 5 个核心问题 |
-| `/plan` | 制定创作计划 | 支持 `--detail vol-XX`、`--detail vol-XX-YY` 多卷规划、网文结构模板 |
+| `/plan` | 制定创作计划 | 支持 `--detail vol-XX`、`--detail vol-XX-YY` 多卷规划、`--feedback` 反馈接收、网文结构模板 |
 | `/tasks` | 分解任务清单 | 生成可执行的写作任务 |
-| `/write` | 执行章节写作 | 支持 `--fast` 快写模式、断点续写、自动 Tracking 更新 |
-| `/analyze` | 质量验证分析 | 8 种专项分析、`--range` 批量分析 |
+| `/write` | 执行章节写作 | 支持 `--fast` 快写模式、断点续写、灵感扫描、智能推荐、自动 Tracking 更新 |
+| `/analyze` | 质量验证分析 | 10 种专项分析、`--range` 批量分析、反馈建议 |
 
 ### 角色与引导
 
 | 命令 | 功能 | 说明 |
 |------|------|------|
 | `/character` | 统一角色管理 | create / list / show / update / relate / voice / timeline |
-| `/guide` | 智能引导 | 自动检测创作阶段，推荐下一步操作 |
+| `/guide` | 智能引导 | 自动检测创作阶段，智能推荐引擎，未处理反馈提醒 |
 
 ### 追踪与验证
 
 | 命令 | 功能 | 说明 |
 |------|------|------|
 | `/track-init` | 初始化追踪系统 | 创建 4 个 tracking JSON 文件 |
-| `/track` | 综合追踪更新 | 支持 `--check` 节奏健康检测、`--sync` 批量同步 |
+| `/track` | 综合追踪更新 | 支持 `--check` 节奏健康检测、`--sync` 批量同步、`--stats` 创作数据统计 |
 | `/recap` | 上下文重建 | 支持 `--brief` 快速模式、预测性提示 |
-| `/timeline` | 时间线管理 | 时间线可视化与冲突检测 |
-| `/relations` | 角色关系追踪 | 关系网络管理 |
+| `/timeline` | 时间线管理 | 时间线可视化、多线程时间对齐、时间冲突检测 |
+| `/relations` | 角色关系追踪 | 关系图谱可视化、关系变化追踪、关系冲突检测 |
 
 ### 修改与辅助
 
 | 命令 | 功能 | 说明 |
 |------|------|------|
 | `/revise` | 系统性修改 | 四层修改（结构/节奏/一致性/润色） |
-| `/checklist` | 质量检查清单 | 发布前检查 |
-| `/expert` | 专家咨询 | 按需召唤特定领域专家 |
+| `/checklist` | 质量检查清单 | 阶段性检查模板（写前/写后/卷末）、自动修复建议 |
+| `/expert` | 专家咨询 | 五大领域专家（角色/情节/世界观/文笔/类型）+ 咨询流程 |
 
 ### `/analyze` 专项分析模式
 
@@ -106,6 +109,7 @@ novelws init my-novel --plugins authentic-voice
 | `--focus=reader` | 读者体验（爽点密度、钩子强度、信息投喂） |
 | `--focus=hook` | 钩子专项（章末钩子评分） |
 | `--focus=power` | 力量体系（等级一致性、战力平衡） |
+| `--focus=voice` | 对话一致性（角色声纹指纹分析） |
 | `--range ch-XX-YY` | 批量章节范围分析 |
 | `--range vol-XX` | 单卷分析 |
 | `--range vol-XX-YY` | 多卷对比分析 |
@@ -138,6 +142,7 @@ novelws init my-novel --plugins authentic-voice
 | **Character Arc** | 角色弧线和成长逻辑 |
 | **Pacing Control** | 章内节奏检测、多章单调预警、满足间隔追踪 |
 | **Reader Expectation** | 期待自动识别、满足/颠覆节奏规划、情绪预测曲线 |
+| **Multi-Thread Narrative** | 多线叙事管理（视角切换、信息差追踪、叙事线交汇设计） |
 
 ### 写作工艺知识库（Craft Knowledge）
 
@@ -154,6 +159,8 @@ novelws init my-novel --plugins authentic-voice
 |-------|------|
 | **Consistency Checker** | 一致性自动监控（角色、世界观、时间线） |
 | **Hook Checker** | 5 维钩子评分（悬念强度、情感牵引、信息差、行动暗示、节奏适配） |
+| **Voice Consistency Checker** | 对话一致性检查（语言指纹六维分析） |
+| **Style Detector** | 风格基线建立、风格偏移检测、跨章节一致性评分 |
 | **Workflow Guide** | 七步方法论引导 |
 
 ## 智能资源加载

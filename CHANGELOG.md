@@ -5,6 +5,68 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-02-11
+
+### Added
+
+#### Phase 3: 高级创作引擎（13 个任务，全部完成）
+
+- **多线叙事管理（Task 29）**
+  - Multi-Thread Narrative Skill 扩展：视角切换规划、信息差追踪、叙事线交汇设计
+  - `narrative-threads.json` 数据结构支持
+  - `/track` 命令集成叙事线同步
+
+- **角色声纹指纹系统（Task 30）**
+  - 新增 Voice Consistency Checker Skill（对话一致性检查）
+  - 语言指纹六维分析（词汇、句式、语气、口头禅、修辞、节奏）
+  - `/analyze --focus=voice` 对话一致性专项分析
+
+- **伏笔管理增强（Task 31）**
+  - `/track` 伏笔健康度检测（伏笔热度、伏笔回收、伏笔链）
+  - 紧急度量化评分和回收建议
+
+- **风格一致性引擎增强（Task 32）**
+  - Style Detector Skill 扩展：风格基线建立、风格偏移检测、跨章节风格一致性评分
+
+- **智能"下一步"推荐系统（Task 33）**
+  - `/guide` 智能推荐引擎（6 数据源、P0-P3 优先级）
+  - `/write` 后置智能推荐（写完自动推荐下一步）
+
+- **创作数据统计（Task 34）**
+  - `/track --stats` 创作数据统计面板
+  - 字数详情、角色出场频率、内容构成、伏笔状态、情节线进度
+
+- **反馈循环增强（Task 35）**
+  - `/analyze` 反馈建议模块（反馈分类、规格书/计划/任务反馈）
+  - `/specify --feedback` 反馈接收模式
+  - `/plan --feedback` 反馈接收模式
+  - `/guide` 未处理反馈提醒
+
+- **命令内容增强（Tasks 36-40）**
+  - `/timeline` 时间线可视化、多线程时间对齐、时间冲突检测
+  - `/relations` 关系图谱可视化、关系变化追踪、关系冲突检测
+  - `/expert` 五大领域专家定义（角色塑造/情节设计/世界观构建/文笔提升/类型写作）+ 咨询流程
+  - `/tasks` 任务优先级、任务依赖关系、从计划自动生成任务、任务完成度统计
+  - `/checklist` 阶段性检查模板（写前/写后/卷末）、自定义检查项、自动修复建议
+
+- **灵感扫描机制（Task 41）**
+  - `/write` 灵感扫描（前置）+ 灵感状态更新 + 灵感快速捕捉
+  - `/plan` 灵感分配建议
+  - `ideas.json` 数据结构支持
+
+### Changed
+
+- **CLAUDE.md 新增开发规则**
+  - Bash 最小化原则：禁止用 Bash 执行文件读写操作
+  - 并行任务与共享文件的执行策略：subagent 并行改独立文件，主线程统一改共享文件
+
+### Technical
+
+- 161 个测试全部通过（从 150 增长到 161）
+- 新增 11 个集成测试覆盖 Phase 3 全部功能
+
+---
+
 ## [1.4.1] - 2026-02-11
 
 ### Fixed
@@ -306,17 +368,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned (Phase 3)
-
-- 多线程叙事管理
-- 角色声纹指纹系统
-- 伏笔管理增强
-- 风格一致性引擎增强
-- 智能"下一步"推荐系统
-- 创作数据统计
-- 反馈循环增强
-- 命令内容补全（timeline, relations, expert, tasks, checklist）
-- 灵感扫描机制
+_暂无计划中的功能_
 
 ---
 
