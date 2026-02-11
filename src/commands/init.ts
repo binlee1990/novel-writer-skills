@@ -92,6 +92,15 @@ export function registerInitCommand(program: Command): void {
           spinner.text = '已安装 Agent Skills...';
         }
 
+        // 复制 CLAUDE.md 到 .claude/
+        if (await fs.pathExists(templates.dotClaude)) {
+          const claudeMdSrc = path.join(templates.dotClaude, 'CLAUDE.md');
+          if (await fs.pathExists(claudeMdSrc)) {
+            await fs.copy(claudeMdSrc, paths.claudeMd, { overwrite: false });
+            spinner.text = '已安装 CLAUDE.md 核心规范...';
+          }
+        }
+
         // 复制模板文件到 .specify/templates
         if (await fs.pathExists(templates.all)) {
           await fs.copy(templates.all, paths.specifyTemplates, { overwrite: false });

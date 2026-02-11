@@ -119,6 +119,7 @@ export function getProjectPaths(projectRoot: string) {
     specifyTemplates: path.join(projectRoot, DIRS.SPECIFY, DIRS.TEMPLATES),
     pluginRegistry: path.join(projectRoot, DIRS.SPECIFY, FILES.PLUGIN_REGISTRY),
     claude: path.join(projectRoot, DIRS.CLAUDE),
+    claudeMd: path.join(projectRoot, DIRS.CLAUDE, 'CLAUDE.md'),
     commands: path.join(projectRoot, DIRS.CLAUDE, DIRS.COMMANDS),
     skills: path.join(projectRoot, DIRS.CLAUDE, DIRS.SKILLS),
     stories: path.join(projectRoot, DIRS.STORIES),
@@ -142,6 +143,7 @@ export function getTemplateSourcePaths() {
     tracking: path.join(templatesDir, DIRS.TRACKING),
     knowledge: path.join(templatesDir, DIRS.KNOWLEDGE),
     knowledgeBase: path.join(templatesDir, DIRS.KNOWLEDGE_BASE),
+    dotClaude: path.join(templatesDir, 'dot-claude'),
     all: templatesDir,
   };
 }

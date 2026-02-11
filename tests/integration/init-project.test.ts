@@ -118,4 +118,21 @@ describe('novelws init', () => {
       });
     }).toThrow();
   });
+
+  it('should generate CLAUDE.md in .claude/', () => {
+    const projectName = 'claude-md-test';
+
+    execSync(`node "${CLI_PATH}" init ${projectName} --no-git`, {
+      cwd: testDir,
+      stdio: 'pipe',
+    });
+
+    const claudeMdPath = path.join(testDir, projectName, '.claude', 'CLAUDE.md');
+    expect(fs.existsSync(claudeMdPath)).toBe(true);
+
+    const content = fs.readFileSync(claudeMdPath, 'utf-8');
+    expect(content).toContain('小说创作核心原则');
+    expect(content).toContain('反 AI 写作核心');
+    expect(content).toContain('会话级资源复用');
+  });
 });
