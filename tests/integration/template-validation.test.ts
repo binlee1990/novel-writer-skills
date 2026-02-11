@@ -71,6 +71,16 @@ describe('Template Files Validation', () => {
       expect(content).toContain('关系变化追踪');
       expect(content).toContain('关系冲突检测');
     });
+    it('should have enhanced expert command with domain definitions and consultation flow', () => {
+      const expertFile = path.join(commandsDir, 'expert.md');
+      const content = fs.readFileSync(expertFile, 'utf-8');
+      expect(content).toContain('角色塑造专家');
+      expect(content).toContain('情节设计专家');
+      expect(content).toContain('世界观构建专家');
+      expect(content).toContain('文笔提升专家');
+      expect(content).toContain('类型写作专家');
+      expect(content).toContain('咨询流程');
+    });
   });
 
   describe('Skill Templates', () => {
