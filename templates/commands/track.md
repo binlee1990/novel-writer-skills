@@ -376,6 +376,115 @@ resource-loading:
 - 最长持续信息差：[描述]（已持续 [M] 章）
 ```
 
+
+### 伏笔健康度检测（--check 扩展）
+
+在 `--check` 模式下，对 `plot-tracker.json` 中的伏笔数据执行健康度检测。
+
+#### 增强后的伏笔数据结构
+
+`plot-tracker.json` 的 foreshadowing 条目支持以下增强字段：
+
+```json
+{
+  "foreshadowing": [
+    {
+      "id": "fs-001",
+      "content": "[伏笔内容]",
+      "plantedChapter": 3,
+      "plantedContext": "[埋设时的上下文摘要]",
+      "status": "planted|hinted|partially_resolved|resolved|abandoned",
+      "urgency": 0.5,
+
+      "heat": {
+        "current": 0.6,
+        "trend": "rising|stable|cooling",
+        "lastMentioned": 12,
+        "mentionCount": 3,
+        "readerAwareness": "high|medium|low"
+      },
+
+      "chain": {
+        "parentId": null,
+        "childIds": ["fs-003", "fs-005"],
+        "relatedIds": ["fs-002"],
+        "chainName": "[伏笔链名称，如「身世之谜」]"
+      },
+
+      "resolution": {
+        "plannedChapter": 25,
+        "plannedMethod": "[计划的回收方式]",
+        "actualChapter": null,
+        "actualMethod": null,
+        "impact": "major|moderate|minor"
+      },
+
+      "hints": [
+        {
+          "chapter": 8,
+          "content": "[提示内容]",
+          "subtlety": "obvious|moderate|subtle"
+        }
+      ]
+    }
+  ]
+}
+```
+
+#### 检测 1：伏笔热度管理
+
+```
+🔮 伏笔热度状态
+━━━━━━━━━━━━━━━━━━━━
+
+| 伏笔 | 热度 | 趋势 | 上次提及 | 状态 |
+|------|------|------|---------|------|
+| [身世之谜] | 🔥🔥🔥 高 | ↑ 上升 | 第 15 章 | ✅ 健康 |
+| [神秘宝物] | 🔥🔥 中 | → 稳定 | 第 12 章 | ✅ 健康 |
+| [失踪事件] | 🔥 低 | ↓ 冷却 | 第 5 章 | ⚠️ 需要提示 |
+| [预言] | ❄️ 极低 | ↓ 冷却 | 第 2 章 | ❌ 读者可能已遗忘 |
+
+💡 建议：
+- [失踪事件]：在近 2 章内添加一个 subtle 提示
+- [预言]：在近 1 章内添加一个 obvious 提示，或考虑放弃
+```
+
+#### 检测 2：伏笔回收时机
+
+```
+⏰ 伏笔回收建议
+━━━━━━━━━━━━━━━━━━━━
+
+🔴 紧急回收（紧急度 > 0.8）：
+- [身世之谜]：已持续 20 章，读者期待值极高
+  建议：在第 [N]-[N+3] 章内回收
+  推荐方式：[基于情节的具体建议]
+
+⚠️ 建议回收（紧急度 0.5-0.8）：
+- [神秘宝物]：已持续 12 章，热度中等
+  建议：在第 [M]-[M+5] 章内回收
+
+✅ 可继续持有（紧急度 < 0.5）：
+- [预言]：刚埋设 5 章，可继续持有
+```
+
+#### 检测 3：伏笔链完整性
+
+```
+🔗 伏笔链检查
+━━━━━━━━━━━━━━━━━━━━
+
+伏笔链「身世之谜」：
+fs-001（身世暗示）→ fs-003（血脉觉醒）→ fs-005（真相揭示）
+状态：fs-001 ✅ 已提示 → fs-003 🔄 进行中 → fs-005 ⏳ 待回收
+
+伏笔链「远古秘密」：
+fs-002（古籍线索）→ fs-004（遗迹发现）
+状态：fs-002 ✅ 已提示 → fs-004 ⏳ 待回收
+
+⚠️ 孤立伏笔（未关联到任何链）：
+- fs-006（[内容]）— 考虑是否需要关联或放弃
+```
 ### 节奏健康度检测（--check 扩展）
 
 当使用 `--check` 参数时，除了基础一致性验证外，还执行节奏健康度检测：

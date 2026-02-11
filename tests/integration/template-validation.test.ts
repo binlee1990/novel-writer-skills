@@ -49,6 +49,14 @@ describe('Template Files Validation', () => {
       expect(content).toContain('narrative-threads.json');
       expect(content).toContain('叙事线同步');
     });
+    it('should have foreshadowing health detection in track command', () => {
+      const trackFile = path.join(commandsDir, 'track.md');
+      const content = fs.readFileSync(trackFile, 'utf-8');
+      expect(content).toContain('伏笔健康度检测');
+      expect(content).toContain('伏笔热度');
+      expect(content).toContain('伏笔回收');
+      expect(content).toContain('伏笔链');
+    });
   });
 
   describe('Skill Templates', () => {
