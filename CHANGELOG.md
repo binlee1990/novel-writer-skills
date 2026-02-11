@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-02-11
+
+### Fixed
+
+- **命令模板路径修复** — 修复全部 17 个 Slash Command 模板中与生成项目实际目录结构不匹配的路径引用
+  - `memory/` → `.specify/memory/`（constitution.md、style-reference.md 等）
+  - `templates/knowledge-base/` → `.specify/templates/knowledge-base/`
+  - `templates/skills/` → `.specify/templates/skills/`
+  - `templates/config/` → `.specify/templates/config/`
+  - `.claude/knowledge-base/` → `.specify/templates/knowledge-base/`
+  - `scripts/bash/` → `.specify/scripts/bash/`
+  - `stories/*/spec/tracking/` → `spec/tracking/`
+  - 涉及文件：write.md、analyze.md、plan.md、track.md、specify.md、constitution.md、revise.md、checklist.md、character.md 等
+
+- **`config.ts` knowledgeBase 路径修复** — `getProjectPaths()` 中 `knowledgeBase` 路径从 `.claude/knowledge-base` 修正为 `.specify/templates/knowledge-base`
+
+### Changed
+
+- **CLAUDE.md 新增开发规则**
+  - 并发编辑规则：禁止多个 agent 同时编辑同一文件
+  - 测试框架说明：明确使用 Jest（非 vitest），包含正确运行命令
+  - 生成项目目录结构参考：完整目录树 + 关键路径映射表
+
+---
+
 ## [1.4.0] - 2026-02-11
 
 ### Added

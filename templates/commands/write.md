@@ -140,7 +140,7 @@ powershell -File {SCRIPT} -Json
    writing-style: natural-voice
    ---
    ```
-   则读取：`.claude/knowledge-base/styles/natural-voice.md`
+   则读取：`.specify/templates/knowledge-base/styles/natural-voice.md`
 
    **如果配置了 writing-requirements**，加载对应规范文档：
    ```yaml
@@ -151,8 +151,8 @@ powershell -File {SCRIPT} -Json
    ---
    ```
    则读取：
-   - `.claude/knowledge-base/requirements/anti-ai-v4.md`
-   - `.claude/knowledge-base/requirements/fast-paced.md`
+   - `.specify/templates/knowledge-base/requirements/anti-ai-v4.md`
+   - `.specify/templates/knowledge-base/requirements/fast-paced.md`
 
    ⚠️ **优先级说明**：
    - 风格文档（styles）的优先级**高于** spec/presets/ 中的旧版规范
@@ -664,7 +664,7 @@ resource-loading:
 
 1. **当前任务**：读取 `stories/*/tasks.md`，找到当前 `pending` 或 `in_progress` 的写作任务
 2. **上一章内容**：读取最近完成的章节文件（最后 500 字即可）
-3. **角色状态**：读取 `stories/*/spec/tracking/character-state.json`（仅当前活跃角色）
+3. **角色状态**：读取 `spec/tracking/character-state.json`（仅当前活跃角色）
 
 **不加载**：
 - ❌ 宪法文件
@@ -718,7 +718,7 @@ resource-loading:
 
 在开始写作前，检查是否存在未完成的 checkpoint：
 
-1. 读取 `stories/*/spec/tracking/write-checkpoint.json`
+1. 读取 `spec/tracking/write-checkpoint.json`
 2. 如果文件存在且 `status` 为 `in_progress`：
    - 检查 `expiresAt` 是否已过期（超过 24 小时视为过期）
    - 如果未过期，向用户提示：
@@ -1159,7 +1159,7 @@ resource-loading:
 **验证方法**：
 使用项目提供的字数统计脚本验证章节字数：
 ```bash
-source scripts/bash/common.sh
+source .specify/scripts/bash/common.sh
 count_chinese_words "stories/*/content/第X章.md"
 ```
 
@@ -1356,7 +1356,7 @@ count_chinese_words "stories/*/content/第X章.md"
 
 #### Step 4: 记录到 tracking-log.md
 
-追加更新记录到 `stories/*/spec/tracking/tracking-log.md`。
+追加更新记录到 `spec/tracking/tracking-log.md`。
 
 **日志格式**:
 ```markdown

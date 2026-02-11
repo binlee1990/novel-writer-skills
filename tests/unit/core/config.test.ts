@@ -93,7 +93,7 @@ describe('core/config.ts', () => {
 
     it('should include knowledgeBase path', () => {
       const paths = getProjectPaths(projectRoot);
-      expect(paths.knowledgeBase).toBe(path.join(projectRoot, '.claude', 'knowledge-base'));
+      expect(paths.knowledgeBase).toBe(path.join(projectRoot, '.specify', 'templates', 'knowledge-base'));
     });
 
     it('should include pluginRegistry path', () => {

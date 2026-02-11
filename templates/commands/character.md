@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Glob, Grep, Edit
 
 ## 概述
 
-统一管理故事中所有角色的档案、状态、关系和对话风格。所有角色数据存储在 `stories/*/spec/tracking/` 目录下。
+统一管理故事中所有角色的档案、状态、关系和对话风格。所有角色数据存储在 `spec/tracking/` 目录下。
 
 ## 前置条件
 

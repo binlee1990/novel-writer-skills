@@ -54,12 +54,12 @@ model: claude-sonnet-4-5-20250929
 
 **如有则加载**：
 - `/analyze` 报告：`stories/*/analysis-report.md`
-- 风格参考：`memory/style-reference.md`
-- 个人风格：`memory/personal-voice.md`
+- 风格参考：`.specify/memory/style-reference.md`
+- 个人风格：`.specify/memory/personal-voice.md`
 - 情节追踪：`spec/tracking/plot-tracker.json`
 
 **加载 Skill**：
-- `templates/skills/writing-techniques/revision-polish/SKILL.md`（核心修改流程）
+- `.specify/templates/skills/writing-techniques/revision-polish/SKILL.md`（核心修改流程）
 
 ### 3. 初稿评估
 

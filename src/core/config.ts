@@ -126,7 +126,7 @@ export function getProjectPaths(projectRoot: string) {
     tracking: path.join(projectRoot, DIRS.SPEC, DIRS.TRACKING),
     knowledge: path.join(projectRoot, DIRS.SPEC, DIRS.KNOWLEDGE),
     plugins: path.join(projectRoot, DIRS.PLUGINS),
-    knowledgeBase: path.join(projectRoot, DIRS.CLAUDE, DIRS.KNOWLEDGE_BASE),
+    knowledgeBase: path.join(projectRoot, DIRS.SPECIFY, DIRS.TEMPLATES, DIRS.KNOWLEDGE_BASE),
   };
 }
 

@@ -2,7 +2,7 @@
 name: track
 description: 综合追踪小说创作进度和内容
 argument-hint: [--brief | --plot | --stats | --check | --fix]
-allowed-tools: Read(//spec/tracking/**), Read(spec/tracking/**), Read(//stories/**), Read(stories/**), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
+allowed-tools: Read(//spec/tracking/**), Read(//spec/tracking/**), Read(//stories/**), Read(//stories/**), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
 model: claude-sonnet-4-5-20250929
 scripts:
   sh: .specify/scripts/bash/track-progress.sh
@@ -265,7 +265,7 @@ resource-loading:
 ### 实现逻辑
 
 **读取 tracking-log.md**:
-1. 读取 `stories/*/spec/tracking/tracking-log.md`
+1. 读取 `spec/tracking/tracking-log.md`
 2. 解析日志格式，提取所有更新记录
 3. 根据过滤条件筛选记录
 4. 按时间倒序排列（最新的在前）
@@ -287,7 +287,7 @@ resource-loading:
 
 ```markdown
 ℹ️ 提示：tracking-log.md 不存在
-- 位置：stories/*/spec/tracking/tracking-log.md
+- 位置：spec/tracking/tracking-log.md
 - 原因：尚未执行过任何 tracking 更新命令
 - 建议：执行 /write 或 /plan 命令后会自动创建
 ```

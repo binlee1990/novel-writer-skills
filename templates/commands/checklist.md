@@ -4,8 +4,8 @@ description: 生成或执行质量检查清单（规格验证 + 内容扫描）
 allowed-tools: Read, Bash, Write, Edit, Glob, Grep
 model: claude-sonnet-4-5-20250929
 scripts:
-  sh: scripts/bash/common.sh
-  ps: scripts/powershell/common.ps1
+  sh: .specify/scripts/bash/common.sh
+  ps: .specify/scripts/powershell/common.ps1
 ---
 
 # 质量检查清单（Checklist）
@@ -47,7 +47,7 @@ $ARGUMENTS
 ### 默认加载
 
 自动加载以下资源用于生成检查清单：
-- `memory/constitution.md`（创作宪法）
+- `.specify/memory/constitution.md`（创作宪法）
 - `stories/*/specification.md`（故事规格）
 - `stories/*/tasks.md`（当前任务）
 - `spec/tracking/plot-tracker.json`（情节追踪）
@@ -311,7 +311,7 @@ resource-loading:
 
 执行命令：
 ```bash
-bash scripts/bash/check-world.sh --checklist
+bash .specify/scripts/bash/check-world.sh --checklist
 ```
 
 如果脚本不存在，提示用户该功能正在开发中。
@@ -320,21 +320,21 @@ bash scripts/bash/check-world.sh --checklist
 
 执行命令：
 ```bash
-bash scripts/bash/check-plot.sh --checklist
+bash .specify/scripts/bash/check-plot.sh --checklist
 ```
 
 ##### 2.7 数据同步检查
 
 执行命令：
 ```bash
-bash scripts/bash/check-consistency.sh --checklist
+bash .specify/scripts/bash/check-consistency.sh --checklist
 ```
 
 ##### 2.8 时间线检查
 
 执行命令：
 ```bash
-bash scripts/bash/check-timeline.sh check --checklist
+bash .specify/scripts/bash/check-timeline.sh check --checklist
 ```
 
 ##### 2.9 写作状态检查
@@ -367,7 +367,7 @@ bash scripts/bash/check-timeline.sh check --checklist
 
 如果存在脚本，执行：
 ```bash
-bash scripts/bash/check-writing-state.sh --checklist
+bash .specify/scripts/bash/check-writing-state.sh --checklist
 ```
 
 否则，手动检查上述项目并生成报告。

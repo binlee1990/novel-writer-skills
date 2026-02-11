@@ -1,7 +1,7 @@
 ---
 description: 创建或更新小说创作宪法，定义不可妥协的创作原则
 argument-hint: [创作原则描述]
-allowed-tools: Write(//memory/constitution.md), Write(memory/constitution.md), Read(//memory/**), Read(memory/**), Bash(find:*), Bash(*)
+allowed-tools: Write(//.specify/memory/constitution.md), Write(//.specify/memory/constitution.md), Read(//.specify/memory/**), Read(//.specify/memory/**), Bash(find:*), Bash(*)
 model: claude-sonnet-4-5-20250929
 scripts:
   sh: .specify/scripts/bash/constitution.sh
@@ -40,18 +40,18 @@ resource-loading:
 
 **首先检查是否存在风格参考文档**（来自 `/book-internalize`）：
 ```bash
-test -f memory/style-reference.md && echo "exists" || echo "not-found"
+test -f .specify/memory/style-reference.md && echo "exists" || echo "not-found"
 ```
 
-- 如果存在，使用 Read 工具读取 `memory/style-reference.md`
+- 如果存在，使用 Read 工具读取 `.specify/memory/style-reference.md`
 - 然后告诉用户："检测到您已完成对标作品分析，我将参考该风格帮您起草宪法。"
 
 **然后检查现有宪法**：
 ```bash
-test -f memory/constitution.md && echo "exists" || echo "not-found"
+test -f .specify/memory/constitution.md && echo "exists" || echo "not-found"
 ```
 
-- 如果存在（输出 "exists"），使用 Read 工具读取 `memory/constitution.md` 并准备更新
+- 如果存在（输出 "exists"），使用 Read 工具读取 `.specify/memory/constitution.md` 并准备更新
 - 如果不存在（输出 "not-found"），跳过读取步骤，直接准备创建新宪法
 
 ### 2. 收集创作原则
@@ -213,7 +213,7 @@ test -f memory/constitution.md && echo "exists" || echo "not-found"
 
 ### 7. 输出和保存
 
-- 将宪法保存到 `memory/constitution.md`
+- 将宪法保存到 `.specify/memory/constitution.md`
 - 输出创建/更新成功消息
 - 提示下一步：`/specify` 定义故事规格
 

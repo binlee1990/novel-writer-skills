@@ -302,10 +302,10 @@ my-novel/
 ├── .specify/           # Spec Kit 配置
 │   ├── memory/
 │   │   └── constitution.md
+│   ├── scripts/        # 命令行脚本工具
+│   │   ├── bash/
+│   │   └── powershell/
 │   └── templates/
-│       ├── scripts/    # 命令行脚本工具
-│       │   ├── bash/
-│       │   └── powershell/
 │       ├── commands/
 │       ├── knowledge-base/
 │       │   ├── craft/          # 写作工艺 (hook-design, power-system, tension-management...)
@@ -398,10 +398,10 @@ novelws plugin:remove <plugin-name>
 
 ### 脚本位置
 
-初始化项目后，脚本位于：`.specify/templates/scripts/`
+初始化项目后，脚本位于：`.specify/scripts/`
 
 ```text
-.specify/templates/scripts/
+.specify/scripts/
 ├── bash/          # macOS/Linux 脚本
 └── powershell/    # Windows 脚本
 ```
@@ -419,26 +419,26 @@ novelws plugin:remove <plugin-name>
 
 ```bash
 # 创建宪法
-bash .specify/templates/scripts/bash/constitution.sh
+bash .specify/scripts/bash/constitution.sh
 
 # 定义规格
-bash .specify/templates/scripts/bash/specify-story.sh
+bash .specify/scripts/bash/specify-story.sh
 
 # 追踪进度
-bash .specify/templates/scripts/bash/track-progress.sh
+bash .specify/scripts/bash/track-progress.sh
 ```
 
 **Windows:**
 
 ```powershell
 # 创建宪法
-.\.specify\templates\scripts\powershell\constitution.ps1
+.\.specify\scripts\powershell\constitution.ps1
 
 # 定义规格
-.\.specify\templates\scripts\powershell\specify-story.ps1
+.\.specify\scripts\powershell\specify-story.ps1
 
 # 追踪进度
-.\.specify\templates\scripts\powershell\track-progress.ps1
+.\.specify\scripts\powershell\track-progress.ps1
 ```
 
 ### 何时使用脚本 vs Slash Commands

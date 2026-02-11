@@ -1,7 +1,7 @@
 ---
 description: 基于故事规格制定技术实现方案
 argument-hint: [技术偏好和选择] [--detail vol-XX]
-allowed-tools: Read(//stories/**/specification.md), Read(stories/**/specification.md), Read(//stories/**/creative-plan.md), Read(stories/**/creative-plan.md), Read(//plugins/**), Read(plugins/**), Write(//stories/**/creative-plan.md), Write(stories/**/creative-plan.md), Read(//memory/constitution.md), Read(memory/constitution.md), Bash(find:*), Bash(grep:*), Bash(*)
+allowed-tools: Read(//stories/**/specification.md), Read(//stories/**/specification.md), Read(//stories/**/creative-plan.md), Read(//stories/**/creative-plan.md), Read(//plugins/**), Read(//plugins/**), Write(//stories/**/creative-plan.md), Write(//stories/**/creative-plan.md), Read(//.specify/memory/constitution.md), Read(//.specify/memory/constitution.md), Bash(find:*), Bash(grep:*), Bash(*)
 model: claude-sonnet-4-5-20250929
 scripts:
   sh: .specify/scripts/bash/plan-story.sh
@@ -27,7 +27,7 @@ scripts:
 ### 1. 加载前置文档
 
 **运行脚本** `{SCRIPT}` 检查并加载：
-- 宪法文件：`memory/constitution.md`
+- 宪法文件：`.specify/memory/constitution.md`
 - 规格文件：`stories/*/specification.md`
 - 澄清记录（如果已运行 `/clarify`）
 
@@ -52,10 +52,10 @@ powershell -File {SCRIPT} -Json
 
 **如果 specification.md 未配置 resource-loading**，或 `auto-load: true`（默认），自动加载：
 
-- `templates/knowledge-base/craft/scene-structure.md`（场景结构）
-- `templates/knowledge-base/craft/character-arc.md`（角色弧线）
-- `templates/knowledge-base/craft/pacing.md`（节奏控制）
-- `templates/skills/planning/story-structure/SKILL.md`（如存在）
+- `.specify/templates/knowledge-base/craft/scene-structure.md`（场景结构）
+- `.specify/templates/knowledge-base/craft/character-arc.md`（角色弧线）
+- `.specify/templates/knowledge-base/craft/pacing.md`（节奏控制）
+- `.specify/templates/skills/planning/story-structure/SKILL.md`（如存在）
 
 #### Layer 2: 配置覆盖
 
@@ -92,8 +92,8 @@ resource-loading:
 
 **实际场景示例**：
 假设本次对话已执行过 `/write chapter-1`，加载了以下资源：
-- templates/knowledge-base/craft/dialogue.md
-- templates/knowledge-base/craft/scene-structure.md
+- .specify/templates/knowledge-base/craft/dialogue.md
+- .specify/templates/knowledge-base/craft/scene-structure.md
 
 当用户执行 `/write chapter-2` 时：
 - 如需 dialogue 知识 → **直接使用已有知识**，不重新读取文件
@@ -760,7 +760,7 @@ Boss 战（13-20 章）：
 **执行时机**：全书规划时（非 `--detail` 模式）
 
 **前置加载**：
-- 加载知识库：`templates/knowledge-base/craft/hook-design.md`（如存在）
+- 加载知识库：`.specify/templates/knowledge-base/craft/hook-design.md`（如存在）
 
 **规划步骤**：
 
@@ -1116,7 +1116,7 @@ Boss 战（13-20 章）：
 
 **Step 4: 记录到 tracking-log.md**
 
-追加更新记录到 `stories/*/spec/tracking/tracking-log.md`：
+追加更新记录到 `spec/tracking/tracking-log.md`：
 
 **日志格式示例**:
 
