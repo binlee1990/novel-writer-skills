@@ -152,6 +152,28 @@ describe('Template Files Validation', () => {
       expect(content).toContain('规格书反馈');
       expect(content).toContain('计划反馈');
     });
+    it('should have --feedback mode in specify command', () => {
+      const specifyFile = path.join(commandsDir, 'specify.md');
+      const content = fs.readFileSync(specifyFile, 'utf-8');
+      expect(content).toContain('--feedback');
+      expect(content).toContain('反馈接收模式');
+      expect(content).toContain('规格书反馈处理');
+    });
+    it('should have --feedback mode in plan command', () => {
+      const planFile = path.join(commandsDir, 'plan.md');
+      const content = fs.readFileSync(planFile, 'utf-8');
+      expect(content).toContain('--feedback');
+      expect(content).toContain('反馈接收模式');
+      expect(content).toContain('计划反馈处理');
+    });
+    it('should have unprocessed feedback reminder in guide command', () => {
+      const guideFile = path.join(commandsDir, 'guide.md');
+      const content = fs.readFileSync(guideFile, 'utf-8');
+      expect(content).toContain('反馈状态检查');
+      expect(content).toContain('未处理反馈');
+      expect(content).toContain('/specify --feedback');
+      expect(content).toContain('/plan --feedback');
+    });
   });
 
   describe('Skill Templates', () => {
