@@ -138,6 +138,20 @@ describe('Template Files Validation', () => {
       expect(content).toContain('推荐优先级');
       expect(content).toContain('数据源');
     });
+    it('should have smart recommendations in write post-processing', () => {
+      const writeFile = path.join(commandsDir, 'write.md');
+      const content = fs.readFileSync(writeFile, 'utf-8');
+      expect(content).toContain('智能推荐（后置）');
+      expect(content).toContain('P0/P1');
+    });
+    it('should have feedback suggestion module in analyze command', () => {
+      const analyzeFile = path.join(commandsDir, 'analyze.md');
+      const content = fs.readFileSync(analyzeFile, 'utf-8');
+      expect(content).toContain('反馈建议');
+      expect(content).toContain('反馈分类');
+      expect(content).toContain('规格书反馈');
+      expect(content).toContain('计划反馈');
+    });
   });
 
   describe('Skill Templates', () => {
