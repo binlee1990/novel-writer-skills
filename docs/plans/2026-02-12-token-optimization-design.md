@@ -239,19 +239,157 @@
 2. 新建 `scripts/bash/batch-tracking.sh` — 批量 tracking 操作
 3. `templates/commands/write.md` — 添加 compact 提示和前文裁剪策略
 
-### Phase 4：其他命令优化
+### Phase 4：analyze.md 精简
 
-将同样的策略应用到其他高频命令：
-1. `/plan`（1,285 行 → ~400 行）
-2. `/analyze`（2,070 行 → ~500 行）
-3. `/track`（910 行 → ~300 行）
-4. `/specify`（904 行 → ~300 行）
+**修改文件**：
+1. `templates/commands/analyze.md` — 精简从 2,070 行到 ~370 行
+2. 新建 10 个分析 skill 文件（见 3.1 详细设计）
+
+### Phase 5：plan.md 精简
+
+**修改文件**：
+1. `templates/commands/plan.md` — 精简从 1,286 行到 ~360 行
+2. 新建 `templates/knowledge-base/craft/story-structures.md` — 网文结构模板
+3. 新建 `templates/skills/planning/volume-detail/SKILL.md` — 卷级规划 skill
 
 ---
 
-## 4. 质量保障
+## 4. analyze.md 精简详细设计
 
-### 4.1 质量不受影响的理由
+### 4.1 当前结构分析（2,070 行）
+
+| 内容块 | 行数 | 精简潜力 | 原因 |
+|--------|------|---------|------|
+| 核心流程（模式切换、参数解析） | ~90 行 | 低 | 必须保留的执行逻辑 |
+| 资源加载协议（Layer 1-3） | ~135 行 | **高** | 与 write.md 重复 90%，移到 CLAUDE.md |
+| 会话级资源复用 | ~35 行 | **高** | 与 write.md 完全相同，移到 CLAUDE.md |
+| 模式 A: 框架分析（A1-A5） | ~130 行 | 中 | 报告模板示例可精简 |
+| 模式 B: 内容分析（B1-B8） | ~170 行 | 中 | 报告模板示例可精简 |
+| **10 种专项分析**（每种 40-100 行） | **~800 行** | **极高** | 每次只用 1 种，但全部发送 |
+| 后置处理（询问式 Tracking） | ~200 行 | **高** | JSON 示例和交互流程可外置 |
+| 使用场景示例 | ~90 行 | 高 | 教学性质，可删除 |
+| 反馈建议 + 修改引导 | ~70 行 | 中 | 可精简 |
+| 注意事项（专项分析使用时机） | ~80 行 | 高 | 教学性质 |
+| 命令链式提示 | ~10 行 | 可移到 CLAUDE.md |
+
+### 4.2 核心精简策略：专项分析外置
+
+**关键洞察**：10 种专项分析（opening, pacing, character, foreshadow, logic, style, reader, hook, power, voice）占 800 行（39%），但每次 `/analyze` 最多只用 1-2 种。
+
+**方案**：将 10 种专项分析模板拆分为独立的 skill 文件，analyze.md 仅保留调度逻辑。
+
+```
+templates/skills/analysis/
+├── opening-analysis/SKILL.md       (~50 行)
+├── pacing-analysis/SKILL.md        (~60 行)
+├── character-analysis/SKILL.md     (~60 行)
+├── foreshadow-analysis/SKILL.md    (~40 行)
+├── logic-analysis/SKILL.md         (~50 行)
+├── style-analysis/SKILL.md         (~50 行)
+├── reader-analysis/SKILL.md        (~120 行)
+├── hook-analysis/SKILL.md          (~100 行)
+├── power-analysis/SKILL.md         (~80 行)
+└── voice-analysis/SKILL.md         (~40 行)
+```
+
+### 4.3 精简后的 analyze.md 结构（~370 行）
+
+| 精简后内容 | 行数 |
+|-----------|------|
+| 参数解析 + 模式切换 | ~50 行 |
+| 资源加载（引用 CLAUDE.md） | ~20 行 |
+| 模式 A: 框架分析（精简，删除报告模板中的详细示例） | ~80 行 |
+| 模式 B: 内容分析（精简，删除报告模板中的详细示例） | ~100 行 |
+| 专项分析调度（仅列出名称、触发条件、skill 文件路径） | ~40 行 |
+| 后置处理（引用 auto-tracking skill） | ~40 行 |
+| 反馈建议 + 修改引导（精简） | ~40 行 |
+| **总计** | **~370 行** |
+
+### 4.4 精简率
+
+2,070 → 370 行（**82% 精简**，单次节省 ~23,500 tokens）
+
+### 4.5 质量保障
+
+- 10 种专项分析的完整框架保留在独立 skill 文件中，Claude 在执行时按需读取
+- 模式 A/B 的核心分析维度保留在 prompt 中
+- 资源加载协议通过 CLAUDE.md 始终可用
+
+---
+
+## 5. plan.md 精简详细设计
+
+### 5.1 当前结构分析（1,286 行）
+
+| 内容块 | 行数 | 精简潜力 | 原因 |
+|--------|------|---------|------|
+| 参数解析 + 资源加载 | ~215 行 | **高** | 资源加载协议与 write.md 重复 |
+| 写作方法选择 + 4 种网文结构模板 | ~150 行 | **高** | 结构模板可外置到 knowledge-base |
+| 章节架构设计 | ~140 行 | 中 | 核心内容需保留，模板可精简 |
+| 情绪曲线设计 | ~60 行 | 低 | 重要设计指导 |
+| 卷级详细规划（--detail） | ~220 行 | **高** | 条件性内容，多数调用不触发 |
+| 多卷批量规划 | ~60 行 | 高 | 条件性内容 |
+| 爽点分布 + 钩子链设计 | ~120 行 | 中 | 部分可外置 |
+| 人物/世界观/情节/叙事技术 | ~80 行 | 低 | 精简但必要的规划指导 |
+| 后置处理（plot-tracker） | ~200 行 | **高** | JSON 示例可外置 |
+| 注意事项 | ~60 行 | 中 | 部分教学性质 |
+
+### 5.2 核心精简策略
+
+1. **4 种网文结构模板**外置到 `templates/knowledge-base/craft/story-structures.md`
+2. **卷级详细规划**外置到 `templates/skills/planning/volume-detail/SKILL.md`
+3. **后置处理 JSON 示例**引用 `auto-tracking/SKILL.md`
+4. **资源加载协议**引用 CLAUDE.md
+
+### 5.3 精简后的 plan.md 结构（~360 行）
+
+| 精简后内容 | 行数 |
+|-----------|------|
+| 参数解析 | ~30 行 |
+| 资源加载（引用 CLAUDE.md） | ~20 行 |
+| 写作方法选择（引用 `story-structures.md`） | ~30 行 |
+| 章节架构设计（精简，保留核心框架） | ~80 行 |
+| 情绪曲线设计（保留核心原则） | ~40 行 |
+| 爽点分布 + 钩子链（精简） | ~50 行 |
+| 人物/世界观/情节/叙事 | ~60 行 |
+| 卷级详细规划调度（引用 skill 文件） | ~20 行 |
+| 后置处理（引用 auto-tracking） | ~30 行 |
+| **总计** | **~360 行** |
+
+### 5.4 精简率
+
+1,286 → 360 行（**72% 精简**，单次节省 ~13,000 tokens）
+
+---
+
+## 6. 其他命令精简评估
+
+### 6.1 不值得专门精简的命令
+
+| 命令 | 当前大小 | 使用频率 | 结论 |
+|------|---------|---------|------|
+| track.md | 911 行 | 低 | 可在 Phase 6 做，非紧急 |
+| specify.md | 905 行 | 极低（仅开头用） | 不紧急 |
+| recap.md | 710 行 | 低 | 不紧急 |
+| checklist.md | 599 行 | 极低 | 不值得 |
+| 其余 10 个命令 | 100-400 行 | 极低 | 不值得 |
+
+### 6.2 共享内容统一优化
+
+以下内容出现在多个命令中，通过移到 CLAUDE.md 可一次性为所有命令减少 token：
+
+| 共享内容 | 出现次数 | 行数/次 | 总节省 |
+|---------|---------|---------|--------|
+| 会话级资源复用说明 | 5+ 命令 | ~35 行 | ~175 行 |
+| 命令链式提示模板 | 17 命令 | ~10 行 | ~170 行 |
+| 资源加载协议框架 | 5+ 命令 | ~50 行 | ~250 行 |
+| Tracking 数据结构说明 | 8+ 命令 | ~30 行 | ~240 行 |
+
+---
+
+## 7. 质量保障
+
+### 7.1 质量不受影响的理由
 
 | 精简内容 | 保障方式 |
 |---------|---------|
@@ -260,15 +398,18 @@
 | 后置 tracking 格式 | 移到 `auto-tracking/SKILL.md`，首次读取后复用 |
 | 三层资源加载逻辑 | 由脚本 `check-writing-state.sh` 承担 |
 | 段落结构规范 | 移到 CLAUDE.md（system prompt，始终可用） |
+| 10 种专项分析框架 | 移到独立 skill 文件，按 `--focus` 参数按需读取 |
+| 4 种网文结构模板 | 移到 `story-structures.md`，按故事类型按需读取 |
+| 卷级详细规划流程 | 移到 `volume-detail/SKILL.md`，仅 `--detail` 时读取 |
 
-### 4.2 关键设计原则
+### 7.2 关键设计原则
 
 - **「Claude 可用的知识总量」不减少**——只改变传递方式
 - **首次 /write 加载所有必要资源**——后续复用
 - **核心原则放在 CLAUDE.md**——始终可用且缓存友好
 - **详细参考放在外部文件**——按需读取，会话内复用
 
-### 4.3 回归验证
+### 7.3 回归验证
 
 实施每个 Phase 后，应进行写作测试：
 1. 使用优化后的命令写 3 章
@@ -278,18 +419,39 @@
 
 ---
 
-## 5. 预期收益
+## 8. 预期收益
 
-### 5.1 Token 节省
+### 8.1 Token 节省（三个核心命令）
 
 | 场景 | 当前 | 优化后 | 节省 |
 |------|------|--------|------|
-| 单次 /write | ~16,000 tokens | ~3,500 tokens | 78% |
-| 连续写 5 章 | ~80,000 tokens | ~18,000 tokens | 77% |
-| 连续写 10 章 | ~160,000 tokens | ~33,000 tokens | 79% |
-| 混合命令（/write + /plan + /analyze） | ~200,000 tokens | ~50,000 tokens | 75% |
+| 单次 /write | ~12,600 tokens | ~3,500 tokens | 72% |
+| 单次 /analyze | ~28,800 tokens | ~4,300 tokens | 85% |
+| 单次 /plan | ~18,200 tokens | ~4,200 tokens | 77% |
+| 连续写 5 章 (/write ×5) | ~63,000 tokens | ~17,500 tokens | 72% |
+| 典型会话 (/write ×5 + /plan ×1 + /analyze ×1) | ~110,000 tokens | ~26,000 tokens | **76%** |
 
-### 5.2 其他收益
+### 8.2 新增文件清单
+
+| 文件 | 类型 | 来源 |
+|------|------|------|
+| `.claude/CLAUDE.md`（模板） | 共享核心原则 | 从 write/analyze/plan 提取 |
+| `requirements/concretization.md` | 具象化检查 | 从 write.md 提取 |
+| `skills/auto-tracking/SKILL.md` | Tracking 处理格式 | 从 write.md/analyze.md 提取 |
+| `skills/analysis/opening-analysis/SKILL.md` | 开篇分析 | 从 analyze.md 提取 |
+| `skills/analysis/pacing-analysis/SKILL.md` | 节奏分析 | 从 analyze.md 提取 |
+| `skills/analysis/character-analysis/SKILL.md` | 人物分析 | 从 analyze.md 提取 |
+| `skills/analysis/foreshadow-analysis/SKILL.md` | 伏笔分析 | 从 analyze.md 提取 |
+| `skills/analysis/logic-analysis/SKILL.md` | 逻辑分析 | 从 analyze.md 提取 |
+| `skills/analysis/style-analysis/SKILL.md` | 风格分析 | 从 analyze.md 提取 |
+| `skills/analysis/reader-analysis/SKILL.md` | 读者体验分析 | 从 analyze.md 提取 |
+| `skills/analysis/hook-analysis/SKILL.md` | 钩子分析 | 从 analyze.md 提取 |
+| `skills/analysis/power-analysis/SKILL.md` | 力量体系分析 | 从 analyze.md 提取 |
+| `skills/analysis/voice-analysis/SKILL.md` | 对话一致性分析 | 从 analyze.md 提取 |
+| `knowledge-base/craft/story-structures.md` | 网文结构模板 | 从 plan.md 提取 |
+| `skills/planning/volume-detail/SKILL.md` | 卷级规划 | 从 plan.md 提取 |
+
+### 8.3 其他收益
 
 - **响应速度提升**：更短的 prompt 意味着更快的 API 响应（首 token 延迟降低）
 - **上下文空间释放**：节省的 token 空间可用于更长的章节创作
