@@ -81,6 +81,14 @@ describe('Template Files Validation', () => {
       expect(content).toContain('类型写作专家');
       expect(content).toContain('咨询流程');
     });
+    it('should have enhanced tasks command with priority, dependencies, and statistics', () => {
+      const tasksFile = path.join(commandsDir, 'tasks.md');
+      const content = fs.readFileSync(tasksFile, 'utf-8');
+      expect(content).toContain('任务优先级');
+      expect(content).toContain('任务依赖关系');
+      expect(content).toContain('从计划自动生成任务');
+      expect(content).toContain('任务完成度统计');
+    });
   });
 
   describe('Skill Templates', () => {
