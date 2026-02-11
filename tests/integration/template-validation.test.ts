@@ -64,6 +64,13 @@ describe('Template Files Validation', () => {
       expect(content).toContain('多线程时间对齐');
       expect(content).toContain('时间冲突检测');
     });
+    it('should have enhanced relations command with visualization and conflict detection', () => {
+      const relationsFile = path.join(commandsDir, 'relations.md');
+      const content = fs.readFileSync(relationsFile, 'utf-8');
+      expect(content).toContain('关系图谱可视化');
+      expect(content).toContain('关系变化追踪');
+      expect(content).toContain('关系冲突检测');
+    });
   });
 
   describe('Skill Templates', () => {
