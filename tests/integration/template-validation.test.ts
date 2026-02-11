@@ -183,6 +183,15 @@ describe('Template Files Validation', () => {
       expect(content).toContain('跨章节风格一致性评分');
     });
 
+    it('should have voice-consistency-checker skill with dialogue analysis', () => {
+      const skillFile = path.join(skillsDir, 'quality-assurance', 'voice-consistency-checker', 'SKILL.md');
+      const content = fs.readFileSync(skillFile, 'utf-8');
+      expect(content).toContain('对话一致性');
+      expect(content).toContain('语言指纹');
+      expect(content).toContain('词汇匹配');
+      expect(content).toContain('voice-analyst');
+    });
+
   });
 
   describe('Knowledge Base', () => {
