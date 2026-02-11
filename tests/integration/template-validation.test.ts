@@ -124,6 +124,13 @@ describe('Template Files Validation', () => {
       expect(content).toContain('灵感状态更新');
       expect(content).toContain('灵感快速捕捉');
     });
+    it('should have inspiration allocation in plan command', () => {
+      const planFile = path.join(commandsDir, 'plan.md');
+      const content = fs.readFileSync(planFile, 'utf-8');
+      expect(content).toContain('灵感分配');
+      expect(content).toContain('ideas.json');
+      expect(content).toContain('灵感分配建议');
+    });
   });
 
   describe('Skill Templates', () => {
