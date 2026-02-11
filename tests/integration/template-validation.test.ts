@@ -106,6 +106,17 @@ describe('Template Files Validation', () => {
         }
       }
     });
+
+    it('should have enhanced multi-thread-narrative skill with extended capabilities', () => {
+      const skillFile = path.join(skillsDir, 'writing-techniques', 'multi-thread-narrative', 'SKILL.md');
+      const content = fs.readFileSync(skillFile, 'utf-8');
+      expect(content).toContain('## 扩展能力');
+      expect(content).toContain('视角切换规划');
+      expect(content).toContain('信息差追踪');
+      expect(content).toContain('叙事线交汇设计');
+      expect(content).toContain('narrative-threads.json');
+    });
+
   });
 
   describe('Knowledge Base', () => {
