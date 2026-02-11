@@ -109,6 +109,13 @@ describe('Template Files Validation', () => {
       expect(content).toContain('伏笔状态');
       expect(content).toContain('情节线进度');
     });
+    it('should have --focus=voice in analyze command', () => {
+      const analyzeFile = path.join(commandsDir, 'analyze.md');
+      const content = fs.readFileSync(analyzeFile, 'utf-8');
+      expect(content).toContain('--focus=voice');
+      expect(content).toContain('对话一致性分析');
+      expect(content).toContain('voice-consistency-checker');
+    });
   });
 
   describe('Skill Templates', () => {
