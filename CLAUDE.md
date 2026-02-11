@@ -14,10 +14,31 @@
   - ❌ `ls "D:\repository\cursor\novel-writer-skills\docs\plans\"`
 - 路径中包含空格时使用双引号，但避免路径以 `\` 结尾再紧跟 `"`
 
+### Bash 最小化原则
+- **禁止用 Bash 执行文件读写操作**，必须使用专用工具替代：
+  - 读取文件：用 `Read` 工具，**禁止** `cat`/`head`/`tail`
+  - 编辑文件：用 `Edit` 工具，**禁止** `sed`/`awk`
+  - 创建文件：用 `Write` 工具，**禁止** `echo >`/`cat <<EOF`
+  - 搜索文件：用 `Grep`/`Glob` 工具，**禁止** `grep`/`find`/`rg`
+- Bash **仅限**以下场景使用：
+  - `git` 命令（commit、add、status、log 等）
+  - `npx jest` / `npm test`（运行测试）
+  - `npm` / `npx` 命令（包管理、脚本执行）
+  - 其他必须在 shell 中执行的系统命令
+- **Subagent / 后台 agent 同样遵守此规则**：在 subagent prompt 中必须明确指出使用 Read/Edit/Write 替代 Bash 文件操作，避免产生不必要的终端确认请求
+
 ### 并发编辑规则
 - **禁止多个 agent 同时编辑同一文件**：当使用后台 agent 并行处理时，必须确保每个文件只分配给一个 agent
 - 如果主线程和后台 agent 都需要编辑同一文件，由 agent 完成后主线程再 Read + Edit
 - Edit 前必须 Read，且两次操作之间该文件不能被其他 agent 修改
+
+### 并行任务与共享文件的执行策略
+- 当多个任务各自修改不同文件、但都需要修改同一个共享文件（如测试文件）时，**将共享文件的修改从 subagent 中剥离**：
+  1. 并行派发 subagent，每个只负责修改各自独立的文件并 git commit
+  2. 所有 subagent 完成后，由主线程统一修改共享文件（如一次性添加所有测试用例）
+  3. 主线程提交共享文件的修改、运行测试验证
+- **禁止**将共享文件分配给某一个 subagent 修改后再让其他 subagent 串行等待
+- 这样既保证了并行效率，又避免了文件编辑冲突
 
 ### 测试框架
 - 本项目使用 **Jest**（配置文件：`jest.config.cjs`）
