@@ -89,6 +89,16 @@ describe('Template Files Validation', () => {
       expect(content).toContain('从计划自动生成任务');
       expect(content).toContain('任务完成度统计');
     });
+    it('should have enhanced checklist command with stage templates and auto-fix', () => {
+      const checklistFile = path.join(commandsDir, 'checklist.md');
+      const content = fs.readFileSync(checklistFile, 'utf-8');
+      expect(content).toContain('阶段性检查模板');
+      expect(content).toContain('写前检查');
+      expect(content).toContain('写后检查');
+      expect(content).toContain('卷末检查');
+      expect(content).toContain('自定义检查项');
+      expect(content).toContain('自动修复建议');
+    });
   });
 
   describe('Skill Templates', () => {
