@@ -5,6 +5,73 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-02-12
+
+### Changed
+
+- **Token 优化：三大核心命令精简 76.9%**
+  - `write.md`: 1,617 → 438 行（72.8% 精简）
+  - `analyze.md`: 2,071 → 329 行（84.1% 精简）
+  - `plan.md`: 1,286 → 380 行（70.5% 精简）
+  - 合计：4,974 → 1,147 行，典型会话 token 消耗从 ~110,000 降至 ~26,000
+
+- **精简策略**
+  - 重复的反 AI 规范、具象化检查清单、后置 Tracking 处理细节提取到独立文件
+  - 三层资源加载中的 JavaScript 伪代码删除，保留执行指令
+  - 会话级资源复用说明统一到 CLAUDE.md，各命令引用
+  - 10 种专项分析从 analyze.md 提取为独立 Skill 文件（按需加载）
+  - 4 种网文结构模板和卷级详细规划从 plan.md 提取到知识库/Skill 文件
+
+### Added
+
+- **`CLAUDE.md` 模板**（`templates/dot-claude/CLAUDE.md`）
+  - 跨命令共享的核心写作规范（~55 行）
+  - `novelws init` 自动生成到 `.claude/CLAUDE.md`
+  - 利用 system prompt 缓存机制（90% 折扣），后续命令几乎零额外 token
+  - 包含：反 AI 写作核心、段落格式规范、后置 Tracking 处理、会话级资源复用、前文内容加载策略、/compact 使用建议
+
+- **具象化检查文件**（`templates/knowledge-base/requirements/concretization.md`）
+  - 从 write.md 提取的完整具象化检查清单和示例
+  - 时间/人物/数量/场景四维具象化对照表
+  - 首次写作时按需加载
+
+- **Auto-Tracking Skill**（`templates/skills/auto-tracking/SKILL.md`）
+  - 从 write.md 提取的完整 Tracking 更新格式和流程
+  - 4 个 JSON 文件（character-state, relationships, plot-tracker, timeline）的更新示例
+  - tracking-log.md 日志格式模板
+  - 错误处理策略
+
+- **10 个分析 Skill 文件**（`templates/skills/analysis/*/SKILL.md`）
+  - opening-analysis: 开篇分析（黄金开篇法则、钩子评估）
+  - pacing-analysis: 节奏分析（冲突分布、爽点间隔、高潮放置）
+  - character-analysis: 人物分析（角色弧追踪、一致性检查、关系网络）
+  - foreshadow-analysis: 伏笔分析（埋设/回收追踪、密度评估）
+  - logic-analysis: 逻辑分析（时间线、因果、能力一致性、世界观）
+  - style-analysis: 风格分析（词汇、句式、叙事风格）
+  - reader-analysis: 读者体验（爽点密度、钩子强度、信息投喂）
+  - hook-analysis: 钩子分析（逐章钩子扫描、类型分布、回收率）
+  - power-analysis: 力量体系（等级一致性、战力平衡、升级节奏）
+  - voice-analysis: 对话一致性（语言指纹分析）
+
+- **网文结构模板文件**（`templates/knowledge-base/craft/story-structures.md`）
+  - 从 plan.md 提取的 4 种网文结构模板
+  - 升级流/副本流/任务流/日常流的卷模板和爽点分布
+
+- **卷级规划 Skill**（`templates/skills/planning/volume-detail/SKILL.md`）
+  - 从 plan.md 提取的卷级详细规划流程（Step 1-6）
+  - 多卷批量规划工作流
+  - 灵感分配工作流
+
+- **`src/core/config.ts`** — 新增 `dotClaude` 和 `claudeMd` 路径
+- **`src/commands/init.ts`** — 新增 CLAUDE.md 复制逻辑
+
+### Technical
+
+- 162 个测试全部通过（从 161 增长到 162，新增 CLAUDE.md 生成测试）
+- Agent Skills 从 24 个增长到 37 个（+10 分析 + 1 auto-tracking + 1 volume-detail + 1 planning 目录）
+
+---
+
 ## [2.0.1] - 2026-02-12
 
 ### Fixed

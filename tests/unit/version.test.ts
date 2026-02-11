@@ -9,7 +9,7 @@ describe('version.ts', () => {
 
     it('should return the version from package.json', () => {
       const version = getVersion();
-      expect(version).toBe('2.0.1');
+      expect(version).toBe('2.1.0');
     });
   });
 
