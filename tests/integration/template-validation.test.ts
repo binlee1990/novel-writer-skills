@@ -99,6 +99,16 @@ describe('Template Files Validation', () => {
       expect(content).toContain('自定义检查项');
       expect(content).toContain('自动修复建议');
     });
+    it('should have creation stats mode in track command', () => {
+      const trackFile = path.join(commandsDir, 'track.md');
+      const content = fs.readFileSync(trackFile, 'utf-8');
+      expect(content).toContain('创作数据统计');
+      expect(content).toContain('字数详情');
+      expect(content).toContain('角色出场频率');
+      expect(content).toContain('内容构成');
+      expect(content).toContain('伏笔状态');
+      expect(content).toContain('情节线进度');
+    });
   });
 
   describe('Skill Templates', () => {
