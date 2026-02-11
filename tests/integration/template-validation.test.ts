@@ -57,6 +57,13 @@ describe('Template Files Validation', () => {
       expect(content).toContain('伏笔回收');
       expect(content).toContain('伏笔链');
     });
+    it('should have enhanced timeline command with visualization and conflict detection', () => {
+      const timelineFile = path.join(commandsDir, 'timeline.md');
+      const content = fs.readFileSync(timelineFile, 'utf-8');
+      expect(content).toContain('时间线可视化');
+      expect(content).toContain('多线程时间对齐');
+      expect(content).toContain('时间冲突检测');
+    });
   });
 
   describe('Skill Templates', () => {
