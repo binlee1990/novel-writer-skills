@@ -117,6 +117,15 @@ describe('Template Files Validation', () => {
       expect(content).toContain('narrative-threads.json');
     });
 
+    it('should have enhanced style-detector skill with baseline and drift detection', () => {
+      const skillFile = path.join(skillsDir, 'quality-assurance', 'style-detector', 'SKILL.md');
+      const content = fs.readFileSync(skillFile, 'utf-8');
+      expect(content).toContain('## 扩展能力');
+      expect(content).toContain('风格基线建立');
+      expect(content).toContain('风格偏移检测');
+      expect(content).toContain('跨章节风格一致性评分');
+    });
+
   });
 
   describe('Knowledge Base', () => {
