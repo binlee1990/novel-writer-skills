@@ -131,6 +131,13 @@ describe('Template Files Validation', () => {
       expect(content).toContain('ideas.json');
       expect(content).toContain('灵感分配建议');
     });
+    it('should have smart recommendation engine in guide command', () => {
+      const guideFile = path.join(commandsDir, 'guide.md');
+      const content = fs.readFileSync(guideFile, 'utf-8');
+      expect(content).toContain('智能推荐引擎');
+      expect(content).toContain('推荐优先级');
+      expect(content).toContain('数据源');
+    });
   });
 
   describe('Skill Templates', () => {
