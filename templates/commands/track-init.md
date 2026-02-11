@@ -1,7 +1,7 @@
 ---
 name: track-init
 description: 初始化追踪系统，基于故事大纲设置追踪数据
-allowed-tools: Read(//stories/**/specification.md), Read(//stories/**/specification.md), Read(//stories/**/outline.md), Read(//stories/**/outline.md), Read(//stories/**/creative-plan.md), Read(//stories/**/creative-plan.md), Write(//spec/tracking/**), Write(//spec/tracking/**), Bash(find:*), Bash(grep:*), Bash(wc:*), Bash(*)
+allowed-tools: Read(//stories/**/specification.md), Read(//stories/**/specification.md), Read(//stories/**/creative-plan.md), Read(//stories/**/creative-plan.md), Write(//spec/tracking/**), Write(//spec/tracking/**), Bash(find:*), Bash(grep:*), Bash(wc:*), Bash(*)
 model: claude-sonnet-4-5-20250929
 scripts:
   sh: .specify/scripts/bash/init-tracking.sh
@@ -32,13 +32,13 @@ resource-loading:
 
 ## 使用时机
 
-在完成 `/story` 和 `/outline` 之后，开始写作之前执行此命令。
+在完成 `/specify` 和 `/plan` 之后，开始写作之前执行此命令。
 
 ## 初始化流程
 
 1. **读取基础数据**
-   - 读取 `stories/*/story.md` 获取故事设定
-   - 读取 `stories/*/outline.md` 获取章节规划
+   - 读取 `stories/*/specification.md` 获取故事设定
+   - 读取 `stories/*/creative-plan.md` 获取章节规划
    - 读取 `.specify/config.json` 获取写作方法
 
 2. **初始化追踪文件**

@@ -167,7 +167,7 @@ export function registerInitCommand(program: Command): void {
         console.log('\n' + chalk.yellow('     📊 追踪管理命令:'));
         console.log(`     ${chalk.cyan('/track-init')}  - 初始化追踪系统`);
         console.log(`     ${chalk.cyan('/track')}       - 综合追踪更新`);
-        console.log(`     ${chalk.cyan('/plot-check')}  - 检查情节一致性`);
+        console.log(`     ${chalk.cyan('/checklist')}   - 质量检查清单`);
         console.log(`     ${chalk.cyan('/timeline')}    - 管理故事时间线`);
 
         console.log('\n' + chalk.gray('Agent Skills 会自动激活，无需手动调用'));

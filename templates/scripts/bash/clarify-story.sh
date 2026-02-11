@@ -39,7 +39,7 @@ if [ ! -d "$STORIES_DIR" ]; then
     if [ "$JSON_MODE" = true ]; then
         echo '{"error": "No stories directory found"}'
     else
-        echo "错误：未找到 stories 目录，请先运行 /story 创建故事大纲"
+        echo "错误：未找到 stories 目录，请先运行 /specify 创建故事规格"
     fi
     exit 1
 fi
@@ -51,7 +51,7 @@ if [ -z "$STORY_DIR" ]; then
     if [ "$JSON_MODE" = true ]; then
         echo '{"error": "No story found"}'
     else
-        echo "错误：未找到故事，请先运行 /story 创建故事大纲"
+        echo "错误：未找到故事，请先运行 /specify 创建故事规格"
     fi
     exit 1
 fi

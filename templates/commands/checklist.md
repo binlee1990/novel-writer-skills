@@ -17,7 +17,7 @@ scripts:
 ### 第一类：规格质量检查（问题生成式）
 验证规划文档本身的质量（类似"需求的单元测试"）：
 
-- `大纲质量` - 检查 outline.md 的完整性、清晰度、一致性
+- `大纲质量` - 检查 creative-plan.md 的完整性、清晰度、一致性
 - `角色设定` - 检查 spec/knowledge/characters.md
 - `世界观` - 检查 spec/knowledge/world-setting.md 及相关文档
 - `创作计划` - 检查 creative-plan.md / specification.md
@@ -120,10 +120,10 @@ resource-loading:
 
 ##### 2.1 大纲质量检查
 
-**目标**：验证 outline.md 是否具备良好的完整性、清晰度和一致性。
+**目标**：验证 creative-plan.md 是否具备良好的完整性、清晰度和一致性。
 
 **读取文件**：
-- `outline.md` 或 `stories/*/outline.md`
+- `creative-plan.md` 或 `stories/*/creative-plan.md`
 - `spec/tracking/plot-tracker.json`（如果存在）
 
 **生成检查项维度**：
@@ -161,7 +161,7 @@ resource-loading:
 ```markdown
 # 大纲质量检查清单
 **创建时间**: 2025-10-11
-**检查对象**: outline.md
+**检查对象**: creative-plan.md
 **检查维度**: 完整性、清晰度、一致性、可测量性、覆盖范围
 
 ## 完整性 (Completeness)
@@ -282,7 +282,7 @@ resource-loading:
 
 **读取文件**：
 - `spec/tracking/plot-tracker.json`
-- `outline.md`
+- `creative-plan.md`
 
 **生成检查项维度**：
 
@@ -350,7 +350,7 @@ bash .specify/scripts/bash/check-timeline.sh check --checklist
 
 **规格文档状态**：
 - [ ] specification.md 是否存在且完整？
-- [ ] outline.md 是否存在？
+- [ ] creative-plan.md 是否存在？
 - [ ] 角色设定是否完整？
 
 **追踪数据状态**：

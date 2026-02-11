@@ -23,7 +23,7 @@ fi
 
 # 文件路径
 PLOT_TRACKER="$STORY_DIR/spec/tracking/plot-tracker.json"
-OUTLINE="$STORY_DIR/outline.md"
+OUTLINE="$STORY_DIR/creative-plan.md"
 PROGRESS="$STORY_DIR/progress.json"
 
 # 检查必要文件
@@ -43,8 +43,8 @@ check_required_files() {
     fi
 
     if [ ! -f "$OUTLINE" ]; then
-        echo "错误: 未找到章节大纲 (outline.md)" >&2
-        echo "请先使用 /outline 命令创建大纲" >&2
+        echo "错误: 未找到创作计划 (creative-plan.md)" >&2
+        echo "请先使用 /plan 命令创建创作计划" >&2
         exit 1
     fi
 }
@@ -216,7 +216,7 @@ output_checklist() {
 # 情节对齐检查 Checklist
 
 **检查时间**: $(date '+%Y-%m-%d %H:%M:%S')
-**检查对象**: plot-tracker.json, outline.md, progress.json
+**检查对象**: plot-tracker.json, creative-plan.md, progress.json
 **当前进度**: 第 ${CURRENT_CHAPTER} 章（第 ${CURRENT_VOLUME} 卷）
 
 ---
@@ -224,7 +224,7 @@ output_checklist() {
 ## 文件完整性
 
 - [$([ -f "$PLOT_TRACKER" ] && echo "x" || echo " ")] CHK001 plot-tracker.json 存在
-- [$([ -f "$OUTLINE" ] && echo "x" || echo " ")] CHK002 outline.md 存在
+- [$([ -f "$OUTLINE" ] && echo "x" || echo " ")] CHK002 creative-plan.md 存在
 - [$([ -f "$PROGRESS" ] && echo "x" || echo " ")] CHK003 progress.json 存在
 
 ## 情节进度

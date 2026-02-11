@@ -10,7 +10,7 @@ Write-Host "🚀 初始化追踪系统..."
 
 $root = Get-ProjectRoot
 $storyDir = Get-CurrentStoryDir
-if (-not $storyDir) { throw "请先完成 /story 和 /outline，未找到 stories/*/ 目录" }
+if (-not $storyDir) { throw "请先完成 /specify 和 /plan，未找到 stories/*/ 目录" }
 
 $storyName = Split-Path $storyDir -Leaf
 $specTrack = Join-Path $root "spec/tracking"
@@ -94,5 +94,5 @@ Write-Host ""
 Write-Host "💡 下一步："
 Write-Host "   1. 使用 /write 开始创作（会自动更新追踪数据）"
 Write-Host "   2. 定期使用 /track 查看综合报告"
-Write-Host "   3. 使用 /plot-check 等命令进行一致性检查"
+Write-Host "   3. 使用 /checklist 等命令进行一致性检查"
 

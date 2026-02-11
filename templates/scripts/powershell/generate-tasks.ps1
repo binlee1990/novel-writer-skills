@@ -19,17 +19,17 @@ $storyDir = Get-LatestStory
 
 if (!$storyDir) {
     Write-Host "错误：没有找到故事项目"
-    Write-Host "请先使用 /story 命令创建故事"
+    Write-Host "请先使用 /specify 命令创建故事规格"
     exit 1
 }
 
-$outlineFile = "$storyDir/outline.md"
+$outlineFile = "$storyDir/creative-plan.md"
 $tasksFile = "$storyDir/tasks.md"
 $progressFile = "$storyDir/progress.json"
 
 if (!(Test-Path $outlineFile)) {
-    Write-Host "错误：没有找到章节规划"
-    Write-Host "请先使用 /outline 命令创建章节规划"
+    Write-Host "错误：没有找到创作计划"
+    Write-Host "请先使用 /plan 命令创建创作计划"
     exit 1
 }
 

@@ -23,10 +23,9 @@
 | `/track-init` | 初始化追踪系统 | `spec/tracking/*.json` | 首次使用 |
 | `/track` | 综合追踪更新 | 更新 `spec/tracking/*.json` | 每章后 |
 | `/recap` | 上下文重建简报 | 对话中输出简报 | 隔天续写时 |
-| `/plot-check` | 情节一致性检查 | 分析报告 | 每 5-10 章 |
+| `/checklist` | 质量检查清单 | 检查报告 | 每 5-10 章 |
 | `/timeline` | 时间线管理 | `spec/tracking/timeline.json` | 重要事件后 |
 | `/relations` | 角色关系追踪 | `spec/tracking/relationships.json` | 关系变化时 |
-| `/world-check` | 世界观验证 | 分析报告 | 新设定后 |
 
 ## 详细说明
 

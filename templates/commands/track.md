@@ -699,7 +699,7 @@ fs-002（古籍线索）→ fs-004（遗迹发现）
 ### 数据一致性验证
 
 基础检查（默认执行）：
-- plot-tracker.json 与 outline.md 的一致性
+- plot-tracker.json 与 creative-plan.md 的一致性
 - timeline.json 的时间逻辑
 - relationships.json 的关系冲突
 - character-state.json 的位置合理性

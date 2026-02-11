@@ -12,7 +12,7 @@ if (-not $storyDir) { throw "未找到故事项目（stories/*）" }
 
 $plotPath = Join-Path $storyDir "spec/tracking/plot-tracker.json"
 if (-not (Test-Path $plotPath)) { $plotPath = Join-Path $root "spec/tracking/plot-tracker.json" }
-$outlinePath = Join-Path $storyDir "outline.md"
+$outlinePath = Join-Path $storyDir "creative-plan.md"
 $progressPath = Join-Path $storyDir "progress.json"
 
 function Ensure-PlotTracker {
@@ -23,7 +23,7 @@ function Ensure-PlotTracker {
     New-Item -ItemType Directory -Path (Split-Path $plotPath -Parent) -Force | Out-Null
     Copy-Item $tpl $plotPath -Force
   }
-  if (-not (Test-Path $outlinePath)) { throw "未找到章节大纲 outline.md，请先使用 /outline" }
+  if (-not (Test-Path $outlinePath)) { throw "未找到创作计划 creative-plan.md，请先使用 /plan" }
 }
 
 function Get-CurrentProgress {

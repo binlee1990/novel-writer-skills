@@ -12,15 +12,15 @@ if ls stories/*/specification.md 1> /dev/null 2>&1; then
     story_file=$(ls stories/*/specification.md | head -1)
 fi
 
-# 查找 outline 文件
-if ls stories/*/outline.md 1> /dev/null 2>&1; then
+# 查找 creative-plan 文件
+if ls stories/*/creative-plan.md 1> /dev/null 2>&1; then
     outline_exists=true
-    outline_file=$(ls stories/*/outline.md | head -1)
+    outline_file=$(ls stories/*/creative-plan.md | head -1)
 fi
 
 if [ "$story_exists" = false ] || [ "$outline_exists" = false ]; then
     echo "❌ 请先完成 /specify 和 /plan 命令"
-    echo "   缺少: ${story_exists:+}${story_exists:-specification.md} ${outline_exists:+}${outline_exists:-outline.md}"
+    echo "   缺少: ${story_exists:+}${story_exists:-specification.md} ${outline_exists:+}${outline_exists:-creative-plan.md}"
     exit 1
 fi
 
@@ -178,6 +178,6 @@ echo ""
 echo "💡 下一步："
 echo "   1. 使用 /write 开始创作（会自动更新追踪数据）"
 echo "   2. 定期使用 /track 查看综合报告"
-echo "   3. 使用 /plot-check 等命令进行一致性检查"
+echo "   3. 使用 /checklist 等命令进行一致性检查"
 echo ""
 echo "📝 提示：追踪文件已预填充基础结构，会在写作过程中自动更新"

@@ -195,10 +195,9 @@ Skills 会在检测到问题时主动提醒：
 ### 专项检查
 
 ```
-/plot-check   # 情节一致性
+/checklist    # 质量检查清单（情节一致性、世界观验证等）
 /timeline     # 时间线管理
 /relations    # 角色关系
-/world-check  # 世界观验证
 ```
 
 ## 插件系统

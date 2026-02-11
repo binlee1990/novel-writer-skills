@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-02-12
+
+### Fixed
+
+- **清理遗留引用** — 全面排查并修复命令模板和脚本中引用不存在的文件/命令的问题
+  - `outline.md` → `creative-plan.md`（7 个文件）：`/outline` 命令已合并到 `/plan`，但引用未同步更新
+  - `/story` → `/specify`（6 个文件）：`/story` 命令已重命名为 `/specify`，脚本和模板中残留旧名称
+  - `/plot-check` → `/checklist`（3 个文件）：`/plot-check` 已被统一的 `/checklist` 命令替代
+  - `story.md` → `specification.md`（1 个文件）：`clarify.md` 的 `allowed-tools` 声明引用了旧文件名
+- **文档同步更新** — `commands.md`、`getting-started.md` 中的废弃命令引用已修正
+
+### Changed
+
+- `src/commands/init.ts` 初始化提示：`/plot-check` 替换为 `/checklist`
+
+---
+
 ## [2.0.0] - 2026-02-11
 
 ### Added

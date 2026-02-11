@@ -21,8 +21,8 @@ if [ ! -f "$STORY_DIR/specification.md" ]; then
     exit 1
 fi
 
-if [ ! -f "$STORY_DIR/outline.md" ]; then
-    echo "错误: 未找到章节规划，请先使用 /outline 命令" >&2
+if [ ! -f "$STORY_DIR/creative-plan.md" ]; then
+    echo "错误: 未找到创作计划，请先使用 /plan 命令" >&2
     exit 1
 fi
 

@@ -1,7 +1,7 @@
 ---
 description: 通过针对性问答澄清故事大纲中的模糊点，确保创作方向明确，支持焦点参数
 argument-hint: [关键词或焦点领域]
-allowed-tools: Read(//stories/**), Read(//stories/**), Read(//plugins/**), Read(plugins/**), Write(//stories/*/story.md), Write(//stories/*/story.md), Bash(ls:*), Bash(find:*), Bash(*)
+allowed-tools: Read(//stories/**), Read(//stories/**), Read(//plugins/**), Read(plugins/**), Write(//stories/*/specification.md), Write(//stories/*/specification.md), Bash(ls:*), Bash(find:*), Bash(*)
 model: claude-sonnet-4-5-20250929
 disable-model-invocation: false
 scripts:
@@ -24,7 +24,7 @@ scripts:
 
 运行 `{SCRIPT}` 获取当前故事路径：
 - 解析 JSON 获取 `STORY_PATH` 和 `STORY_NAME`
-- 如果没有找到故事文件，提示用户先运行 `/story` 创建故事大纲
+- 如果没有找到故事文件，提示用户先运行 `/specify` 创建故事规格
 - 加载故事文件内容进行分析
 
 <!-- PLUGIN_HOOK: genre-knowledge-clarify -->
@@ -221,7 +221,7 @@ A. 18-25岁  B. 26-35岁  C. 36-45岁
 ## 行为规则
 
 - 如果没有发现有意义的歧义，回应："未检测到需要立即澄清的关键歧义。"
-- 如果故事文件缺失，指导用户先运行 `/story`
+- 如果故事文件缺失，指导用户先运行 `/specify`
 - 不超过5个问题的总限制
 - 避免询问纯技术写作细节
 - 尊重用户的提前终止信号

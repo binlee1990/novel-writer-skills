@@ -25,7 +25,7 @@ if (-not (Test-Path $StoriesDir -PathType Container)) {
     if ($Json) {
         Write-Output '{"error": "No stories directory found"}'
     } else {
-        Write-Error "错误：未找到 stories 目录，请先运行 /story 创建故事大纲"
+        Write-Error "错误：未找到 stories 目录，请先运行 /specify 创建故事规格"
     }
     exit 1
 }
@@ -36,7 +36,7 @@ if ($StoryDirs.Count -eq 0) {
     if ($Json) {
         Write-Output '{"error": "No story found"}'
     } else {
-        Write-Error "错误：未找到故事，请先运行 /story 创建故事大纲"
+        Write-Error "错误：未找到故事，请先运行 /specify 创建故事规格"
     }
     exit 1
 }
