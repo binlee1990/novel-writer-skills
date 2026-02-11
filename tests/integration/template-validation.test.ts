@@ -116,6 +116,14 @@ describe('Template Files Validation', () => {
       expect(content).toContain('对话一致性分析');
       expect(content).toContain('voice-consistency-checker');
     });
+    it('should have inspiration scanning in write command', () => {
+      const writeFile = path.join(commandsDir, 'write.md');
+      const content = fs.readFileSync(writeFile, 'utf-8');
+      expect(content).toContain('灵感扫描');
+      expect(content).toContain('ideas.json');
+      expect(content).toContain('灵感状态更新');
+      expect(content).toContain('灵感快速捕捉');
+    });
   });
 
   describe('Skill Templates', () => {

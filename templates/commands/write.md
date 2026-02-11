@@ -841,6 +841,68 @@ resource-loading:
 
 ## 写作执行流程
 
+### 灵感扫描（前置）
+
+在开始写作前，自动扫描 `notes/ideas.json`（如存在），推荐与当前章节相关的灵感：
+
+#### ideas.json 数据结构
+
+灵感笔记存储在 `stories/*/notes/ideas.json` 中：
+
+```json
+{
+  "version": "1.0",
+  "ideas": [
+    {
+      "id": "idea-001",
+      "content": "[灵感内容简述]",
+      "category": "plot|character|world|dialogue|scene|other",
+      "tags": ["战斗", "转折", "师姐"],
+      "status": "new|planned|used|discarded",
+      "createdAt": "[ISO日期]",
+      "usedInChapter": null,
+      "relatedChapters": [15, 20],
+      "relatedCharacters": ["师姐", "主角"],
+      "priority": "high|medium|low",
+      "detailFile": "idea-001.md"
+    }
+  ],
+  "updatedAt": "[ISO日期]"
+}
+```
+
+#### 匹配规则
+
+| 匹配维度 | 方法 |
+|---------|------|
+| 章节关联 | 灵感的 `relatedChapters` 包含当前章节号 |
+| 角色关联 | 灵感的 `relatedCharacters` 与本章出场角色重叠 |
+| 标签关联 | 灵感的 `tags` 与本章计划关键词重叠 |
+| 类别关联 | 本章有战斗 → 推荐 category=scene 的灵感 |
+
+#### 输出格式
+
+```
+💡 相关灵感提醒
+━━━━━━━━━━━━━━━━━━━━
+
+与第 [N] 章相关的灵感（[M] 条）：
+
+1. 💡 [灵感内容]
+   标签：#战斗 #师姐
+   关联：角色「师姐」在本章出场
+   状态：🆕 未使用
+
+2. 💡 [灵感内容]
+   标签：#转折
+   关联：本章为转折章节
+   状态：🆕 未使用
+
+是否要在本章使用这些灵感？（写作过程中可随时参考）
+```
+
+---
+
 ### 1. 选择写作任务
 从 `tasks.md` 中选择状态为 `pending` 的写作任务，标记为 `in_progress`。
 
@@ -1207,6 +1269,39 @@ count_chinese_words "stories/*/content/第X章.md"
 **执行时机**: 章节写作完成后，内容已写入 `stories/*/content/*.md` 文件
 
 **更新策略**: 核心命令（/write）自动更新，无需用户确认
+
+### 灵感状态更新
+
+写作完成后，检查本章是否使用了推荐的灵感：
+- 如果使用 → 更新灵感状态为 `used`，记录 `usedInChapter`
+- 如果未使用 → 保持 `new` 状态
+- 自动将更新写回 `notes/ideas.json`
+
+### 灵感快速捕捉
+
+用户可以在写作过程中随时记录灵感：
+
+1. **直接告诉 AI**：「记一下，我想到一个情节...」
+2. **在 /write 过程中**：「等等，我突然想到...」
+3. **专门记录**：「帮我记录一个灵感：...」
+
+AI 识别到灵感记录意图后：
+1. 提取灵感内容
+2. 自动分类和打标签
+3. 写入 `notes/ideas.json`
+4. 确认记录成功
+
+```
+💡 灵感已记录
+━━━━━━━━━━━━━━━━━━━━
+
+内容：[灵感内容]
+分类：情节
+标签：#转折 #反派
+优先级：高
+
+已保存至 notes/ideas.json（ID: idea-015）
+```
 
 ### 自动更新的文件（4 个）
 
