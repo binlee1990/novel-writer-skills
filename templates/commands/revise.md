@@ -2,7 +2,6 @@
 description: 系统性修改润色：四层修改流程（结构→节奏→一致性→文字），支持分层修改、指定范围、快速模式
 argument-hint: [--layer=structure|pacing|consistency|polish] [--chapters=1-10] [--chapter=5] [--quick]
 allowed-tools: Bash(find:*), Bash(wc:*), Bash(grep:*), Read(//**), Write(//stories/**), Bash(*)
-model: claude-sonnet-4-5-20250929
 ---
 
 对已完成的初稿进行系统性修改润色。从结构到文字的四层修改流程，将 `/analyze` 的诊断转化为具体可执行的修改方案。

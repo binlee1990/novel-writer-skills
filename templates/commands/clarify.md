@@ -2,7 +2,6 @@
 description: 通过针对性问答澄清故事大纲中的模糊点，确保创作方向明确，支持焦点参数
 argument-hint: [关键词或焦点领域]
 allowed-tools: Read(//stories/**), Read(//stories/**), Read(//plugins/**), Read(plugins/**), Write(//stories/*/specification.md), Write(//stories/*/specification.md), Bash(ls:*), Bash(find:*), Bash(*)
-model: claude-sonnet-4-5-20250929
 disable-model-invocation: false
 scripts:
   sh: .specify/scripts/bash/clarify-story.sh --json --paths-only

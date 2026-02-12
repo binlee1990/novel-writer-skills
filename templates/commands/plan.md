@@ -2,7 +2,6 @@
 description: 基于故事规格制定技术实现方案
 argument-hint: [技术偏好和选择] [--detail vol-XX]
 allowed-tools: Read(//stories/**/specification.md), Read(//stories/**/specification.md), Read(//stories/**/creative-plan.md), Read(//stories/**/creative-plan.md), Read(//plugins/**), Read(//plugins/**), Write(//stories/**/creative-plan.md), Write(//stories/**/creative-plan.md), Read(//.specify/memory/constitution.md), Read(//.specify/memory/constitution.md), Bash(find:*), Bash(grep:*), Bash(*)
-model: claude-sonnet-4-5-20250929
 scripts:
   sh: .specify/scripts/bash/plan-story.sh
   ps: .specify/scripts/powershell/plan-story.ps1

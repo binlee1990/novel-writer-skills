@@ -55,8 +55,22 @@ export async function ensureProjectRoot(): Promise<string> {
 }
 
 /**
- * 获取项目信息
+ * 向命令文件的 frontmatter 中注入 model 字段
  */
+export async function injectModelToCommands(commandsDir: string, model: string): Promise<void> {
+  const files = await fs.readdir(commandsDir);
+  for (const file of files) {
+    if (!file.endsWith('.md')) continue;
+    const filePath = path.join(commandsDir, file);
+    let content = await fs.readFile(filePath, 'utf-8');
+    const firstIdx = content.indexOf('---');
+    if (firstIdx === -1) continue;
+    const secondIdx = content.indexOf('---', firstIdx + 3);
+    if (secondIdx === -1) continue;
+    content = content.slice(0, secondIdx) + `model: ${model}\n` + content.slice(secondIdx);
+    await fs.writeFile(filePath, content, 'utf-8');
+  }
+}
 export async function getProjectInfo(projectPath: string): Promise<ProjectInfo | null> {
   try {
     const configPath = path.join(projectPath, DIRS.SPECIFY, FILES.CONFIG);

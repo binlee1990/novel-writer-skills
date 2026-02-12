@@ -2,7 +2,6 @@
 description: 专家模式 - 获取专业写作指导
 argument-hint: [plot | character | world | style]
 allowed-tools: Read(//.specify/experts/**), Read(//.specify/experts/**), Read(//plugins/**/experts/**), Read(//plugins/**/experts/**), Bash(find:*), Bash(ls:*), Bash(*)
-model: claude-sonnet-4-5-20250929
 scripts:
   sh: echo ""
   ps: Write-Output ""

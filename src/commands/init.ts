@@ -16,12 +16,14 @@ import {
   getProjectPaths,
   DEFAULT_GITIGNORE,
 } from '../core/config.js';
+import { injectModelToCommands } from '../utils/project.js';
 
 export function registerInitCommand(program: Command): void {
   program
     .command('init')
     .argument('[name]', '小说项目名称')
     .option('--here', '在当前目录初始化')
+    .option('--model <name>', '指定命令使用的 AI 模型')
     .option('--plugins <names>', '预装插件，逗号分隔')
     .option('--no-git', '跳过 Git 初始化')
     .description('初始化一个新的小说项目')
@@ -84,6 +86,10 @@ export function registerInitCommand(program: Command): void {
         // 复制命令文件
         if (await fs.pathExists(templates.commands)) {
           await fs.copy(templates.commands, paths.commands);
+          // 如果指定了 --model，注入到命令文件 frontmatter
+          if (options.model) {
+            await injectModelToCommands(paths.commands, options.model);
+          }
           spinner.text = '已安装 Slash Commands...';
         }
 

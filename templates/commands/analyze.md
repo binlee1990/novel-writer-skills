@@ -2,7 +2,6 @@
 description: 智能分析：自动选择框架分析（write前）或内容分析（write后），支持 --type 手动指定
 argument-hint: [--type=framework|content]
 allowed-tools: Bash(find:*), Bash(wc:*), Bash(grep:*), Read(//**), Read(//plugins/**), Read(//plugins/**), Write(//stories/**/analysis-report.md), Bash(*)
-model: claude-sonnet-4-5-20250929
 scripts:
   sh: .specify/scripts/bash/check-analyze-stage.sh --json
   ps: .specify/scripts/powershell/check-analyze-stage.ps1 -Json

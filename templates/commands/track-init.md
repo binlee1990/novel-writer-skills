@@ -2,7 +2,6 @@
 name: track-init
 description: 初始化追踪系统，基于故事大纲设置追踪数据
 allowed-tools: Read(//stories/**/specification.md), Read(//stories/**/specification.md), Read(//stories/**/creative-plan.md), Read(//stories/**/creative-plan.md), Write(//spec/tracking/**), Write(//spec/tracking/**), Bash(find:*), Bash(grep:*), Bash(wc:*), Bash(*)
-model: claude-sonnet-4-5-20250929
 scripts:
   sh: .specify/scripts/bash/init-tracking.sh
   ps: .specify/scripts/powershell/init-tracking.ps1

@@ -11,6 +11,7 @@ import {
   getProjectPaths,
   getTemplateSourcePaths,
 } from '../core/config.js';
+import { injectModelToCommands } from '../utils/project.js';
 
 export function registerUpgradeCommand(program: Command): void {
   program
@@ -18,6 +19,7 @@ export function registerUpgradeCommand(program: Command): void {
     .option('--commands', '更新命令文件')
     .option('--skills', '更新 Skills 文件')
     .option('--scripts', '更新脚本文件')
+    .option('--model <name>', '指定命令使用的 AI 模型')
     .option('--all', '更新所有内容')
     .option('-y, --yes', '跳过确认提示')
     .description('升级现有项目到最新版本')
@@ -72,6 +74,9 @@ export function registerUpgradeCommand(program: Command): void {
           spinner.text = '更新 Slash Commands...';
           if (await fs.pathExists(templates.commands)) {
             await fs.copy(templates.commands, paths.commands, { overwrite: true });
+            if (options.model) {
+              await injectModelToCommands(paths.commands, options.model);
+            }
           }
         }
 

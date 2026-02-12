@@ -2,7 +2,6 @@
 description: 定义故事规格，明确要创造什么样的作品
 argument-hint: [故事描述] [--world]
 allowed-tools: Read(//stories/**/specification.md), Read(//stories/**/specification.md), Write(//stories/**/specification.md), Write(//stories/**/specification.md), Read(//.specify/memory/constitution.md), Read(//.specify/memory/constitution.md), Bash(find:*), Bash(*)
-model: claude-sonnet-4-5-20250929
 scripts:
   sh: .specify/scripts/bash/specify-story.sh --json
   ps: .specify/scripts/powershell/specify-story.ps1 -Json

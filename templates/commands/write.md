@@ -2,7 +2,6 @@
 description: 基于任务清单执行章节写作，自动加载上下文和验证规则
 argument-hint: [章节编号或任务ID] [--fast]
 allowed-tools: Read(//**), Write(//stories/**/content/**), Bash(ls:*), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
-model: claude-sonnet-4-5-20250929
 scripts:
   sh: .specify/scripts/bash/check-writing-state.sh
   ps: .specify/scripts/powershell/check-writing-state.ps1

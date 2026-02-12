@@ -3,7 +3,6 @@ name: recap
 description: 自动重建创作上下文，汇总角色状态、未解决伏笔、情节进展和关系网络，生成结构化简报
 argument-hint: [--brief]
 allowed-tools: Read(//**), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
-model: claude-sonnet-4-5-20250929
 ---
 
 # /recap - 上下文重建命令
