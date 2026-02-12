@@ -17,6 +17,7 @@ export function registerUpgradeCommand(program: Command): void {
     .command('upgrade')
     .option('--commands', '更新命令文件')
     .option('--skills', '更新 Skills 文件')
+    .option('--scripts', '更新脚本文件')
     .option('--all', '更新所有内容')
     .option('-y, --yes', '跳过确认提示')
     .description('升级现有项目到最新版本')
@@ -40,10 +41,12 @@ export function registerUpgradeCommand(program: Command): void {
 
         let updateCommands = options.all || options.commands || false;
         let updateSkills = options.all || options.skills || false;
+        let updateScripts = options.all || options.scripts || false;
 
-        if (!updateCommands && !updateSkills) {
+        if (!updateCommands && !updateSkills && !updateScripts) {
           updateCommands = true;
           updateSkills = true;
+          updateScripts = true;
         }
 
         if (!options.yes) {
@@ -79,6 +82,14 @@ export function registerUpgradeCommand(program: Command): void {
           }
         }
 
+        if (updateScripts) {
+          spinner.text = '更新脚本文件...';
+          if (await fs.pathExists(templates.scripts)) {
+            await fs.ensureDir(paths.specifyScripts);
+            await fs.copy(templates.scripts, paths.specifyScripts, { overwrite: true });
+          }
+        }
+
 
         config.version = getVersion();
         await fs.writeJson(paths.specifyConfig, config, { spaces: 2 });
@@ -88,6 +99,7 @@ export function registerUpgradeCommand(program: Command): void {
         console.log(chalk.cyan('✨ 升级内容:'));
         if (updateCommands) console.log('  • Slash Commands 已更新');
         if (updateSkills) console.log('  • Agent Skills 已更新');
+        if (updateScripts) console.log('  • 脚本文件已更新');
         console.log(`  • 版本号: ${projectVersion} → ${getVersion()}`);
       } catch (error) {
         console.error(chalk.red('\n❌ 升级失败:'), error);

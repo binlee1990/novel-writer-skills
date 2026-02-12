@@ -62,6 +62,7 @@ export const DIRS = {
   TEMPLATES: 'templates',
   TRACKING: 'tracking',
   KNOWLEDGE: 'knowledge',
+  SCRIPTS: 'scripts',
 } as const;
 
 /** 文件名常量 */
@@ -128,6 +129,7 @@ export function getProjectPaths(projectRoot: string) {
     knowledge: path.join(projectRoot, DIRS.SPEC, DIRS.KNOWLEDGE),
     plugins: path.join(projectRoot, DIRS.PLUGINS),
     knowledgeBase: path.join(projectRoot, DIRS.SPECIFY, DIRS.TEMPLATES, DIRS.KNOWLEDGE_BASE),
+    specifyScripts: path.join(projectRoot, DIRS.SPECIFY, DIRS.SCRIPTS),
   };
 }
 
@@ -143,6 +145,7 @@ export function getTemplateSourcePaths() {
     tracking: path.join(templatesDir, DIRS.TRACKING),
     knowledge: path.join(templatesDir, DIRS.KNOWLEDGE),
     knowledgeBase: path.join(templatesDir, DIRS.KNOWLEDGE_BASE),
+    scripts: path.join(templatesDir, DIRS.SCRIPTS),
     dotClaude: path.join(templatesDir, 'dot-claude'),
     all: templatesDir,
   };

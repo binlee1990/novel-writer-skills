@@ -60,6 +60,7 @@ export function registerInitCommand(program: Command): void {
           paths.spec,
           paths.tracking,
           paths.knowledge,
+          paths.specifyScripts,
         ];
 
         for (const dir of baseDirs) {
@@ -101,9 +102,13 @@ export function registerInitCommand(program: Command): void {
           }
         }
 
-        // 复制模板文件到 .specify/templates
+        // 复制模板文件到 .specify/templates（排除 scripts，scripts 单独复制到 .specify/scripts/）
         if (await fs.pathExists(templates.all)) {
-          await fs.copy(templates.all, paths.specifyTemplates, { overwrite: false });
+          const scriptsDir = path.normalize(templates.scripts);
+          await fs.copy(templates.all, paths.specifyTemplates, {
+            overwrite: false,
+            filter: (src: string) => !path.normalize(src).startsWith(scriptsDir),
+          });
         }
 
         // 复制 memory 文件
@@ -119,6 +124,12 @@ export function registerInitCommand(program: Command): void {
         // 复制知识库模板（项目特定）
         if (await fs.pathExists(templates.knowledge)) {
           await fs.copy(templates.knowledge, paths.knowledge);
+        }
+
+        // 复制脚本文件到 .specify/scripts/
+        if (await fs.pathExists(templates.scripts)) {
+          await fs.copy(templates.scripts, paths.specifyScripts);
+          spinner.text = '已安装脚本文件...';
         }
 
 
