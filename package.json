@@ -1,6 +1,6 @@
 {
   "name": "novelws",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "type": "module",
   "description": "Claude Code 专用的 AI 小说创作工具 - 深度集成 Slash Commands 和 Agent Skills",
   "keywords": [

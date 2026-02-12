@@ -40,6 +40,9 @@ novelws init my-novel
 # 在当前目录初始化
 novelws init --here
 
+# 指定命令使用的 AI 模型
+novelws init my-novel --model claude-sonnet-4-5-20250929
+
 # 预装插件
 novelws init my-novel --plugins authentic-voice
 ```
@@ -432,8 +435,14 @@ novelws init <project-name>
 # 检查环境
 novelws check
 
-# 升级项目
+# 升级项目（命令 + Skills + 脚本）
 novelws upgrade
+
+# 仅升级命令，并指定模型
+novelws upgrade --commands --model claude-sonnet-4-5-20250929
+
+# 仅升级脚本
+novelws upgrade --scripts
 ```
 
 ### 插件管理

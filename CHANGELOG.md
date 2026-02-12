@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2026-02-12
+
+### Fixed
+
+- **脚本目录路径修复** — `novelws init` 现在正确将脚本复制到 `.specify/scripts/` 而非 `.specify/templates/scripts/`，同时从整体模板复制中排除 scripts 目录避免重复
+- **PowerShell 脚本错误修复**
+  - `text-audit.ps1`: 修复使用 bash heredoc 语法（`<< PY`）导致 PowerShell 报错，改为 here-string + 管道
+  - `generate-tasks.ps1`: 修复未引入 `common.ps1` 且硬编码相对路径导致的运行失败
+  - `check-writing-state.ps1`: 修复引用 `templates/` 路径应为 `.specify/templates/`
+  - `track-progress.ps1`: 修复硬编码 `stories/current/progress.json` 路径
+  - `specify-story.ps1`、`plan-story.ps1`、`constitution.ps1`、`analyze-story.ps1`: 添加缺失的 `Set-StrictMode` / `$ErrorActionPreference`
+- **Bash 脚本路径修复** — `check-writing-state.sh` 中 knowledge-base 和 skills 路径同步修正为 `.specify/templates/` 前缀
+- **`upgrade` 命令支持脚本更新** — 新增 `--scripts` 选项，升级时可更新 `.specify/scripts/`
+
+### Changed
+
+- **模型配置不再硬编码** — 移除所有 15 个命令模板中的 `model: claude-sonnet-4-5-20250929`，默认不指定模型（使用 Claude Code 默认模型）
+- **新增 `--model` 参数** — `novelws init --model <name>` 和 `novelws upgrade --model <name>` 支持指定命令使用的 AI 模型
+
 ## [2.1.0] - 2026-02-12
 
 ### Changed
