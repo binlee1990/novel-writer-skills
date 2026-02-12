@@ -145,17 +145,17 @@ $StoryDir = Join-Path "stories" $StoryName
 if (-not $script:PreloadCompleted) {
     $preloadFileList = @(
         # 知识库文件
-        (Join-Path $ProjectRoot "templates/knowledge-base/craft/dialogue.md")
-        (Join-Path $ProjectRoot "templates/knowledge-base/craft/scene-structure.md")
-        (Join-Path $ProjectRoot "templates/knowledge-base/craft/character-arc.md")
-        (Join-Path $ProjectRoot "templates/knowledge-base/craft/pacing.md")
-        (Join-Path $ProjectRoot "templates/knowledge-base/craft/show-not-tell.md")
+        (Join-Path $ProjectRoot ".specify/templates/knowledge-base/craft/dialogue.md")
+        (Join-Path $ProjectRoot ".specify/templates/knowledge-base/craft/scene-structure.md")
+        (Join-Path $ProjectRoot ".specify/templates/knowledge-base/craft/character-arc.md")
+        (Join-Path $ProjectRoot ".specify/templates/knowledge-base/craft/pacing.md")
+        (Join-Path $ProjectRoot ".specify/templates/knowledge-base/craft/show-not-tell.md")
         # Skill 文件
-        (Join-Path $ProjectRoot "templates/skills/writing-techniques/dialogue-techniques/SKILL.md")
-        (Join-Path $ProjectRoot "templates/skills/writing-techniques/scene-structure/SKILL.md")
-        (Join-Path $ProjectRoot "templates/skills/writing-techniques/character-arc/SKILL.md")
-        (Join-Path $ProjectRoot "templates/skills/writing-techniques/pacing-control/SKILL.md")
-        (Join-Path $ProjectRoot "templates/skills/quality-assurance/consistency-checker/SKILL.md")
+        (Join-Path $ProjectRoot ".specify/templates/skills/writing-techniques/dialogue-techniques/SKILL.md")
+        (Join-Path $ProjectRoot ".specify/templates/skills/writing-techniques/scene-structure/SKILL.md")
+        (Join-Path $ProjectRoot ".specify/templates/skills/writing-techniques/character-arc/SKILL.md")
+        (Join-Path $ProjectRoot ".specify/templates/skills/writing-techniques/pacing-control/SKILL.md")
+        (Join-Path $ProjectRoot ".specify/templates/skills/quality-assurance/consistency-checker/SKILL.md")
         # 规格文件
         (Join-Path $StoryDir "specification.md")
     )
@@ -182,19 +182,19 @@ function Generate-LoadReport {
 
     # 默认加载所有资源
     $knowledgeBaseFiles = @(
-        "craft/dialogue.md",
-        "craft/scene-structure.md",
-        "craft/character-arc.md",
-        "craft/pacing.md",
-        "craft/show-not-tell.md"
+        ".specify/templates/knowledge-base/craft/dialogue.md",
+        ".specify/templates/knowledge-base/craft/scene-structure.md",
+        ".specify/templates/knowledge-base/craft/character-arc.md",
+        ".specify/templates/knowledge-base/craft/pacing.md",
+        ".specify/templates/knowledge-base/craft/show-not-tell.md"
     )
 
     $skillsFiles = @(
-        "writing-techniques/dialogue-techniques",
-        "writing-techniques/scene-structure",
-        "writing-techniques/character-arc",
-        "writing-techniques/pacing-control",
-        "quality-assurance/consistency-checker"
+        ".specify/templates/skills/writing-techniques/dialogue-techniques",
+        ".specify/templates/skills/writing-techniques/scene-structure",
+        ".specify/templates/skills/writing-techniques/character-arc",
+        ".specify/templates/skills/writing-techniques/pacing-control",
+        ".specify/templates/skills/quality-assurance/consistency-checker"
     )
 
     $disabledResources = @()
@@ -209,30 +209,26 @@ function Generate-LoadReport {
 
     # 检查文件存在性（使用缓存 + Phase 2: 资源去重）
     foreach ($kb in $knowledgeBaseFiles) {
-        $kbPath = "templates/knowledge-base/$kb"
-
         # Phase 2: 资源去重检查
-        if (Is-ResourceLoaded $kbPath) {
-            # 资源已检查过，跳过
+        if (Is-ResourceLoaded $kb) {
             continue
         }
 
         # 标记为已加载
-        Mark-ResourceLoaded $kbPath
+        Mark-ResourceLoaded $kb
 
         # 检查文件是否存在（使用完整路径）
-        $fullPath = Join-Path $ProjectRoot $kbPath
+        $fullPath = Join-Path $ProjectRoot $kb
         if (-not (Test-FileExistsCached $fullPath)) {
             $warnings += "知识库文件不存在: $kb"
         }
     }
 
     foreach ($skill in $skillsFiles) {
-        $skillPath = "templates/skills/$skill/SKILL.md"
+        $skillPath = "$skill/SKILL.md"
 
         # Phase 2: 资源去重检查
         if (Is-ResourceLoaded $skillPath) {
-            # 资源已检查过，跳过
             continue
         }
 
@@ -242,7 +238,7 @@ function Generate-LoadReport {
         # 检查文件是否存在（使用完整路径）
         $fullPath = Join-Path $ProjectRoot $skillPath
         if (-not (Test-FileExistsCached $fullPath)) {
-            $warnings += "Skill 文件不存在: $skill/SKILL.md"
+            $warnings += "Skill 文件不存在: $skillPath"
         }
     }
 
@@ -414,11 +410,11 @@ function Check-KnowledgeBaseAvailable {
     $available = @()
 
     $craftFiles = @(
-        "templates/knowledge-base/craft/dialogue.md",
-        "templates/knowledge-base/craft/scene-structure.md",
-        "templates/knowledge-base/craft/character-arc.md",
-        "templates/knowledge-base/craft/pacing.md",
-        "templates/knowledge-base/craft/show-not-tell.md"
+        ".specify/templates/knowledge-base/craft/dialogue.md",
+        ".specify/templates/knowledge-base/craft/scene-structure.md",
+        ".specify/templates/knowledge-base/craft/character-arc.md",
+        ".specify/templates/knowledge-base/craft/pacing.md",
+        ".specify/templates/knowledge-base/craft/show-not-tell.md"
     )
 
     foreach ($file in $craftFiles) {
@@ -449,10 +445,10 @@ function Check-SkillsAvailable {
     $available = @()
 
     $skillDirs = @(
-        "templates/skills/writing-techniques/dialogue-techniques",
-        "templates/skills/writing-techniques/scene-structure",
-        "templates/skills/writing-techniques/character-arc",
-        "templates/skills/writing-techniques/pacing-control"
+        ".specify/templates/skills/writing-techniques/dialogue-techniques",
+        ".specify/templates/skills/writing-techniques/scene-structure",
+        ".specify/templates/skills/writing-techniques/character-arc",
+        ".specify/templates/skills/writing-techniques/pacing-control"
     )
 
     foreach ($dir in $skillDirs) {

@@ -234,17 +234,17 @@ if [ "$PRELOAD_FILES_PENDING" = true ]; then
     # 构建待预加载的文件列表
     PRELOAD_FILE_LIST=(
         # 知识库文件
-        "$PROJECT_ROOT/templates/knowledge-base/craft/dialogue.md"
-        "$PROJECT_ROOT/templates/knowledge-base/craft/scene-structure.md"
-        "$PROJECT_ROOT/templates/knowledge-base/craft/character-arc.md"
-        "$PROJECT_ROOT/templates/knowledge-base/craft/pacing.md"
-        "$PROJECT_ROOT/templates/knowledge-base/craft/show-not-tell.md"
+        "$PROJECT_ROOT/.specify/templates/knowledge-base/craft/dialogue.md"
+        "$PROJECT_ROOT/.specify/templates/knowledge-base/craft/scene-structure.md"
+        "$PROJECT_ROOT/.specify/templates/knowledge-base/craft/character-arc.md"
+        "$PROJECT_ROOT/.specify/templates/knowledge-base/craft/pacing.md"
+        "$PROJECT_ROOT/.specify/templates/knowledge-base/craft/show-not-tell.md"
         # Skill 文件
-        "$PROJECT_ROOT/templates/skills/writing-techniques/dialogue-techniques/SKILL.md"
-        "$PROJECT_ROOT/templates/skills/writing-techniques/scene-structure/SKILL.md"
-        "$PROJECT_ROOT/templates/skills/writing-techniques/character-arc/SKILL.md"
-        "$PROJECT_ROOT/templates/skills/writing-techniques/pacing-control/SKILL.md"
-        "$PROJECT_ROOT/templates/skills/quality-assurance/consistency-checker/SKILL.md"
+        "$PROJECT_ROOT/.specify/templates/skills/writing-techniques/dialogue-techniques/SKILL.md"
+        "$PROJECT_ROOT/.specify/templates/skills/writing-techniques/scene-structure/SKILL.md"
+        "$PROJECT_ROOT/.specify/templates/skills/writing-techniques/character-arc/SKILL.md"
+        "$PROJECT_ROOT/.specify/templates/skills/writing-techniques/pacing-control/SKILL.md"
+        "$PROJECT_ROOT/.specify/templates/skills/quality-assurance/consistency-checker/SKILL.md"
         # 规格文件
         "$STORY_DIR/specification.md"
     )
@@ -553,11 +553,11 @@ check_knowledge_base_available() {
 
     # 检查所有 craft knowledge-base
     local craft_files=(
-        "templates/knowledge-base/craft/dialogue.md"
-        "templates/knowledge-base/craft/scene-structure.md"
-        "templates/knowledge-base/craft/character-arc.md"
-        "templates/knowledge-base/craft/pacing.md"
-        "templates/knowledge-base/craft/show-not-tell.md"
+        ".specify/templates/knowledge-base/craft/dialogue.md"
+        ".specify/templates/knowledge-base/craft/scene-structure.md"
+        ".specify/templates/knowledge-base/craft/character-arc.md"
+        ".specify/templates/knowledge-base/craft/pacing.md"
+        ".specify/templates/knowledge-base/craft/show-not-tell.md"
     )
 
     for file in "${craft_files[@]}"; do
@@ -590,10 +590,10 @@ check_skills_available() {
 
     # 检查 writing-techniques skills
     local skill_dirs=(
-        "templates/skills/writing-techniques/dialogue-techniques"
-        "templates/skills/writing-techniques/scene-structure"
-        "templates/skills/writing-techniques/character-arc"
-        "templates/skills/writing-techniques/pacing-control"
+        ".specify/templates/skills/writing-techniques/dialogue-techniques"
+        ".specify/templates/skills/writing-techniques/scene-structure"
+        ".specify/templates/skills/writing-techniques/character-arc"
+        ".specify/templates/skills/writing-techniques/pacing-control"
     )
 
     for dir in "${skill_dirs[@]}"; do
@@ -667,7 +667,7 @@ generate_load_report() {
     # 检查文件是否存在，生成警告（使用缓存 + Phase 2 去重）
     local warnings=()
     for kb in "${knowledge_base_files[@]}"; do
-        local kb_path="templates/knowledge-base/$kb"
+        local kb_path=".specify/templates/knowledge-base/$kb"
 
         # Phase 2: 资源去重检查
         if is_resource_loaded "$kb_path"; then
@@ -685,7 +685,7 @@ generate_load_report() {
     done
 
     for skill in "${skills_files[@]}"; do
-        local skill_path="templates/skills/$skill/SKILL.md"
+        local skill_path=".specify/templates/skills/$skill/SKILL.md"
 
         # Phase 2: 资源去重检查
         if is_resource_loaded "$skill_path"; then

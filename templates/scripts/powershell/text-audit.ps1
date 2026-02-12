@@ -17,7 +17,8 @@ $cfg = if (Test-Path $cfgProject) { $cfgProject } elseif (Test-Path $cfgTemplate
 
 if (-not (Test-Path $File)) { throw "用法: text-audit.ps1 -File <路径>" }
 
-python3 - << PY
+# 使用 PowerShell here-string 传递 Python 脚本
+$pyScript = @"
 import json, re, sys, os, math
 path = r'''$File'''
 cfg_path = r'''$cfg'''
@@ -96,5 +97,6 @@ print("  - 用具体动作/器物/气味替代空话与抽象名词")
 print("  - 打断长长串句子；合并过多的短句以形成起伏")
 print("  - 复查连接词是否可删除或自然过渡")
 print("  - 写前先列3个生活细节作为锚点")
-PY
+"@
 
+$pyScript | python3 -

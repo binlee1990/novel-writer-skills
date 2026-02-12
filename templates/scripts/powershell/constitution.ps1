@@ -5,6 +5,9 @@ param(
     [string]$Command = "check"
 )
 
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
 # 导入通用函数
 . "$PSScriptRoot\common.ps1"
 

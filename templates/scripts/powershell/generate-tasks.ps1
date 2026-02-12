@@ -1,33 +1,28 @@
 #!/usr/bin/env pwsh
 # 生成写作任务
+# 用于 /tasks 命令
 
-$STORIES_DIR = "stories"
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
 
-# 查找最新的故事目录
-function Get-LatestStory {
-    $latest = Get-ChildItem -Path $STORIES_DIR -Directory |
-              Sort-Object Name -Descending |
-              Select-Object -First 1
+. "$PSScriptRoot/common.ps1"
 
-    if ($latest) {
-        return $latest.FullName
-    }
-    return $null
-}
+$root = Get-ProjectRoot
+Set-Location $root
 
-$storyDir = Get-LatestStory
-
-if (!$storyDir) {
+$storyDir = Get-CurrentStoryDir
+if (-not $storyDir) {
     Write-Host "错误：没有找到故事项目"
     Write-Host "请先使用 /specify 命令创建故事规格"
     exit 1
 }
 
-$outlineFile = "$storyDir/creative-plan.md"
-$tasksFile = "$storyDir/tasks.md"
-$progressFile = "$storyDir/progress.json"
+$storyName = Split-Path $storyDir -Leaf
+$outlineFile = Join-Path $storyDir "creative-plan.md"
+$tasksFile = Join-Path $storyDir "tasks.md"
+$progressFile = Join-Path $storyDir "progress.json"
 
-if (!(Test-Path $outlineFile)) {
+if (-not (Test-Path $outlineFile)) {
     Write-Host "错误：没有找到创作计划"
     Write-Host "请先使用 /plan 命令创建创作计划"
     exit 1
@@ -51,7 +46,7 @@ $tasksContent = @"
 $tasksContent | Out-File -FilePath $tasksFile -Encoding UTF8
 
 # 创建或更新进度文件
-if (!(Test-Path $progressFile)) {
+if (-not (Test-Path $progressFile)) {
     $progressContent = @{
         created_at = $currentDateTime
         updated_at = $currentDateTime

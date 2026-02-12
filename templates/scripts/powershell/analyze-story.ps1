@@ -6,6 +6,9 @@ param(
     [string]$AnalysisType = "full"  # full, compliance, quality, progress
 )
 
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
 # 导入通用函数
 . "$PSScriptRoot\common.ps1"
 

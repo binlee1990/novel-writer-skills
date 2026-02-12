@@ -16,7 +16,7 @@ $ErrorActionPreference = 'Stop'
 
 $root = Get-ProjectRoot
 $storyDir = Get-CurrentStoryDir
-$progress = Join-Path $root "stories/current/progress.json"
+$progress = if ($storyDir) { Join-Path $storyDir "progress.json" } else { "" }
 $plotPath = Join-Path $root "spec/tracking/plot-tracker.json"
 
 function Show-BasicReport {
