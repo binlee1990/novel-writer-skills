@@ -1,4 +1,6 @@
 import { getVersion, getVersionInfo } from '../../src/version.js';
+import * as fs from 'fs-extra';
+import * as path from 'path';
 
 describe('version.ts', () => {
   describe('getVersion()', () => {
@@ -9,7 +11,10 @@ describe('version.ts', () => {
 
     it('should return the version from package.json', () => {
       const version = getVersion();
-      expect(version).toBe('2.1.1');
+      const packageJson = JSON.parse(
+        fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf-8')
+      );
+      expect(version).toBe(packageJson.version);
     });
   });
 
