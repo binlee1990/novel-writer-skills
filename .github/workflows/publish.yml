@@ -4,12 +4,38 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 3.0.0)'
+        required: false
+        type: string
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ -n "${{ inputs.version }}" ]; then
+              echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+            else
+              echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Display version
+        run: |
+          echo "📦 Publishing version: ${{ steps.version.outputs.version }}"
+          echo "📌 Trigger: ${{ github.event_name }}"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -29,7 +55,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       id-token: write
     steps:
       - uses: actions/checkout@v4
@@ -50,3 +76,35 @@ jobs:
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Verify publication
+        run: |
+          echo "⏳ Waiting for npm registry to update..."
+          sleep 30
+          VERSION=$(node -p "require('./package.json').version")
+          PUBLISHED_VERSION=$(npm view novelws version)
+          echo "📦 Published version: $PUBLISHED_VERSION"
+          if [ "$VERSION" = "$PUBLISHED_VERSION" ]; then
+            echo "✅ Successfully published novelws@$VERSION to npm"
+          else
+            echo "❌ Version mismatch: expected $VERSION, got $PUBLISHED_VERSION"
+            exit 1
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.test.outputs.version }}
+          name: Release v${{ needs.test.outputs.version }}
+          body: |
+            ## 📦 novelws v${{ needs.test.outputs.version }}
+
+            Install via npm:
+            ```bash
+            npm install -g novelws@${{ needs.test.outputs.version }}
+            ```
+
+            See [CHANGELOG.md](https://github.com/binlee1990/novel-writer-skills/blob/main/CHANGELOG.md) for details.
+          draft: false
+          prerelease: false
+          generate_release_notes: true
