@@ -84,6 +84,93 @@ powershell -File {SCRIPT} -Json
 
 **验证规格澄清状态**：如有未澄清的关键决策，提示先运行 `/clarify`。
 
+---
+
+## Tracking 数据加载策略
+
+在更新 `plot-tracker.json` 时，采用 **三层回退** 机制：
+
+### Layer 3: MCP 查询（优先）
+
+```typescript
+// 如果 MCP 已启用且数据已同步
+const plotData = await mcp.call('novelws-mcp/query_plot', {
+  volume: 'vol-03',      // 如果指定了 --detail vol-XX
+  status: 'all'
+});
+```
+
+**优势**：
+- 高性能范围查询（按卷过滤伏笔）
+- 自动聚合紧急度统计
+- 支持跨卷伏笔关联查询
+
+### Layer 2: 分片 JSON（次优）
+
+```bash
+# 当 spec/tracking/volumes/ 存在时
+if [[ -n "$VOLUME_FILTER" ]]; then
+  # 仅读取指定卷的 plot-tracker
+  cat "spec/tracking/volumes/$VOLUME_FILTER/plot-tracker.json"
+else
+  # 读取全局摘要 + 所有卷数据
+  cat "spec/tracking/summary/plot-summary.json"
+  for vol in spec/tracking/volumes/vol-*/; do
+    cat "$vol/plot-tracker.json"
+  done
+fi
+```
+
+**适用场景**：
+- MCP 未启用或同步延迟
+- 需要精确章节级别的伏笔数据
+- 手动编辑 JSON 后即时验证
+
+### Layer 1: 单文件 JSON（兜底）
+
+```bash
+# 传统模式，加载完整文件
+cat spec/tracking/plot-tracker.json
+```
+
+**向下兼容**：小型项目（< 300 章）继续使用单文件模式
+
+### 数据写入协议
+
+**分片模式**（spec/tracking/volumes/ 存在）：
+
+1. **确定目标卷**：
+   - 如果指定 `--detail vol-XX`，写入该卷
+   - 否则根据规划的章节范围确定卷
+
+2. **写入分片文件**：
+   ```bash
+   Write(spec/tracking/volumes/${target_volume}/plot-tracker.json)
+   ```
+
+3. **更新全局摘要**：
+   ```bash
+   # 更新 plot-summary.json 的伏笔统计
+   Write(spec/tracking/summary/plot-summary.json)
+   ```
+
+4. **触发 MCP 同步**（如果启用）：
+   ```bash
+   mcp-cli call novelws-mcp/sync_from_json '{
+     "mode": "incremental",
+     "tables": ["plot_threads", "foreshadows"]
+   }'
+   ```
+
+**单文件模式**（传统）：
+
+直接写入完整 `plot-tracker.json`：
+```bash
+Write(spec/tracking/plot-tracker.json)
+```
+
+---
+
 ### 2. 制定创作计划
 
 创建 `stories/*/creative-plan.md`，包含以下内容：

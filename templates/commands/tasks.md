@@ -27,6 +27,95 @@ resource-loading:
 
 **推荐资源**: scene-structure.md, pacing.md（辅助任务规划）
 
+---
+
+## Tracking 数据加载策略
+
+在 `--from-plan` 模式下，需要读取 tracking 数据生成修复/维护任务，采用 **三层回退** 机制：
+
+### Layer 3: MCP 查询（优先）
+
+```typescript
+// 如果 MCP 已启用且数据已同步
+// 获取延迟伏笔
+const overduePlots = await mcp.call('novelws-mcp/query_plot', {
+  status: 'overdue',      // 紧急度 > 0.9 或已超期
+  volume: 'vol-03'        // 可选：仅查询指定卷
+});
+
+// 获取卷进度统计
+const volumeStats = await mcp.call('novelws-mcp/stats_volume', {
+  volume: 'vol-03'
+});
+
+// 获取角色缺席情况
+const characters = await mcp.call('novelws-mcp/query_characters', {
+  volume: 'vol-03',
+  absent: true            // 仅返回长期缺席的角色
+});
+```
+
+**优势**：
+- 高性能聚合查询（自动计算紧急度）
+- 跨卷数据对比
+- 自动过滤需要关注的项
+
+### Layer 2: 分片 JSON（次优）
+
+```bash
+# 当 spec/tracking/volumes/ 存在时
+# 读取摘要数据
+plot_summary=$(cat spec/tracking/summary/plot-summary.json)
+
+# 提取未解决伏笔和紧急伏笔
+unresolved_plots=$(echo "$plot_summary" | jq '.unresolved')
+urgent_plots=$(echo "$plot_summary" | jq '.urgent')
+
+# 读取角色摘要
+character_summary=$(cat spec/tracking/summary/characters-summary.json)
+absent_characters=$(echo "$character_summary" | jq '.absent')
+```
+
+**适用场景**：
+- MCP 未启用或同步延迟
+- 摘要数据已足够生成任务
+- 需要快速扫描全局状态
+
+### Layer 1: 单文件 JSON（兜底）
+
+```bash
+# 传统模式，加载完整文件并手动过滤
+plot_tracker=$(cat spec/tracking/plot-tracker.json)
+character_state=$(cat spec/tracking/character-state.json)
+
+# 手动计算紧急度、缺席章节等
+```
+
+**向下兼容**：小型项目（< 300 章）使用单文件模式
+
+### 从 Tracking 数据生成任务的规则
+
+| 数据来源 | 生成的任务类型 | 优先级 | 条件 |
+|---------|--------------|--------|------|
+| plot-tracker | 伏笔回收任务 | P0-P2 | 紧急度 > 0.5 |
+| character-state | 角色出场任务 | P1-P2 | 缺席章节数 > 阈值 |
+| /analyze 反馈 | 修复任务 | P0-P1 | 存在错误或冲突 |
+| tracking 落后 | 数据同步任务 | P1 | 落后章节数 > 2 |
+
+### 使用示例
+
+```bash
+# 从计划生成任务（包含 tracking 数据分析）
+/tasks --from-plan
+
+# 生成的任务示例：
+# [P0] 回收伏笔"身世之谜"（已延迟 5 章，紧急度 0.95）
+# [P1] 安排师姐出场（已缺席 8 章）
+# [P1] 同步 tracking 数据（落后 3 章）
+```
+
+---
+
 ## 目标
 
 将宏观计划转化为微观任务，让创作变得可管理、可追踪。
