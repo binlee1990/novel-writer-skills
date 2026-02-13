@@ -1,7 +1,7 @@
 ---
 name: track
 description: 综合追踪小说创作进度和内容
-argument-hint: [--brief | --plot | --stats | --check | --fix | --sync | --migrate [--auto | --volumes "1-100,101-200"]]
+argument-hint: [--brief | --plot | --stats | --check [--volume vol-XX] | --fix | --sync [--incremental] | --migrate [--auto | --volumes "1-100,101-200"] | --log]
 allowed-tools: Read(//spec/tracking/**), Read(//spec/tracking/**), Read(//stories/**), Read(//stories/**), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
 scripts:
   sh: .specify/scripts/bash/track-progress.sh
@@ -44,9 +44,9 @@ resource-loading:
 - `--brief` - 显示简要信息
 - `--plot` - 仅显示情节追踪
 - `--stats` - 仅显示统计数据
-- `--check` - **[增强]** 执行深度一致性检查（包含角色验证）
+- `--check` - **[增强]** 执行深度一致性检查（包含角色验证），支持 `--volume vol-XX` 限定范围
 - `--fix` - **[新增]** 自动修复发现的简单问题
-- `--sync` - **[新增]** 批量同步多章节的 tracking 数据
+- `--sync` - **[新增]** 批量同步多章节的 tracking 数据，支持 `--incremental` 增量同步
 
 ## 数据来源
 
@@ -707,6 +707,14 @@ fs-002（古籍线索）→ fs-004（遗迹发现）
 
 当使用 `--check` 参数时，执行程序化的深度验证：
 
+#### --volume 范围限定
+
+支持 `--volume vol-XX` 限定检查范围：
+- 带 --volume：只检查该卷的 tracking 数据和对应章节
+- 不带 --volume：检查当前卷（分片模式）或全部（单文件模式）
+
+**MCP 优先：** 如果 MCP 可用，调用 `stats_consistency` 获取一致性报告，避免逐文件扫描。
+
 #### 内部任务流程（自动执行）
 ```markdown
 # Phase 1: 基础验证 [并行执行]
@@ -829,6 +837,17 @@ fs-002（古籍线索）→ fs-004（遗迹发现）
 
 当使用 `--sync` 参数时，批量扫描并同步多个章节的 tracking 数据：
 
+#### 增量同步（--sync --incremental）
+
+不扫描所有章节，只处理上次同步后的新章节：
+
+1. 读取 `spec/tracking/tracking-log.md` 最后一条记录，获取 last_sync_chapter
+2. 扫描 `stories/[current]/content/` 中编号 > last_sync_chapter 的章节
+3. 只对这些新章节执行 tracking 更新
+4. 更新 tracking-log.md 记录本次同步
+
+如果 tracking-log.md 不存在或无法确定 last_sync_chapter，回退到全量同步。
+
 #### 使用场景
 
 - 连续写了多章但忘记更新 tracking
@@ -894,6 +913,28 @@ tracking 最后更新：第 [M] 章
 - 按章节顺序处理，避免重复分析
 - 增量更新：仅更新变化部分
 - 批量写入：所有更新一次性写入文件
+
+---
+
+### 数据写入协议
+
+当 /track 更新 tracking 数据时，根据当前模式选择写入方式：
+
+**三层 Fallback 数据加载：**
+
+读取 tracking 数据时按以下优先级：
+1. **MCP 查询（优先）**：调用对应 MCP 工具获取精确数据
+2. **分片 JSON（次优）**：读取 `spec/tracking/volumes/[currentVolume]/` 下的分片文件
+3. **单文件 JSON（兜底）**：读取 `spec/tracking/` 下的单文件
+
+**分片模式写入：**
+1. 确定当前章节属于哪个卷（从 volume-summaries.json 的 chapters 范围判断）
+2. 更新该卷的分片文件（如 `spec/tracking/volumes/vol-03/character-state.json`）
+3. 同步更新全局摘要文件（如 characters-summary.json 的 activeCount）
+4. 如果 MCP 可用，调用 `sync_from_json` 同步到 SQLite
+
+**单文件模式写入：**
+- 直接更新 `spec/tracking/` 下的文件（现有逻辑）
 
 ---
 
