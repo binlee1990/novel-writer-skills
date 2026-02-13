@@ -151,6 +151,25 @@ resource-loading:
    - `spec/tracking/relationships.json`（关系网络）
    - `spec/tracking/plot-tracker.json`（情节追踪 - 如有）
    - `spec/tracking/validation-rules.json`（验证规则 - 如有）
+   - `spec/tracking/story-facts.json`（设定事实 - 如有）
+
+   **📋 本章引用的设定事实**（如当前章节已有 `<!-- story-facts: ... -->` 注释）：
+
+   - 解析注释头，提取声明的 fact ID 列表
+   - 从 `story-facts.json` 加载这些事实的当前值
+   - 展示为写作参考：
+
+   ```
+   📋 本章引用的设定事实（来自 story-facts.json）:
+
+     - finance-monthly-deficit: 宗门月亏损 = 1000灵石
+     - finance-reserve: 灵石储备 = 5000灵石
+     - finance-runway: 储备可撑月数 = 5月
+
+   ⚠️ 写作时请确保上述数值与正文一致。
+   ```
+
+   - **快写模式（--fast）**: 跳过详细展示，但保留数据加载
 
 4. **再查（知识库）**：
    - `spec/knowledge/` 相关文件（世界观、角色档案等）
@@ -346,6 +365,13 @@ resource-loading:
 
 **格式规范检查**：确认未使用数字标记分段，场景转换使用空行分隔
 
+**设定事实校验**（如 story-facts.json 存在且非空）：
+- 如果本章声明了 `<!-- story-facts: ... -->` 注释，调用 facts-checker skill
+- 检查声明的事实值是否与 story-facts.json 一致
+- 验证涉及本章 facts 的算术规则
+- 如发现不一致，输出警告（不阻断写作流程）
+- **快写模式（--fast）**: 仍执行校验，但简化报告
+
 ### 📊 具象化检查（去AI味关键）⭐
 
 写完一段后，主动识别并替换抽象表达。
@@ -422,6 +448,44 @@ count_chinese_words "stories/*/content/第X章.md"
 ### Checkpoint 完成标记
 
 写作正常完成后，更新 `write-checkpoint.json` 的 `status` 为 `completed`。
+
+### 新事实注册提示
+
+写作完成后，检查正文中是否出现新的可量化事实（具体数字 + 单位的组合）：
+
+**检测规则**：
+- 数字 + 单位模式（如 `1000灵石`、`200人`、`5月`）
+- 中文数字 + 单位（如 `五百灵石`，识别但提示用户确认）
+- 专有名词首次出现（引号包围或首字母大写）
+
+**去重逻辑**：
+- 检查 `story-facts.json` 中是否已存在相同值
+- 检查之前章节的 `<!-- story-facts: ... -->` 注释中是否已声明
+
+**输出提示**：
+
+```
+💡 Story Facts 提示
+
+检测到以下可能的新事实（未注册）:
+
+1. "外门弟子二百人"
+   建议 ID: sect-outer-disciples
+   类型: number
+   值: 200
+   单位: 人
+
+2. "内门长老十二位"
+   建议 ID: sect-inner-elders
+   类型: number
+   值: 12
+   单位: 位
+
+使用 /facts 命令添加这些事实以便后续追踪。
+```
+
+- **仅提示，不自动注册**：用户需手动使用 `/facts` 命令确认添加
+- **快写模式（--fast）**: 仍执行检测和提示
 
 ### 智能推荐（后置）
 
