@@ -159,6 +159,32 @@ describe('novelws init', () => {
     expect(config.scale).toBe('large');
   });
 
+  it('should store withMcp flag in config.json when --with-mcp', () => {
+    const projectName = 'mcp-test';
+
+    execSync(`node "${CLI_PATH}" init ${projectName} --no-git --with-mcp`, {
+      cwd: testDir,
+      stdio: 'pipe',
+    });
+
+    const configPath = path.join(testDir, projectName, '.specify', 'config.json');
+    const config = fs.readJsonSync(configPath);
+    expect(config.mcp).toBe(true);
+  });
+
+  it('should imply --scale large when --with-mcp', () => {
+    const projectName = 'mcp-large-test';
+
+    execSync(`node "${CLI_PATH}" init ${projectName} --no-git --with-mcp`, {
+      cwd: testDir,
+      stdio: 'pipe',
+    });
+
+    const projectPath = path.join(testDir, projectName);
+    const summaryDir = path.join(projectPath, 'spec', 'tracking', 'summary');
+    expect(fs.existsSync(summaryDir)).toBe(true);
+  });
+
   it('should fail gracefully when project already exists', () => {
     const projectName = 'existing-project';
     const projectPath = path.join(testDir, projectName);
