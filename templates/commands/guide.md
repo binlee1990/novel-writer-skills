@@ -20,6 +20,71 @@ allowed-tools: Read, Glob, Grep
 
 ---
 
+## 数据加载策略
+
+本命令在检测项目状态时，采用 **三层回退** 机制：
+
+### Layer 3: MCP 查询（优先）
+
+```typescript
+// 如果 MCP 已启用且数据已同步
+const volumeStats = await mcp.call('novelws-mcp/stats_volume', {});
+const consistencyStats = await mcp.call('novelws-mcp/stats_consistency', {});
+```
+
+**优势**：
+- 高性能聚合统计（章节数、追踪状态）
+- 自动计算一致性指标
+- 跨卷数据对比
+
+### Layer 2: 分片 JSON（次优）
+
+```bash
+# 当 spec/tracking/volumes/ 存在时
+# 读取 summary/ 文件夹的摘要数据
+character_summary=$(cat spec/tracking/summary/characters-summary.json)
+plot_summary=$(cat spec/tracking/summary/plot-summary.json)
+```
+
+**适用场景**：
+- MCP 未启用或同步延迟
+- 需要快速检测项目状态
+- 摘要数据已足够进行状态判断
+
+### Layer 1: 单文件 JSON（兜底）
+
+```bash
+# 传统模式，加载完整文件
+character_state=$(cat spec/tracking/character-state.json)
+plot_tracker=$(cat spec/tracking/plot-tracker.json)
+```
+
+**向下兼容**：小型项目（< 300 章）继续使用单文件模式
+
+### 检测流程
+
+```javascript
+// 1. 检测分片模式
+is_sharded = exists('spec/tracking/volumes/')
+
+// 2. 检测 MCP
+has_mcp = exists('mcp-servers.json')
+
+// 3. 选择数据源
+if (has_mcp) {
+  // Layer 3: 使用 MCP 查询
+  stats = await mcp.call('novelws-mcp/stats_volume', {});
+} else if (is_sharded) {
+  // Layer 2: 读取 summary 摘要
+  stats = readSummaryFiles();
+} else {
+  // Layer 1: 读取单文件
+  stats = readTrackingFiles();
+}
+```
+
+---
+
 ## 执行流程
 
 ### Step 1: 读取项目状态
@@ -37,15 +102,30 @@ tasks = Read('stories/*/tasks.md')
 chapters = Glob('stories/*/content/*.md')
   → 统计已写章节数
 
-// 2. Tracking 文件检测（仅检测存在性和修改时间）
-write_checkpoint = exists('spec/tracking/write-checkpoint.json')
-character_state = exists('spec/tracking/character-state.json')
-plot_tracker = exists('spec/tracking/plot-tracker.json')
-timeline = exists('spec/tracking/timeline.json')
-story_facts = exists('spec/tracking/story-facts.json')
-tracking_log = exists('spec/tracking/tracking-log.md')
+// 2. 检测分片模式
+is_sharded = exists('spec/tracking/volumes/')
+has_mcp = exists('mcp-servers.json') // MCP 是否配置
 
-// 3. 性能优化
+// 3. Tracking 文件检测（仅检测存在性和修改时间）
+// 分片模式：检测 summary/ 和 volumes/
+// 单文件模式：检测根目录 JSON
+if (is_sharded) {
+  write_checkpoint = exists('spec/tracking/summary/write-checkpoint.json')
+  character_state = exists('spec/tracking/summary/characters-summary.json')
+  plot_tracker = exists('spec/tracking/summary/plot-summary.json')
+  timeline = exists('spec/tracking/summary/timeline-summary.json')
+  story_facts = exists('spec/tracking/summary/story-facts-summary.json')
+  tracking_log = exists('spec/tracking/summary/tracking-log-summary.md')
+} else {
+  write_checkpoint = exists('spec/tracking/write-checkpoint.json')
+  character_state = exists('spec/tracking/character-state.json')
+  plot_tracker = exists('spec/tracking/plot-tracker.json')
+  timeline = exists('spec/tracking/timeline.json')
+  story_facts = exists('spec/tracking/story-facts.json')
+  tracking_log = exists('spec/tracking/tracking-log.md')
+}
+
+// 4. 性能优化
 - 只读取文件头部（前 50 行）判断状态
 - Tracking 文件只检测存在性，不深度解析（除非触发 P0）
 - 缓存读取结果，避免重复
@@ -67,8 +147,11 @@ tracking_log = exists('spec/tracking/tracking-log.md')
 planned_chapters = creative_plan.总章节数 || 0
 actual_chapters = chapters.length
 
-// 规模分级（只判断长篇类别）
-IF planned_chapters > 500 OR actual_chapters > 300
+// 规模分级（考虑分片模式）
+IF is_sharded
+  // 如果已启用分片，自动判定为超长篇
+  → project_scale = "超长篇"
+ELSE IF planned_chapters > 500 OR actual_chapters > 300
   → project_scale = "超长篇"
 ELSE IF planned_chapters > 100 OR actual_chapters > 50
   → project_scale = "长篇"
@@ -530,7 +613,36 @@ total_volumes = creative_plan?.volumes?.length || "未知"
 
 ---
 
-#### 场景 4: P0 紧急情况
+#### 场景 4: 分片模式建议
+
+**触发条件**: `actual_chapters > 300 AND NOT is_sharded`
+
+**输出模板**：
+
+```
+📍 当前状态
+━━━━━━━━━━━━━━━━━━━━
+📊 进度：第 [actual_chapters] 章（超过 300 章）
+
+💡 超长篇优化建议
+━━━━━━━━━━━━━━━━━━━━
+检测到项目已超过 300 章，建议启用分片模式以提升性能：
+
+  /track --migrate
+
+迁移后的优势：
+  • 按卷拆分 tracking 数据，降低单文件大小
+  • 命令支持 --volume 参数进行范围操作
+  • 可选启用 MCP 加速查询
+
+🎯 下一步推荐
+━━━━━━━━━━━━━━━━━━━━
+▶️ [primary_command] — [primary_reason]
+```
+
+---
+
+#### 场景 5: P0 紧急情况
 
 **触发条件**: `p0_issues.length > 0`
 
