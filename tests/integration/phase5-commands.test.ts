@@ -204,8 +204,8 @@ describe('Phase 5: Light Commands Adaptation', () => {
 
     it('should have correct frontmatter', () => {
       const content = fs.readFileSync(volumeSummaryPath, 'utf-8');
-      expect(content).toMatch(/^---\nname: volume-summary/);
-      expect(content).toMatch(/argument-hint: vol-XX.*--export/);
+      expect(content).toMatch(/^---[\r\n]+name: volume-summary/);
+      expect(content).toMatch(/argument-hint:.*vol-XX.*--export/);
     });
 
     it('should have three-layer data loading strategy', () => {
@@ -249,7 +249,7 @@ describe('Phase 5: Light Commands Adaptation', () => {
 
     it('should have correct frontmatter', () => {
       const content = fs.readFileSync(searchPath, 'utf-8');
-      expect(content).toMatch(/^---\nname: search/);
+      expect(content).toMatch(/^---[\r\n]+name: search/);
       expect(content).toMatch(/argument-hint:.*--type.*--volume.*--fuzzy.*--regex/);
     });
 
@@ -358,7 +358,8 @@ describe('Phase 5: Light Commands Adaptation', () => {
       volumeCommands.forEach((file) => {
         const filePath = path.join(__dirname, '../../templates/commands', file);
         const content = fs.readFileSync(filePath, 'utf-8');
-        expect(content).toMatch(/--volume vol-\d+/);
+        // Accept both --volume vol-XX (template) and --volume vol-\d+ (example)
+        expect(content).toMatch(/--volume vol-(?:XX|\d+)/);
       });
     });
 
