@@ -4,6 +4,7 @@
 
 import { Command } from '@commander-js/extra-typings';
 import chalk from 'chalk';
+import path from 'path';
 import fs from 'fs-extra';
 import ora from 'ora';
 import { getVersion } from '../version.js';
@@ -99,7 +100,33 @@ export function registerUpgradeCommand(program: Command): void {
         config.version = getVersion();
         await fs.writeJson(paths.specifyConfig, config, { spaces: 2 });
 
+        // 检测 tracking 文件大小，提示迁移
+        const MIGRATION_THRESHOLD = 50 * 1024; // 50KB
+        const trackingFileNames = [
+          'character-state.json',
+          'plot-tracker.json',
+          'timeline.json',
+          'relationships.json',
+        ];
+
+        let hasLargeFiles = false;
+        for (const file of trackingFileNames) {
+          const filePath = path.join(paths.tracking, file);
+          if (await fs.pathExists(filePath)) {
+            const stat = await fs.stat(filePath);
+            if (stat.size > MIGRATION_THRESHOLD) {
+              hasLargeFiles = true;
+              break;
+            }
+          }
+        }
+
         spinner.succeed(chalk.green('升级完成！\n'));
+
+        if (hasLargeFiles) {
+          console.log(chalk.yellow('⚠️  检测到 tracking 文件较大，建议执行分片迁移以提升性能'));
+          console.log(chalk.gray('  运行 /track --migrate 将数据按卷分片存储\n'));
+        }
 
         console.log(chalk.cyan('✨ 升级内容:'));
         if (updateCommands) console.log('  • Slash Commands 已更新');
