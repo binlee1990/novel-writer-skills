@@ -1,7 +1,7 @@
 ---
 name: track
 description: 综合追踪小说创作进度和内容
-argument-hint: [--brief | --plot | --stats | --check | --fix]
+argument-hint: [--brief | --plot | --stats | --check | --fix | --sync | --migrate [--auto | --volumes "1-100,101-200"]]
 allowed-tools: Read(//spec/tracking/**), Read(//spec/tracking/**), Read(//stories/**), Read(//stories/**), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
 scripts:
   sh: .specify/scripts/bash/track-progress.sh
@@ -894,6 +894,135 @@ tracking 最后更新：第 [M] 章
 - 按章节顺序处理，避免重复分析
 - 增量更新：仅更新变化部分
 - 批量写入：所有更新一次性写入文件
+
+---
+
+## 🆕 分片迁移（--migrate）
+
+当 tracking 文件过大（单文件超过 50KB）时，将数据从单文件模式迁移到分卷分片模式。
+
+### 使用方法
+
+```
+/track --migrate              # 交互式迁移（AI 引导确认卷边界）
+/track --migrate --auto       # 自动迁移（按 100 章一卷拆分）
+/track --migrate --volumes "1-100,101-250,251-400"  # 自定义卷边界
+```
+
+### 迁移流程
+
+#### 阶段 1：检测与备份
+
+1. 运行脚本检测当前状态：
+```powershell
+powershell -File {SCRIPT_DIR}/migrate-tracking.ps1 -Mode check -Json
+```
+
+2. 如果已经是分片模式，提示用户并退出
+3. 如果是单文件模式，运行备份：
+```powershell
+powershell -File {SCRIPT_DIR}/migrate-tracking.ps1 -Mode backup -Json
+```
+
+#### 阶段 2：确定卷边界
+
+**--auto 模式：**
+- 读取 `plot-tracker.json` 的 `checkpoints.volumeEnd` 确定已有的卷边界
+- 如果没有卷边界信息，按每 100 章一卷自动划分
+- 最后一卷可以不满 100 章
+
+**--volumes 模式：**
+- 解析用户提供的卷边界字符串，如 `"1-100,101-250,251-400"`
+- 验证边界连续且覆盖所有已写章节
+
+**交互式模式（默认）：**
+- 读取 `plot-tracker.json` 和 `creative-plan.md`
+- 分析情节弧线，建议合理的卷边界
+- 向用户展示建议并确认
+
+#### 阶段 3：数据拆分
+
+运行脚本创建目录结构：
+```powershell
+powershell -File {SCRIPT_DIR}/migrate-tracking.ps1 -Mode auto -Json
+```
+
+然后按卷边界拆分每个 tracking 文件：
+
+**character-state.json 拆分规则：**
+- `protagonist` 复制到每个卷（状态更新为该卷末尾的状态）
+- `supportingCharacters` 按 `lastSeen.chapter` 分配到对应卷
+- `appearanceTracking` 按 `chapter` 分配到对应卷
+- `characterGroups` 每卷独立维护
+
+**timeline.json 拆分规则：**
+- `events` 按 `chapter` 分配到对应卷
+- `storyTime` 每卷记录该卷的时间范围
+- `parallelEvents` 按时间点分配
+- `anomalies` 分配到发现该异常的卷
+
+**relationships.json 拆分规则：**
+- `characters` 复制到每个卷（只保留该卷活跃的角色）
+- `history` 按 `chapter` 分配到对应卷
+- `factions` 复制到每个卷（状态更新为该卷末尾）
+
+**plot-tracker.json 拆分规则：**
+- `foreshadowing` 按 `planted.chapter` 分配到对应卷
+- 跨卷未解决的伏笔在后续卷中保留引用
+- `plotlines` 每卷记录该卷的进展
+- `checkpoints` 按卷分配
+
+将拆分后的数据写入 `spec/tracking/volumes/vol-XX/` 对应文件。
+
+#### 阶段 4：生成全局摘要
+
+基于拆分后的数据，生成 4 个摘要文件到 `spec/tracking/summary/`：
+
+**characters-summary.json：**
+- 遍历所有卷的 character-state.json
+- active：最后一卷中仍活跃的角色
+- archived：已退场/死亡的角色
+- 统计 totalCount 和 activeCount
+
+**plot-summary.json：**
+- 汇总所有卷的伏笔状态
+- unresolvedForeshadowing：所有 status=active 的伏笔
+- resolvedCount / totalPlanted 统计
+
+**timeline-summary.json：**
+- 提取每卷的关键里程碑事件
+- 记录故事时间范围
+
+**volume-summaries.json：**
+- 每卷生成一条摘要记录
+- 包含：id, title, chapters, wordCount, keyEvents, unresolvedPlots, newCharacters, exitedCharacters
+
+#### 阶段 5：初始化 SQLite（如果 MCP 可用）
+
+如果检测到 novelws-mcp 已安装：
+- 调用 MCP 工具 `sync_from_json` 将分片数据导入 SQLite
+- 调用 `sync_status` 验证同步结果
+
+如果 MCP 不可用，跳过此步骤。
+
+#### 阶段 6：验证与清理
+
+1. 验证每个卷的文件都存在且 JSON 格式正确
+2. 验证摘要文件的统计数据与分卷数据一致
+3. 确认无误后，删除原始单文件（备份已保存）
+4. 输出迁移报告：
+   - 迁移前：单文件模式，总大小 XXX KB
+   - 迁移后：N 卷分片，每卷平均 XX KB
+   - 备份位置：spec/tracking/backup/YYYYMMDD-HHMMSS/
+
+### 错误处理
+
+- 任何步骤失败时，提示用户从备份恢复：
+  ```
+  迁移失败。备份文件在 spec/tracking/backup/YYYYMMDD-HHMMSS/
+  可以手动将备份文件复制回 spec/tracking/ 恢复原状。
+  ```
+- 不自动删除备份，由用户手动清理
 
 ---
 
