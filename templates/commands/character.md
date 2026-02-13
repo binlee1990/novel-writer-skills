@@ -1,7 +1,7 @@
 ---
 name: character
 description: "统一角色管理 — 创建、查看、更新角色档案，管理角色关系，设定对话指纹"
-argument-hint: [子命令] [角色名或参数]
+argument-hint: [子命令] [角色名或参数] [--volume vol-XX]
 allowed-tools: Read, Write, Glob, Grep, Edit
 ---
 
@@ -15,9 +15,20 @@ allowed-tools: Read, Write, Glob, Grep, Edit
 
 1. 确认当前故事目录存在：`stories/*/`
 2. 确认 `spec/tracking/` 目录存在，不存在则创建
-3. 读取现有角色数据（如有）：
-   - `spec/tracking/character-state.json`
-   - `spec/tracking/relationships.json`
+3. 按三层 Fallback 加载角色数据：
+
+**Layer 1: MCP 查询（优先）**
+- `query_characters` → 角色列表（支持 `--volume vol-XX` 过滤）
+- `query_relationships` → 关系网络
+- `search_content --query=[角色名]` → 角色出场章节
+
+**Layer 2: 分片 JSON（次优，检测 spec/tracking/volumes/ 是否存在）**
+- 无 --volume：读取 `spec/tracking/summary/characters-summary.json`（活跃角色概览）
+- 有 --volume：读取 `spec/tracking/volumes/vol-XX/character-state.json` 和 `relationships.json`
+
+**Layer 3: 单文件 JSON（兜底）**
+- `spec/tracking/character-state.json`
+- `spec/tracking/relationships.json`
 
 ## 子命令决策
 
@@ -133,7 +144,9 @@ allowed-tools: Read, Write, Glob, Grep, Edit
 
 **Step 1: 读取所有角色数据**
 
-从 `character-state.json` 读取所有角色。
+从三层 Fallback 加载角色数据（见前置条件）。
+
+如果指定了 `--volume vol-XX`，仅显示该卷中出场的角色（按 `lastAppearance` 或 `firstAppearance` 在该卷章节范围内过滤）。
 
 **Step 2: 按类型分组输出**
 
@@ -346,6 +359,10 @@ allowed-tools: Read, Write, Glob, Grep, Edit
 
 **Step 1: 从 timeline.json 和章节内容中提取角色相关事件**
 
+**MCP 优先**：如果 MCP 可用，调用 `search_content --query=[角色名]` 获取所有出场章节，按章节号排序生成时间线。
+
+**Fallback**：从 timeline.json（或分片 `volumes/vol-XX/timeline.json`）和章节内容中提取。如果指定了 `--volume vol-XX`，仅显示该卷范围内的时间线。
+
 **Step 2: 输出角色时间线**
 
 ```
@@ -379,6 +396,19 @@ allowed-tools: Read, Write, Glob, Grep, Edit
 ### 自动同步
 
 当 `/write` 或 `/track` 更新 tracking 数据时，`character-state.json` 和 `relationships.json` 的格式必须与 `/character` 命令兼容。
+
+### 分片写入协议
+
+当 `/character` 更新角色数据时：
+
+**分片模式（检测到 spec/tracking/volumes/ 存在）**：
+1. 确定角色最后出场章节所属的卷
+2. 更新该卷的 `character-state.json` 或 `relationships.json`
+3. 同步更新全局摘要：`spec/tracking/summary/characters-summary.json`
+4. 如果 MCP 可用，调用 `sync_from_json` 同步到 SQLite
+
+**单文件模式**：
+- 直接更新 `spec/tracking/character-state.json` 和 `relationships.json`
 
 ### 数据校验
 
