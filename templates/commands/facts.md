@@ -1,6 +1,6 @@
 ---
 description: 管理和校验故事设定事实的一致性
-argument-hint: [check | update <fact-id> | add | remove <fact-id>]
+argument-hint: [check | update <fact-id> | add | remove <fact-id>] [--volume vol-XX | --range ch-XXX-YYY]
 allowed-tools: Read(//spec/tracking/**), Read(//stories/**/content/**), Write(//spec/tracking/story-facts.json), Bash(bash:*), Bash(powershell:*)
 scripts:
   sh: .specify/scripts/bash/check-facts.sh
@@ -110,6 +110,33 @@ scripts:
 - 逗号分隔多个 fact ID
 - 放在章节标题和正文之间
 - 一个章节只允许一个 story-facts 注释（多个时取第一个）
+
+---
+
+## 数据加载协议（三层 Fallback）
+
+### 读取 story-facts.json
+
+按以下优先级加载事实数据：
+
+**Layer 1: MCP 查询（优先）**
+- 调用 `query_facts` 获取事实列表
+- 支持 `--volume vol-XX` 过滤：`query_facts --volume=vol-XX`
+- 支持 `--range ch-XXX-YYY` 过滤：`query_facts --chapter_from=XXX --chapter_to=YYY`
+
+**Layer 2: 分片 JSON（次优）**
+- 检测 `spec/tracking/volumes/` 是否存在
+- 无 --volume 参数：读取 `spec/tracking/story-facts.json`（全局事实文件，不按卷分片）
+- 有 --volume 参数：读取全局事实文件，按 `source` 字段过滤属于该卷的事实
+
+**Layer 3: 单文件 JSON（兜底）**
+- 读取 `spec/tracking/story-facts.json`
+
+### 章节扫描范围
+
+- `--volume vol-XX`：只扫描该卷范围内的章节文件（从 volume-summaries.json 获取章节范围）
+- `--range ch-XXX-YYY`：只扫描指定范围的章节文件
+- 无参数：扫描所有章节文件
 
 ---
 
@@ -232,7 +259,24 @@ scripts:
 
 执行完整的事实一致性校验，包括章节引用和算术规则。
 
-#### 执行步骤
+支持 `--volume vol-XX` 或 `--range ch-XXX-YYY` 限定校验范围。
+
+#### MCP 优先策略（推荐）
+
+如果 MCP 可用，优先使用全文检索进行校验：
+1. 调用 `query_facts` 获取所有已记录的事实
+2. 对每个事实，调用 `search_content` 全文检索所有提到该事实 key 的章节
+3. 检查搜索结果中的 value 是否与记录一致
+4. 输出不一致列表
+
+示例：
+- 事实：`{ "key": "天魂珠颜色", "value": "蓝色" }`
+- MCP 搜索 "天魂珠" → 找到第 15 章 "蓝色的天魂珠"、第 203 章 "绿色的天魂珠"
+- 报告：第 203 章与事实记录不一致（蓝色 vs 绿色）
+
+如果 MCP 不可用，回退到脚本扫描方式。
+
+#### 执行步骤（Fallback）
 
 1. **运行脚本获取章节引用报告**：
    ```bash
