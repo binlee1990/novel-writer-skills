@@ -134,9 +134,10 @@ describe('Template Files Validation', () => {
     it('should have smart recommendation engine in guide command', () => {
       const guideFile = path.join(commandsDir, 'guide.md');
       const content = fs.readFileSync(guideFile, 'utf-8');
-      expect(content).toContain('智能推荐引擎');
-      expect(content).toContain('推荐优先级');
-      expect(content).toContain('数据源');
+      expect(content).toContain('三层优先级');
+      expect(content).toContain('P0/P1/P2');
+      expect(content).toContain('智能推荐');
+      expect(content).toContain('唯一最佳下一步');
     });
     it('should have smart recommendations in write post-processing', () => {
       const writeFile = path.join(commandsDir, 'write.md');
@@ -166,13 +167,15 @@ describe('Template Files Validation', () => {
       expect(content).toContain('反馈接收模式');
       expect(content).toContain('计划反馈处理');
     });
-    it('should have unprocessed feedback reminder in guide command', () => {
+    it('should have priority-based recommendation system in guide command', () => {
       const guideFile = path.join(commandsDir, 'guide.md');
       const content = fs.readFileSync(guideFile, 'utf-8');
-      expect(content).toContain('反馈状态检查');
-      expect(content).toContain('未处理反馈');
-      expect(content).toContain('/specify --feedback');
-      expect(content).toContain('/plan --feedback');
+      expect(content).toContain('P0 优先级');
+      expect(content).toContain('P1 优先级');
+      expect(content).toContain('P2 优先级');
+      expect(content).toContain('长篇');
+      expect(content).toContain('超长篇');
+      expect(content).toContain('备选操作');
     });
   });
 
