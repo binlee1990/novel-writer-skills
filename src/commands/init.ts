@@ -25,12 +25,19 @@ export function registerInitCommand(program: Command): void {
     .option('--here', '在当前目录初始化')
     .option('--model <name>', '指定命令使用的 AI 模型')
     .option('--plugins <names>', '预装插件，逗号分隔')
+    .option('--scale <size>', '项目规模预设 (large: 启用分片存储)')
+    .option('--with-mcp', '启用 MCP + SQLite 数据中枢（隐含 --scale large）')
     .option('--no-git', '跳过 Git 初始化')
     .description('初始化一个新的小说项目')
     .action(async (name, options) => {
       const spinner = ora('正在初始化小说项目...').start();
 
       try {
+        // --with-mcp 隐含 --scale large
+        if (options.withMcp && !options.scale) {
+          options.scale = 'large';
+        }
+
         // 确定项目路径
         let projectPath: string;
         if (options.here) {
@@ -76,6 +83,8 @@ export function registerInitCommand(program: Command): void {
           ai: 'claude',
           created: new Date().toISOString(),
           version: getVersion(),
+          ...(options.scale && { scale: options.scale }),
+          ...(options.withMcp && { mcp: true }),
         };
 
         await fs.writeJson(paths.specifyConfig, config, { spaces: 2 });
@@ -122,9 +131,35 @@ export function registerInitCommand(program: Command): void {
           await fs.copy(templates.memory, paths.specifyMemory);
         }
 
-        // 复制追踪文件模板
+        // 复制追踪文件模板（非 large 模式排除 summary 子目录）
         if (await fs.pathExists(templates.tracking)) {
-          await fs.copy(templates.tracking, paths.tracking);
+          const summaryDir = path.normalize(templates.trackingSummary);
+          await fs.copy(templates.tracking, paths.tracking, {
+            filter: (src: string) => !path.normalize(src).startsWith(summaryDir),
+          });
+        }
+
+        // 大型项目：创建分片目录结构
+        if (options.scale === 'large') {
+          await fs.ensureDir(paths.trackingSummary);
+          await fs.ensureDir(path.join(paths.trackingVolumes, 'vol-01'));
+
+          // 复制 summary 模板
+          if (await fs.pathExists(templates.trackingSummary)) {
+            await fs.copy(templates.trackingSummary, paths.trackingSummary);
+          }
+
+          // 复制 tracking 模板到 vol-01 作为初始卷
+          const trackingFiles = ['character-state.json', 'plot-tracker.json', 'timeline.json', 'relationships.json'];
+          for (const file of trackingFiles) {
+            const src = path.join(templates.tracking, file);
+            const dest = path.join(paths.trackingVolumes, 'vol-01', file);
+            if (await fs.pathExists(src)) {
+              await fs.copy(src, dest);
+            }
+          }
+
+          spinner.text = '已创建大型项目分片结构...';
         }
 
         // 复制知识库模板（项目特定）

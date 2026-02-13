@@ -106,6 +106,59 @@ describe('novelws init', () => {
     expect(fs.existsSync(qaDir)).toBe(true);
   });
 
+  it('should create summary directory with --scale large', () => {
+    const projectName = 'large-novel';
+
+    execSync(`node "${CLI_PATH}" init ${projectName} --no-git --scale large`, {
+      cwd: testDir,
+      stdio: 'pipe',
+    });
+
+    const projectPath = path.join(testDir, projectName);
+
+    // 验证 summary 目录和文件
+    const summaryDir = path.join(projectPath, 'spec', 'tracking', 'summary');
+    expect(fs.existsSync(summaryDir)).toBe(true);
+    expect(fs.existsSync(path.join(summaryDir, 'characters-summary.json'))).toBe(true);
+    expect(fs.existsSync(path.join(summaryDir, 'plot-summary.json'))).toBe(true);
+    expect(fs.existsSync(path.join(summaryDir, 'timeline-summary.json'))).toBe(true);
+    expect(fs.existsSync(path.join(summaryDir, 'volume-summaries.json'))).toBe(true);
+
+    // 验证 volumes 目录
+    const volumesDir = path.join(projectPath, 'spec', 'tracking', 'volumes');
+    expect(fs.existsSync(volumesDir)).toBe(true);
+    expect(fs.existsSync(path.join(volumesDir, 'vol-01'))).toBe(true);
+  });
+
+  it('should NOT create summary/volumes directories without --scale large', () => {
+    const projectName = 'normal-novel';
+
+    execSync(`node "${CLI_PATH}" init ${projectName} --no-git`, {
+      cwd: testDir,
+      stdio: 'pipe',
+    });
+
+    const projectPath = path.join(testDir, projectName);
+    const summaryDir = path.join(projectPath, 'spec', 'tracking', 'summary');
+    const volumesDir = path.join(projectPath, 'spec', 'tracking', 'volumes');
+
+    expect(fs.existsSync(summaryDir)).toBe(false);
+    expect(fs.existsSync(volumesDir)).toBe(false);
+  });
+
+  it('should store scale in config.json when --scale large', () => {
+    const projectName = 'scale-config-test';
+
+    execSync(`node "${CLI_PATH}" init ${projectName} --no-git --scale large`, {
+      cwd: testDir,
+      stdio: 'pipe',
+    });
+
+    const configPath = path.join(testDir, projectName, '.specify', 'config.json');
+    const config = fs.readJsonSync(configPath);
+    expect(config.scale).toBe('large');
+  });
+
   it('should fail gracefully when project already exists', () => {
     const projectName = 'existing-project';
     const projectPath = path.join(testDir, projectName);
