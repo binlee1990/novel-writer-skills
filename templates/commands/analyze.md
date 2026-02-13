@@ -1,6 +1,6 @@
 ---
 description: 智能分析：自动选择框架分析（write前）或内容分析（write后），支持 --type 手动指定
-argument-hint: [--type=framework|content]
+argument-hint: [--type=framework|content] [--range ch-XXX-YYY | --volume vol-XX | --volume-report vol-XX]
 allowed-tools: Bash(find:*), Bash(wc:*), Bash(grep:*), Read(//**), Read(//plugins/**), Read(//plugins/**), Write(//stories/**/analysis-report.md), Bash(*)
 scripts:
   sh: .specify/scripts/bash/check-analyze-stage.sh --json
@@ -41,6 +41,8 @@ scripts:
 - `--range ch-XX-YY` → 指定章节范围分析
 - `--range vol-XX` → 指定卷分析
 - `--range vol-XX-YY` → 多卷范围分析（含跨卷对比）
+- `--volume vol-XX` → 等同于 `--range vol-XX`
+- `--volume-report vol-XX` → 生成指定卷的综合分析报告（见下方详细说明）
 
 **专项分析模式**：
 - `--focus=opening` → 开篇专项分析（前3章）
@@ -58,7 +60,44 @@ scripts:
 - 章节数 < 3 → **框架分析**
 - 章节数 ≥ 3 → **内容分析**
 
-### 3. 资源加载
+### 4. 数据加载策略（三层 Fallback）
+
+当执行 `--range` 或 `--volume` 分析时，按以下优先级加载数据：
+
+**Layer 1: MCP 查询（优先）**
+- 调用 `query_characters --volume=vol-XX` 获取该卷角色数据
+- 调用 `query_plot --volume=vol-XX` 获取该卷情节数据
+- 调用 `query_timeline --chapter_from=X --chapter_to=Y` 获取时间线
+- 调用 `stats_volume --volume=vol-XX` 获取卷统计数据
+
+**Layer 2: 分片 JSON（次优）**
+- 检测 `spec/tracking/volumes/vol-XX/` 是否存在
+- 读取该卷的 4 个分片文件
+- 读取 `spec/tracking/summary/volume-summaries.json` 获取卷元信息
+
+**Layer 3: 单文件 JSON（兜底）**
+- 读取 `spec/tracking/` 下的单文件
+- 根据章节范围手动过滤数据
+
+### 5. --volume-report 综合报告
+
+当使用 `--volume-report vol-XX` 时，生成该卷的完整分析报告，包含：
+
+**报告结构：**
+1. **卷概览**：章节范围、总字数、关键事件、主要角色
+2. **情节分析**：该卷的情节线推进、伏笔埋设与回收、高潮设计
+3. **角色发展**：该卷中角色的成长弧线、关系变化
+4. **节奏评估**：爽点分布、钩子强度、情绪曲线
+5. **一致性检查**：逻辑漏洞、时间线问题、角色行为一致性
+6. **跨卷对比**：与前卷的衔接、与后卷的铺垫
+7. **改进建议**：分级建议（P0/P1/P2）
+
+**数据来源：**
+- 优先使用 MCP `stats_volume` 获取预计算的统计数据
+- 读取该卷的章节文件（`stories/[current]/content/chapter-XXX.md`）
+- 读取该卷的 tracking 数据（分片或单文件）
+
+### 6. 资源加载
 
 **参考 CLAUDE.md 中的资源加载规则**，加载以下基准文档：
 - 宪法文件：`.specify/memory/constitution.md`
@@ -244,6 +283,12 @@ scripts:
 - **[S]** 选择性应用（逐项确认）
 
 应用后追加更新记录到 `tracking-log.md`。
+
+**分片模式写入协议**：
+- 如果检测到 `spec/tracking/volumes/` 存在，确定章节所属卷
+- 更新该卷的分片文件（如 `spec/tracking/volumes/vol-03/character-state.json`）
+- 同步更新全局摘要文件（如 `spec/tracking/summary/characters-summary.json`）
+- 如果 MCP 可用，调用 `sync_from_json` 同步到 SQLite
 
 **错误处理**：
 - tracking 文件不存在 → 建议运行 `/track --init`
