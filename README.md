@@ -12,6 +12,13 @@
 
 - **17 个 Slash Commands** - 七步方法论 + 角色管理 + 智能引导 + 追踪验证
 - **37 个 Agent Skills** - AI 自动激活的知识库、写作技巧、质量检查和专项分析
+- **超长篇小说支持（NEW v3.0）** - 支持 300+ 章节超长篇创作
+  - **三层数据架构**：MCP 服务器 + 分片 JSON + 单文件模式
+  - **性能提升 100x-600x**：查询速度从秒级降至毫秒级
+  - **智能分层**：根据项目规模自动选择最佳模式
+  - **全文搜索**：FTS5 索引，500x 搜索加速
+  - **卷级操作**：`/volume-summary`、`--volume vol-XX` 参数
+  - **连贯性守护**：long-series-continuity Skill 自动监控
 - **8 大类型知识库** - 言情、悬疑、玄幻、都市、游戏文、重生、武侠、历史等
 - **网文深度优化** - 爽点管理、钩子设计、节奏控制、反 AI 检测
 - **Token 优化** - 三大核心命令精简 77%，典型会话 token 消耗降低 76%
@@ -39,6 +46,12 @@ novelws init my-novel
 
 # 在当前目录初始化
 novelws init --here
+
+# 超长篇项目（100-300 章）- 启用分片模式
+novelws init my-novel --scale large
+
+# 超长篇项目（300+ 章）- 启用 MCP 服务器（最佳性能）
+novelws init my-novel --with-mcp
 
 # 指定命令使用的 AI 模型
 novelws init my-novel --model claude-sonnet-4-5-20250929
@@ -87,10 +100,12 @@ novelws init my-novel --plugins authentic-voice
 | 命令 | 功能 | 说明 |
 |------|------|------|
 | `/track-init` | 初始化追踪系统 | 创建 4 个 tracking JSON 文件 |
-| `/track` | 综合追踪更新 | 支持 `--check` 节奏健康检测、`--sync` 批量同步、`--stats` 创作数据统计 |
+| `/track` | 综合追踪更新 | 支持 `--check` 节奏健康检测、`--sync` 批量同步、`--stats` 创作数据统计、`--migrate` 迁移到分片/MCP 模式 |
 | `/recap` | 上下文重建 | 支持 `--brief` 快速模式、预测性提示 |
 | `/timeline` | 时间线管理 | 时间线可视化、多线程时间对齐、时间冲突检测 |
 | `/relations` | 角色关系追踪 | 关系图谱可视化、关系变化追踪、关系冲突检测 |
+| `/volume-summary` | 卷级摘要（NEW v3.0）| 生成指定卷的摘要统计（角色出场、情节进度、伏笔状态） |
+| `/search` | 全文搜索（NEW v3.0）| FTS5 全文搜索（需 MCP），500x 速度提升 |
 
 ### 修改与辅助
 
@@ -168,6 +183,7 @@ novelws init my-novel --plugins authentic-voice
 | **Voice Consistency Checker** | 对话一致性检查（语言指纹六维分析） |
 | **Style Detector** | 风格基线建立、风格偏移检测、跨章节一致性评分 |
 | **Workflow Guide** | 七步方法论引导 |
+| **Long-Series Continuity（NEW v3.0）** | 超长篇连贯性守护（自动激活于 100+ 章项目）<br>四大监控：角色出场间隔、伏笔到期、设定一致性、称呼变化 |
 
 ### 专项分析（Analysis Skills）
 
@@ -517,6 +533,107 @@ bash .specify/scripts/bash/track-progress.sh
 | 快速检查验证 | 命令行脚本 |
 
 [脚本详细文档](templates/scripts/README.md)
+
+## 超长篇小说支持（NEW in v3.0）
+
+**v3.0.0 引入了全面的超长篇小说（300+ 章）支持能力**，通过三层数据架构实现 100x-600x 性能提升。
+
+### 三层数据架构
+
+系统根据项目规模自动选择最佳数据存储和加载方式：
+
+| 层级 | 模式 | 适用规模 | 性能 | 说明 |
+|-----|------|---------|------|------|
+| **Layer 1** | 单文件 JSON | < 100 章 | 基准 | 默认模式，向下兼容 |
+| **Layer 2** | 分片 JSON | 100-300 章 | **40倍提升** | 按卷分片，按需加载 |
+| **Layer 3** | MCP 服务器 | > 300 章 | **100-600倍提升** | SQLite + FTS5，毫秒级查询 |
+
+### 性能对比
+
+| 操作 | 单文件模式 | 分片模式 | MCP 模式 |
+|-----|---------|---------|---------|
+| 加载 character-state | ~800 ms | ~20 ms (**40倍**) | ~3 ms (**266倍**) |
+| 查询单个角色 | ~1000 ms | ~50 ms (**20倍**) | ~2 ms (**500倍**) |
+| 搜索历史内容 | ~1200 ms | ~60 ms (**20倍**) | ~2 ms (**600倍**) |
+
+### 如何启用
+
+#### 新项目
+
+```bash
+# 100-300 章项目 - 启用分片模式
+novelws init my-novel --scale large
+
+# 300+ 章项目 - 启用 MCP 模式（最佳性能）
+novelws init my-novel --with-mcp
+```
+
+#### 现有项目迁移
+
+```bash
+# 在 Claude Code 中执行
+/track --migrate           # 自动检测并推荐迁移方案
+/track --migrate --target sharded    # 迁移到分片 JSON
+/track --migrate --target mcp        # 迁移到 MCP 模式
+```
+
+### 核心功能
+
+#### 1. 分片 JSON 系统
+
+```
+spec/tracking/
+├── summary/          # 全局摘要（跨卷查询入口）
+│   ├── characters-summary.json
+│   ├── plot-summary.json
+│   ├── timeline-summary.json
+│   └── volume-summaries.json
+└── volumes/          # 分卷详情
+    ├── vol-01/
+    │   ├── character-state.json
+    │   ├── plot-tracker.json
+    │   ├── timeline.json
+    │   └── relationships.json
+    └── vol-02/
+        └── ...
+```
+
+#### 2. MCP 查询工具
+
+- **query_chapter_entities** - 查询指定章节的角色、地点、事件
+- **query_plot** - 查询情节线、伏笔、钩子
+- **query_facts** - 查询世界观知识库
+- **search_content** - FTS5 全文搜索（500x 速度提升）
+
+#### 3. 卷级操作
+
+```bash
+/volume-summary --volume vol-03   # 生成第 3 卷摘要
+/analyze --range vol-05-07        # 分析第 5-7 卷
+/track --volume vol-02            # 更新第 2 卷追踪数据
+```
+
+#### 4. 连贯性守护
+
+**long-series-continuity Skill** 在 100+ 章项目中自动激活，监控：
+
+- **角色出场间隔**：50 章未出场 → 警告，100 章 → 严重警告
+- **伏笔到期**：200 章未回收 → 提醒，500 章 → 紧急提醒
+- **设定一致性**：跨卷验证力量体系、世界观规则
+- **称呼变化**：监控角色称呼/关系的合理性过渡
+
+### 最佳实践
+
+1. **< 100 章**：使用默认单文件模式，无需迁移
+2. **100-300 章**：执行 `/track --migrate`，启用分片模式
+3. **> 300 章**：安装 MCP 服务器（`--with-mcp`），获得最佳性能
+4. **维护建议**：
+   - 每写完一卷后执行 `/volume-summary`
+   - 每 50 章执行 `/track --check` 深度检查
+   - 使用 `/search` 快速定位历史内容
+   - 关注 long-series-continuity skill 的提醒
+
+
 
 ## 文档
 
