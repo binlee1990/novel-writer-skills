@@ -5,7 +5,10 @@ import os from 'os';
 
 const scriptPath = path.resolve(__dirname, '../../../templates/scripts/powershell/migrate-tracking.ps1');
 
-describe('migrate-tracking.ps1', () => {
+// PowerShell tests only run on Windows
+const describeOnWindows = process.platform === 'win32' ? describe : describe.skip;
+
+describeOnWindows('migrate-tracking.ps1', () => {
   let tempDir: string;
   let trackingDir: string;
 
