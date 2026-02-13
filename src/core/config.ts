@@ -63,6 +63,8 @@ export const DIRS = {
   TRACKING: 'tracking',
   KNOWLEDGE: 'knowledge',
   SCRIPTS: 'scripts',
+  SUMMARY: 'summary',
+  VOLUMES: 'volumes',
 } as const;
 
 /** 文件名常量 */
@@ -130,6 +132,8 @@ export function getProjectPaths(projectRoot: string) {
     plugins: path.join(projectRoot, DIRS.PLUGINS),
     knowledgeBase: path.join(projectRoot, DIRS.SPECIFY, DIRS.TEMPLATES, DIRS.KNOWLEDGE_BASE),
     specifyScripts: path.join(projectRoot, DIRS.SPECIFY, DIRS.SCRIPTS),
+    trackingSummary: path.join(projectRoot, DIRS.SPEC, DIRS.TRACKING, DIRS.SUMMARY),
+    trackingVolumes: path.join(projectRoot, DIRS.SPEC, DIRS.TRACKING, DIRS.VOLUMES),
   };
 }
 
@@ -147,6 +151,7 @@ export function getTemplateSourcePaths() {
     knowledgeBase: path.join(templatesDir, DIRS.KNOWLEDGE_BASE),
     scripts: path.join(templatesDir, DIRS.SCRIPTS),
     dotClaude: path.join(templatesDir, 'dot-claude'),
+    trackingSummary: path.join(templatesDir, DIRS.TRACKING, DIRS.SUMMARY),
     all: templatesDir,
   };
 }

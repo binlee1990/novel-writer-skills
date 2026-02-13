@@ -100,6 +100,16 @@ describe('core/config.ts', () => {
       const paths = getProjectPaths(projectRoot);
       expect(paths.pluginRegistry).toBe(path.join(projectRoot, '.specify', 'plugins.json'));
     });
+
+    it('should include trackingSummary path', () => {
+      const paths = getProjectPaths(projectRoot);
+      expect(paths.trackingSummary).toBe(path.join(projectRoot, 'spec', 'tracking', 'summary'));
+    });
+
+    it('should include trackingVolumes path', () => {
+      const paths = getProjectPaths(projectRoot);
+      expect(paths.trackingVolumes).toBe(path.join(projectRoot, 'spec', 'tracking', 'volumes'));
+    });
   });
 
   describe('getTemplateSourcePaths()', () => {
@@ -114,6 +124,12 @@ describe('core/config.ts', () => {
       expect(templates.tracking).toBe(path.join(templatesDir, 'tracking'));
       expect(templates.knowledge).toBe(path.join(templatesDir, 'knowledge'));
       expect(templates.all).toBe(templatesDir);
+    });
+
+    it('should include trackingSummary template path', () => {
+      const templates = getTemplateSourcePaths();
+      const templatesDir = getTemplatesDir();
+      expect(templates.trackingSummary).toBe(path.join(templatesDir, 'tracking', 'summary'));
     });
   });
 });
