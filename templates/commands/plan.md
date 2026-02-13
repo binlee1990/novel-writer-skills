@@ -320,9 +320,17 @@ powershell -File {SCRIPT} -Json
 
 **更新流程**：
 1. 从 `creative-plan.md` 提取情节线定义、章节分配、伏笔规划
-2. 生成或合并 `spec/tracking/plot-tracker.json`（保留已有 progress）
-3. 追加更新记录到 `spec/tracking/tracking-log.md`（使用 diff 格式）
-4. 验证 JSON 格式有效性
+2. 按三层 Fallback 读取现有 plot-tracker 数据：
+   - **MCP 查询（优先）**：`query_plot` 获取现有情节线和伏笔
+   - **分片 JSON（次优）**：读取 `spec/tracking/volumes/` 下各卷的 `plot-tracker.json`
+   - **单文件 JSON（兜底）**：读取 `spec/tracking/plot-tracker.json`
+3. 生成或合并 plot-tracker 数据（保留已有 progress）
+4. 写入 tracking 数据：
+   - **分片模式**：按卷写入 `spec/tracking/volumes/vol-XX/plot-tracker.json`，同步更新 `spec/tracking/summary/plot-summary.json`
+   - **单文件模式**：直接写入 `spec/tracking/plot-tracker.json`
+5. 如果 MCP 可用，调用 `sync_from_json` 同步到 SQLite
+6. 追加更新记录到 `spec/tracking/tracking-log.md`（使用 diff 格式）
+7. 验证 JSON 格式有效性
 
 **错误处理**：
 - 计划格式不完整 → 创建基础 plot-tracker（仅含元信息）

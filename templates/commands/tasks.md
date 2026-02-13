@@ -222,8 +222,12 @@ resource-loading:
 2. 提取每章的计划内容
 3. 为每章生成一个写作任务
 4. 自动设置依赖关系（顺序依赖）
-5. 从 `/analyze` 反馈中提取修复任务
-6. 从 `/track --check` 中提取维护任务
+5. 按三层 Fallback 读取 tracking 数据生成修复/维护任务：
+   - **MCP 查询（优先）**：`query_plot --status=overdue` 获取延迟伏笔，`stats_volume` 获取进度
+   - **分片 JSON（次优）**：读取 `spec/tracking/summary/plot-summary.json` 获取未解决伏笔
+   - **单文件 JSON（兜底）**：读取 `spec/tracking/plot-tracker.json`
+6. 从 `/analyze` 反馈中提取修复任务
+7. 从 `/track --check` 中提取维护任务
 
 #### 生成规则
 
