@@ -214,4 +214,41 @@ describe('novelws init', () => {
     expect(content).toContain('反 AI 写作核心');
     expect(content).toContain('会话级资源复用');
   });
+
+  it('should copy volume-summary and search commands', () => {
+    const projectName = 'new-commands-test';
+
+    execSync(`node "${CLI_PATH}" init ${projectName} --no-git`, {
+      cwd: testDir,
+      stdio: 'pipe',
+    });
+
+    const commandsDir = path.join(testDir, projectName, '.claude', 'commands');
+    expect(fs.existsSync(path.join(commandsDir, 'volume-summary.md'))).toBe(true);
+    expect(fs.existsSync(path.join(commandsDir, 'search.md'))).toBe(true);
+  });
+
+  it('should copy long-series-continuity skill', () => {
+    const projectName = 'long-series-skill-test';
+
+    execSync(`node "${CLI_PATH}" init ${projectName} --no-git`, {
+      cwd: testDir,
+      stdio: 'pipe',
+    });
+
+    const qaSkillsDir = path.join(
+      testDir,
+      projectName,
+      '.claude',
+      'skills',
+      'quality-assurance'
+    );
+    const skillPath = path.join(qaSkillsDir, 'long-series-continuity', 'SKILL.md');
+    expect(fs.existsSync(skillPath)).toBe(true);
+
+    // 验证 skill 内容包含关键标记
+    const content = fs.readFileSync(skillPath, 'utf-8');
+    expect(content).toContain('long-series-continuity');
+    expect(content).toContain('超长篇连贯性守护');
+  });
 });
