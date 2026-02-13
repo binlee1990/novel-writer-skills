@@ -1,6 +1,7 @@
 ---
 name: checklist
 description: 生成或执行质量检查清单（规格验证 + 内容扫描）
+argument-hint: [检查类型] [--volume vol-XX | --pre-write | --post-write | --volume-end]
 allowed-tools: Read, Bash, Write, Edit, Glob, Grep
 scripts:
   sh: .specify/scripts/bash/common.sh
@@ -90,6 +91,65 @@ resource-loading:
 ```
 
 **默认行为**: 如果未配置 keyword-triggers，此步骤不执行。
+
+## 数据加载策略
+
+本命令在执行内容验证类检查时，采用 **三层回退** 机制加载 tracking 数据：
+
+### Layer 3: MCP 查询（优先）
+
+```typescript
+// 如果 MCP 已启用且数据已同步
+const stats = await mcp.call('novelws-mcp/stats_consistency', {
+  volume: 'vol-03'     // --volume 参数
+});
+
+const plotData = await mcp.call('novelws-mcp/query_plot', {
+  volume: 'vol-03',
+  status: 'all'
+});
+```
+
+**优势**：
+- 高性能范围查询（volume 过滤）
+- 自动聚合一致性统计
+- 支持跨卷数据对比
+
+### Layer 2: 分片 JSON（次优）
+
+```bash
+# 当 spec/tracking/volumes/ 存在时
+for volume_dir in spec/tracking/volumes/vol-*; do
+  if [[ -n "$VOLUME_FILTER" ]] && [[ "$volume_dir" != *"$VOLUME_FILTER"* ]]; then
+    continue
+  fi
+  # 读取该卷的 tracking 数据
+  cat "$volume_dir/plot-tracker.json"
+  cat "$volume_dir/character-state.json"
+  # ...
+done
+```
+
+**适用场景**：
+- MCP 未启用或同步延迟
+- 需要精确章节级别的检查
+- 手动编辑 JSON 后即时验证
+
+### Layer 1: 单文件 JSON（兜底）
+
+```bash
+# 传统模式，加载完整文件
+cat spec/tracking/plot-tracker.json
+cat spec/tracking/character-state.json
+# ...
+```
+
+**向下兼容**：小型项目（< 300 章）继续使用单文件模式
+
+### 参数过滤行为
+
+- **`--volume vol-XX`**: 仅检查指定卷的内容（Layer 3/2 生效，Layer 1 需手动过滤章节）
+- **阶段性检查** (`--pre-write`, `--post-write`, `--volume-end`): 自动确定检查范围，不受 `--volume` 影响
 
 ## 执行流程
 
@@ -419,6 +479,16 @@ bash .specify/scripts/bash/check-writing-state.sh --checklist
 /checklist 世界观一致性
 /checklist 情节对齐
 /checklist 数据同步
+
+# 卷级检查（超长篇）
+/checklist 世界观一致性 --volume vol-03
+/checklist 情节对齐 --volume vol-02
+/checklist 数据同步 --volume vol-05
+
+# 阶段性检查
+/checklist --pre-write ch-042
+/checklist --post-write ch-042
+/checklist --volume-end vol-03
 ```
 
 ## 注意事项
@@ -427,6 +497,83 @@ bash .specify/scripts/bash/check-writing-state.sh --checklist
 2. **内容验证类 checklist**：用于写作后的内容检查，发现实际产出的问题
 3. 两类 checklist 互补，建议：规划阶段使用第一类，写作阶段使用第二类
 4. 所有 checklist 保存在 `spec/checklists/` 目录，便于追踪历史检查记录
+
+## 数据写入协议
+
+检查结果的保存遵循以下协议：
+
+### 保存位置
+
+- **规格质量类检查**：
+  ```
+  spec/checklists/quality/[类型]-quality-[日期].md
+  ```
+  示例：`spec/checklists/quality/outline-quality-20260214.md`
+
+- **内容验证类检查**：
+  - **单文件模式**：
+    ```
+    spec/checklists/validation/[类型]-[日期].md
+    ```
+  - **分片模式**（如果指定 `--volume`）：
+    ```
+    spec/checklists/validation/[卷]/[类型]-[日期].md
+    ```
+    示例：`spec/checklists/validation/vol-03/world-consistency-20260214.md`
+
+- **阶段性检查**：
+  ```
+  spec/checklists/stage/[阶段]-ch[章节号]-[日期].md
+  ```
+  示例：`spec/checklists/stage/post-write-ch042-20260214.md`
+
+### 写入流程
+
+1. **生成检查清单内容**（基于检查类型和范围）
+
+2. **确定保存路径**：
+   ```typescript
+   const checklistDir = 'spec/checklists';
+   const subDir = isQualityCheck ? 'quality' :
+                  isStageCheck ? 'stage' : 'validation';
+
+   let savePath = `${checklistDir}/${subDir}/`;
+
+   // 如果是卷级检查且为分片模式
+   if (volumeFilter && isSharded && !isQualityCheck) {
+     savePath += `${volumeFilter}/`;
+   }
+
+   savePath += `${checkType}-${date}.md`;
+   ```
+
+3. **写入文件**：
+   ```bash
+   # 确保目录存在
+   mkdir -p "$(dirname "$save_path")"
+
+   # 写入检查清单
+   Write(${save_path})
+   ```
+
+4. **可选：记录检查历史**（如果启用 MCP）：
+   ```bash
+   mcp-cli call novelws-mcp/log_command '{
+     "command": "checklist",
+     "args": "--volume vol-03",
+     "result": "Generated 15 check items"
+   }'
+   ```
+
+### 写入示例
+
+```bash
+# 内容验证类检查（vol-03）
+/checklist 世界观一致性 --volume vol-03
+
+# 保存到: spec/checklists/validation/vol-03/world-consistency-20260214.md
+# 如果 MCP 启用，同时记录到 command_log 表
+```
 
 ## 向后兼容说明
 
