@@ -1,7 +1,7 @@
 ---
 name: recap
 description: 自动重建创作上下文，汇总角色状态、未解决伏笔、情节进展和关系网络，生成结构化简报
-argument-hint: [--brief]
+argument-hint: [--brief | --full vol-XX | --volume vol-XX]
 allowed-tools: Read(//**), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
 ---
 
@@ -40,29 +40,68 @@ allowed-tools: Read(//**), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
 
 ## 执行流程
 
+### 参数解析
+
+- `--brief`：快速模式，只读 volume-summaries.json，生成一页参考卡片（第 8 部分）
+- `--full vol-XX`：读取指定卷的完整详情数据
+- `--volume vol-XX`：等同于 --full vol-XX
+- 无参数：默认模式，读取当前卷详情 + 前卷摘要
+
+---
+
 ### 阶段 1: 数据采集
 
-**读取以下文件（按优先级排序）**：
+#### 三层 Fallback 数据加载
 
-#### 第一优先级：追踪数据（核心数据源）
+按以下优先级加载 tracking 数据：
 
-1. `spec/tracking/character-state.json` - 角色当前状态
-2. `spec/tracking/plot-tracker.json` - 情节追踪（含伏笔）
-3. `spec/tracking/relationships.json` - 关系网络
-4. `spec/tracking/timeline.json` - 时间线
+**Layer 1: MCP 查询（优先尝试）**
 
-#### 第二优先级：创作基础文件
+尝试调用 MCP 工具获取精简数据：
+- `query_characters` --status=active --limit=30 → 活跃角色列表
+- `query_plot` --status=active → 未解决伏笔
+- `query_timeline` --chapter_from=[当前卷起始章] → 当前卷时间线
+- `query_relationships` --volume=[当前卷号] → 当前卷关系
+
+如果任一 MCP 调用失败，回退到 Layer 2。
+
+**Layer 2: 分片 JSON（检测 spec/tracking/volumes/ 是否存在）**
+
+**--brief 模式：**
+- 只读 `spec/tracking/summary/volume-summaries.json`
+- 只读 `spec/tracking/summary/characters-summary.json`（仅 active 部分）
+
+**默认模式：**
+- 读 `spec/tracking/summary/volume-summaries.json` → 获取前卷摘要
+- 读 `spec/tracking/summary/characters-summary.json` → 活跃角色概览
+- 读 `spec/tracking/summary/plot-summary.json` → 未解决伏笔
+- 读当前卷详情：`spec/tracking/volumes/[currentVolume]/` 下的 4 个文件
+
+**--full vol-XX 模式：**
+- 读 `spec/tracking/volumes/vol-XX/` 下的 4 个文件（完整数据）
+- 读 `spec/tracking/summary/volume-summaries.json` → 该卷前后的摘要
+
+**Layer 3: 单文件 JSON（兜底，现有逻辑）**
+- 读 `spec/tracking/character-state.json`
+- 读 `spec/tracking/plot-tracker.json`
+- 读 `spec/tracking/relationships.json`
+- 读 `spec/tracking/timeline.json`
+
+#### 创作基础文件（第二优先级）
 
 5. `stories/[current]/specification.md` - 故事规格
 6. `stories/[current]/creative-plan.md` - 创作计划
 7. `stories/[current]/tasks.md` - 任务清单
 
-#### 第三优先级：最近内容
+#### 最近内容（第三优先级）
 
-8. 最近 3 章的章节文件（`stories/[current]/content/chapter-XX.md`）
-   - 按文件名倒序排列，取最近 3 个
+读取最近 3 章的章节文件（`stories/[current]/content/chapter-XX.md`）。如果指定了 --volume：
+- 只读该卷范围内的最近 3 章
+- 卷的章节范围从 volume-summaries.json 获取
 
-#### 第四优先级：辅助文件（可选）
+无 --volume 时按文件名倒序排列，取最近 3 个。
+
+#### 辅助文件（第四优先级，可选）
 
 9. `.specify/memory/constitution.md` - 创作宪法
 10. `spec/tracking/validation-rules.json` - 验证规则
@@ -100,8 +139,9 @@ allowed-tools: Read(//**), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
 按以下结构生成上下文简报。
 
 **参数处理**：
-- 无参数：生成完整的 8 部分简报
+- 无参数：生成完整的 9 部分简报（当前卷数据）
 - `--brief`：仅生成"快速参考卡片"（第 8 部分）
+- `--full vol-XX` / `--volume vol-XX`：生成指定卷的完整简报
 
 ---
 
