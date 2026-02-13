@@ -1,7 +1,7 @@
 ---
 name: relations
 description: 管理和追踪角色关系变化
-argument-hint: [update | show | history | check] [角色] [关系] [目标角色]
+argument-hint: [update | show | history | check] [角色] [关系] [目标角色] [--volume vol-XX | --character-focus 角色名]
 allowed-tools: Read(//spec/tracking/relationships.json), Read(//spec/tracking/relationships.json), Write(//spec/tracking/relationships.json), Write(//spec/tracking/relationships.json), Bash(find:*), Bash(*)
 scripts:
   sh: .specify/scripts/bash/manage-relations.sh
@@ -31,6 +31,52 @@ resource-loading:
 
 **推荐资源**: character-arc.md（理解关系演变）
 
+## 数据加载策略
+
+本命令采用 **三层回退** 机制加载关系数据：
+
+### Layer 3: MCP 查询（优先）
+
+```typescript
+// 如果 MCP 已启用且数据已同步
+const relationships = await mcp.call('novelws-mcp/query_relationships', {
+  volume: 'vol-03',           // --volume 参数
+  character: '李中庸',         // --character-focus 参数
+  type: 'all'                 // 'ally', 'enemy', 'romantic', 'all'
+});
+```
+
+**优势**：
+- 高性能角色关系过滤（按角色、类型、卷）
+- 自动聚合关系变化趋势
+- 支持复杂关系图谱查询（派系、多级关系）
+
+### Layer 2: 分片 JSON（次优）
+
+```bash
+# 当 spec/tracking/volumes/ 存在时
+relationships_data=$(cat spec/tracking/volumes/vol-03/relationships.json)
+```
+
+**适用场景**：
+- MCP 未启用或同步延迟
+- 需要精确章节级别的关系变化记录
+- 手动编辑 JSON 后即时查看
+
+### Layer 1: 单文件 JSON（兜底）
+
+```bash
+# 传统模式，加载完整文件
+relationships_data=$(cat spec/tracking/relationships.json)
+```
+
+**向下兼容**：小型项目（< 300 章）继续使用单文件模式
+
+### 参数过滤行为
+
+- **`--volume vol-XX`**: 仅加载指定卷的关系变化记录（Layer 3/2 生效，Layer 1 需手动过滤）
+- **`--character-focus 角色名`**: 仅显示与指定角色相关的关系（Layer 3 直接过滤，Layer 1/2 筛选后返回）
+
 ## 功能
 
 1. **关系网络** - 维护角色之间的关系图谱
@@ -40,18 +86,37 @@ resource-loading:
 
 ## 使用方法
 
-执行脚本 {SCRIPT} [操作] [参数]：
-- `update` - 更新角色关系
-- `show` - 显示关系网络
-- `history` - 查看关系变化历史
-- `check` - 验证关系逻辑
+执行脚本 {SCRIPT} [操作] [参数]，支持以下子命令：
 
-示例：
-```
-{SCRIPT} update 李中庸 allies 沈玉卿 --chapter 61 --note 初入翰林相助
-# PowerShell:
-{SCRIPT} -Command update -A 李中庸 -Relation allies -B 沈玉卿 -Chapter 61 -Note 初入翰林相助
-```
+### 子命令
+
+- **`update`** - 更新角色关系
+  ```bash
+  {SCRIPT} update 李中庸 allies 沈玉卿 --chapter 61 --note 初入翰林相助
+  # PowerShell:
+  {SCRIPT} -Command update -A 李中庸 -Relation allies -B 沈玉卿 -Chapter 61 -Note 初入翰林相助
+  ```
+  - 自动确定目标卷（基于章节号）并写入对应分片
+
+- **`show`** - 显示关系网络
+  ```bash
+  {SCRIPT} show --character-focus 李中庸
+  {SCRIPT} show --volume vol-03
+  ```
+  - `--character-focus 角色名`: 仅显示与指定角色相关的关系
+  - `--volume vol-XX`: 仅显示指定卷涉及的关系
+
+- **`history`** - 查看关系变化历史
+  ```bash
+  {SCRIPT} history 李中庸 沈玉卿
+  {SCRIPT} history 李中庸 沈玉卿 --volume vol-02
+  ```
+  - 显示两个角色之间的关系演变时间线
+  - 支持 `--volume` 过滤特定卷的变化
+
+- **`check`** - 验证关系逻辑
+  - 检测关系冲突（态度矛盾、称呼不一致、关系跳跃、单向矛盾）
+  - `--volume vol-XX`: 仅检查指定卷的关系一致性
 
 ## 数据存储
 
@@ -92,6 +157,88 @@ resource-loading:
 最近变化（第60章）：
 - 沈玉卿：陌生人 → 相互吸引
 - 张居正：未知 → 师承关系
+```
+
+## 数据写入协议
+
+关系数据更新遵循以下协议：
+
+### 分片模式（spec/tracking/volumes/ 存在）
+
+1. **确定目标卷**：
+   - 如果命令指定 `--volume vol-XX`，写入对应卷
+   - 如果基于章节号（如 `update` 命令指定 `--chapter 42`），根据章节号确定卷：
+     ```bash
+     # 示例：ch-042 属于 vol-02（假设每卷 50 章）
+     volume_num=$((chapter_num / 50 + 1))
+     target_volume="vol-$(printf '%02d' $volume_num)"
+     ```
+
+2. **写入分片文件**：
+   ```bash
+   # 写入指定卷的 relationships.json
+   Write(spec/tracking/volumes/${target_volume}/relationships.json)
+   ```
+
+3. **更新全局摘要**（如果关系变化影响角色摘要）：
+   ```bash
+   # 更新 characters-summary.json 的关系统计
+   Write(spec/tracking/summary/characters-summary.json)
+   ```
+
+4. **触发 MCP 同步**（如果启用）：
+   ```bash
+   mcp-cli call novelws-mcp/sync_from_json '{
+     "mode": "incremental",
+     "tables": ["relationships"]
+   }'
+   ```
+
+### 单文件模式（传统）
+
+直接写入完整 `relationships.json`：
+```bash
+Write(spec/tracking/relationships.json)
+```
+
+### 写入示例
+
+```typescript
+// update 命令：更新第 42 章的关系
+const chapterNum = 42;
+const volumeNum = Math.floor((chapterNum - 1) / 50) + 1;
+const targetVolume = `vol-${String(volumeNum).padStart(2, '0')}`;
+
+// 读取目标卷的 relationships 分片
+const relPath = isSharded
+  ? `spec/tracking/volumes/${targetVolume}/relationships.json`
+  : 'spec/tracking/relationships.json';
+
+const relationships = JSON.parse(fs.readFileSync(relPath));
+
+// 更新关系
+if (!relationships.characters['李中庸']) {
+  relationships.characters['李中庸'] = {};
+}
+if (!relationships.characters['李中庸'].allies) {
+  relationships.characters['李中庸'].allies = [];
+}
+relationships.characters['李中庸'].allies.push({
+  name: '沈玉卿',
+  chapter: 'ch-042',
+  note: '初入翰林相助'
+});
+
+// 写回分片
+fs.writeFileSync(relPath, JSON.stringify(relationships, null, 2));
+
+// 同步到 MCP（如果启用）
+if (mcpEnabled) {
+  await mcp.call('novelws-mcp/sync_from_json', {
+    mode: 'incremental',
+    tables: ['relationships']
+  });
+}
 ```
 
 ---
