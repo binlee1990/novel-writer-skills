@@ -80,7 +80,7 @@ novelws init my-novel --plugins authentic-voice
 | 命令 | 功能 | 说明 |
 |------|------|------|
 | `/character` | 统一角色管理 | create / list / show / update / relate / voice / timeline |
-| `/guide` | 智能引导 | 自动检测创作阶段，智能推荐引擎，未处理反馈提醒 |
+| `/guide` | 智能引导 | 三层优先级推荐引擎（P0/P1/P2），自动推荐唯一最佳下一步 + 备选操作 |
 
 ### 追踪与验证
 
