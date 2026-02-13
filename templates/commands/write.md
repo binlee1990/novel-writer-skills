@@ -1,6 +1,6 @@
 ---
 description: 基于任务清单执行章节写作，自动加载上下文和验证规则
-argument-hint: [章节编号或任务ID] [--fast]
+argument-hint: [章节编号或任务ID] [--fast] [--batch N] [--volume vol-XX]
 allowed-tools: Read(//**), Write(//stories/**/content/**), Bash(ls:*), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
 scripts:
   sh: .specify/scripts/bash/check-writing-state.sh
@@ -146,7 +146,23 @@ resource-loading:
 
 > **性能优化**：参见 CLAUDE.md 中的「会话级资源复用」章节。
 
-3. **再查（状态和数据）**：
+3. **再查（状态和数据 — 三层 Fallback）**：
+
+   按以下优先级加载 tracking 数据：
+
+   **Layer 1: MCP 查询（优先）**
+   - `query_characters --status=active --limit=20` → 活跃角色
+   - `query_relationships --volume=[当前卷号]` → 当前卷关系
+   - `query_plot --status=active` → 活跃伏笔
+   - `query_facts` → 设定事实
+   - 如果指定了 `--volume vol-XX`，所有查询限定到该卷
+
+   **Layer 2: 分片 JSON（次优，检测 spec/tracking/volumes/ 是否存在）**
+   - 确定当前章节属于哪个卷（从 volume-summaries.json 的 chapters 范围判断）
+   - 读取该卷的分片文件：`spec/tracking/volumes/[currentVolume]/character-state.json` 等
+   - 读取全局摘要：`spec/tracking/summary/characters-summary.json`（活跃角色概览）
+
+   **Layer 3: 单文件 JSON（兜底，现有逻辑）**
    - `spec/tracking/character-state.json`（角色状态）
    - `spec/tracking/relationships.json`（关系网络）
    - `spec/tracking/plot-tracker.json`（情节追踪 - 如有）
@@ -428,9 +444,16 @@ count_chinese_words "stories/*/content/第X章.md"
 ### 执行步骤
 
 1. **分析本章内容**：提取角色、关系变化、情节推进、时间线信息
-2. **读取现有 tracking 文件**：character-state.json, relationships.json, plot-tracker.json, timeline.json
+2. **读取现有 tracking 文件**（按三层 Fallback 加载）
 3. **合并更新**：将新内容增量合并到现有数据
-4. **记录日志**：追加到 `spec/tracking/tracking-log.md`
+4. **写入 tracking 数据**：
+   - **分片模式**：确定当前章节所属卷，更新该卷的分片文件，同步更新全局摘要
+   - **单文件模式**：直接更新 `spec/tracking/` 下的文件
+5. **MCP 同步**（如果可用）：
+   - `log_writing_session` — 记录本次写作的章节号、字数
+   - `sync_from_json` — 将更新后的 tracking 数据同步到 SQLite
+   - 更新 FTS 索引 — 将新章节内容索引到全文检索
+6. **记录日志**：追加到 `spec/tracking/tracking-log.md`
 
 > **详细格式和示例**：参见 `.claude/skills/auto-tracking/SKILL.md`
 
@@ -490,6 +513,45 @@ count_chinese_words "stories/*/content/第X章.md"
 ### 智能推荐（后置）
 
 检查 P0/P1 级别推荐（角色缺席、伏笔紧急度），在命令链式提示中展示。
+
+## 🆕 批量写作模式（`--batch N`）
+
+**触发条件**：用户参数 `$ARGUMENTS` 包含 `--batch N`（N 为章节数，1-5）
+
+**执行模型**：Flow-Pipeline，逐章执行完整写作流程。
+
+### 流程
+
+```
+for i in 1..N:
+  1. 加载上下文（首章完整加载，后续章增量更新）
+  2. 执行写作（正常模式或 --fast 模式）
+  3. 后置处理（tracking 更新、checkpoint 保存）
+  4. 将本章结果作为下一章的上下文输入
+```
+
+### 上下文传递
+
+- **首章**：完整执行三层 Fallback 数据加载
+- **后续章**：复用已加载的资源，仅增量更新：
+  - 上一章的结尾内容（续写衔接）
+  - 上一章更新后的角色状态
+  - 上一章更新后的伏笔状态
+  - tasks.md 中的下一个 pending 任务
+
+### 中断与恢复
+
+- 每章完成后保存 checkpoint（含 batch 进度：`batchIndex: 2/5`）
+- 中断后可通过 `/write --batch` 恢复（检测 checkpoint 中的 batch 状态）
+- 单章写作失败不影响已完成的章节
+
+### 限制
+
+- `--batch` 最大值为 5（避免上下文过长导致质量下降）
+- 可与 `--fast` 组合使用：`/write --batch 3 --fast`
+- 可与 `--volume` 组合使用：`/write --batch 3 --volume vol-02`
+
+---
 
 ## 🔗 命令链式提示
 
