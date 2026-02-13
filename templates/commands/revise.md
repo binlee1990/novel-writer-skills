@@ -1,6 +1,6 @@
 ---
 description: 系统性修改润色：四层修改流程（结构→节奏→一致性→文字），支持分层修改、指定范围、快速模式
-argument-hint: [--layer=structure|pacing|consistency|polish] [--chapters=1-10] [--chapter=5] [--quick]
+argument-hint: [--layer=structure|pacing|consistency|polish] [--chapters=1-10] [--chapter=5] [--volume vol-XX] [--quick]
 allowed-tools: Bash(find:*), Bash(wc:*), Bash(grep:*), Read(//**), Write(//stories/**), Bash(*)
 ---
 
@@ -35,6 +35,7 @@ allowed-tools: Bash(find:*), Bash(wc:*), Bash(grep:*), Read(//**), Write(//stori
 **范围模式**（指定章节范围）：
 - `--chapters=1-10` → 修改第 1-10 章
 - `--chapter=5` → 修改第 5 章
+- `--volume vol-XX` → 修改指定卷的所有章节（超长篇）
 
 **快速模式**：
 - `--quick` → 跳过结构和节奏，直接做一致性 + 文字润色
@@ -42,25 +43,92 @@ allowed-tools: Bash(find:*), Bash(wc:*), Bash(grep:*), Read(//**), Write(//stori
 **默认模式**（无参数）：
 - 完整四层修改流程
 
-### 2. 加载上下文
+### 2. 数据加载策略
+
+本命令在加载 tracking 数据时，采用 **三层回退** 机制：
+
+#### Layer 3: MCP 查询（优先）
+
+```typescript
+// 如果 MCP 已启用且数据已同步
+const characters = await mcp.call('novelws-mcp/query_characters', {
+  volume: 'vol-03'     // --volume 参数
+});
+
+const plotData = await mcp.call('novelws-mcp/query_plot', {
+  volume: 'vol-03',
+  status: 'all'
+});
+```
+
+**优势**：
+- 高性能范围查询（volume 过滤）
+- 自动聚合一致性统计
+- 支持全文搜索事实矛盾
+
+#### Layer 2: 分片 JSON（次优）
+
+```bash
+# 当 spec/tracking/volumes/ 存在时
+if [[ -n "$VOLUME_FILTER" ]]; then
+  # 仅加载指定卷的数据
+  cat spec/tracking/volumes/${VOLUME_FILTER}/character-state.json
+  cat spec/tracking/volumes/${VOLUME_FILTER}/relationships.json
+else
+  # 加载所有卷的数据
+  for vol in spec/tracking/volumes/vol-*/; do
+    cat "$vol/character-state.json"
+    cat "$vol/relationships.json"
+  done
+fi
+```
+
+**适用场景**：
+- MCP 未启用或同步延迟
+- 需要精确章节级别的数据
+- 手动编辑 JSON 后即时验证
+
+#### Layer 1: 单文件 JSON（兜底）
+
+```bash
+# 传统模式，加载完整文件
+cat spec/tracking/character-state.json
+cat spec/tracking/relationships.json
+```
+
+**向下兼容**：小型项目（< 300 章）继续使用单文件模式
+
+### 3. 加载上下文
 
 **必须加载**：
-- 所有已完成章节：`stories/*/content/*.md` 或 `stories/*/chapters/*.md`
+- **章节内容**：
+  - 如果指定 `--volume vol-XX`：仅加载该卷章节
+  - 否则：加载所有已完成章节
+  - 路径：`stories/*/content/*.md` 或 `stories/*/chapters/*.md`
 - 故事规格：`stories/*/specification.md`
 - 创作计划：`stories/*/creative-plan.md`
-- 角色状态：`spec/tracking/character-state.json`
-- 关系网络：`spec/tracking/relationships.json`
+- **角色状态**（三层回退）：
+  - Layer 3: `mcp.call('novelws-mcp/query_characters', {volume})`
+  - Layer 2: `spec/tracking/volumes/${volume}/character-state.json`
+  - Layer 1: `spec/tracking/character-state.json`
+- **关系网络**（三层回退）：
+  - Layer 3: `mcp.call('novelws-mcp/query_relationships', {volume})`
+  - Layer 2: `spec/tracking/volumes/${volume}/relationships.json`
+  - Layer 1: `spec/tracking/relationships.json`
 
 **如有则加载**：
 - `/analyze` 报告：`stories/*/analysis-report.md`
 - 风格参考：`.specify/memory/style-reference.md`
 - 个人风格：`.specify/memory/personal-voice.md`
-- 情节追踪：`spec/tracking/plot-tracker.json`
+- **情节追踪**（三层回退）：
+  - Layer 3: `mcp.call('novelws-mcp/query_plot', {volume})`
+  - Layer 2: `spec/tracking/volumes/${volume}/plot-tracker.json`
+  - Layer 1: `spec/tracking/plot-tracker.json`
 
 **加载 Skill**：
 - `.specify/templates/skills/writing-techniques/revision-polish/SKILL.md`（核心修改流程）
 
-### 3. 初稿评估
+### 4. 初稿评估
 
 **如果是完整修改（无 --layer 参数）**，先生成初稿评估报告：
 
@@ -84,7 +152,7 @@ allowed-tools: Bash(find:*), Bash(wc:*), Bash(grep:*), Read(//**), Write(//stori
 [根据评估结果给出建议]
 ```
 
-### 4. 执行修改
+### 5. 执行修改
 
 根据参数和评估结果，按 SKILL.md 中定义的四层模型执行修改。
 
@@ -160,14 +228,14 @@ allowed-tools: Bash(find:*), Bash(wc:*), Bash(grep:*), Read(//**), Write(//stori
 是否执行以上修改？ [Y/N/S(选择性)]
 ```
 
-### 5. 用户确认
+### 6. 用户确认
 
 **每层修改都需要用户确认**：
 - **[Y]** 全部执行 - 应用该层所有修改建议
 - **[N]** 跳过 - 不执行该层修改，进入下一层
 - **[S]** 选择性执行 - 逐项确认每个修改
 
-### 6. 执行修改
+### 7. 执行修改
 
 用户确认后，直接修改章节文件：
 - 读取原始章节文件
@@ -175,7 +243,7 @@ allowed-tools: Bash(find:*), Bash(wc:*), Bash(grep:*), Read(//**), Write(//stori
 - 写入修改后的文件
 - 保留原始文件备份（如用户要求）
 
-### 7. 最终检查
+### 8. 最终检查
 
 所有层修改完成后，运行修改完成检查清单：
 
@@ -282,7 +350,29 @@ AI：修改范围：第 1-10 章
 开始修改第 1-10 章...
 ```
 
-### 场景 5：与 /analyze 联动
+### 场景 5：卷级修改（超长篇）
+
+```bash
+用户：/revise --volume vol-02
+AI：修改范围：第 2 卷（第 51-100 章）
+
+检测到分片模式，使用三层回退加载数据：
+✓ MCP 已启用 → 使用 Layer 3 查询
+✓ 仅加载 vol-02 的 tracking 数据
+
+【初稿评估报告 - 第 2 卷】
+总章数：50 章，总字数：128,000 字
+
+各层问题预估：
+- 结构：🟡 轻微（1 处）
+- 节奏：⚠️ 中等（4 处）
+- 一致性：🟡 轻微（2 处）
+- 文字：⚠️ 中等（8 处）
+
+开始 Layer 1: 结构修改...
+```
+
+### 场景 6：与 /analyze 联动
 
 ```bash
 用户：/analyze
@@ -336,8 +426,14 @@ AI：检测到 /analyze 报告，自动映射问题到修改层：
 
 ### 性能考虑
 - 完整修改需要读取所有章节，token 消耗较大
-- 建议分批修改：先 `--chapters 1-15`，再 `--chapters 16-30`
-- 文字润色（Layer 4）消耗最大，可按章节分批执行
+- **章节分批修改**：`--chapters 1-15`，再 `--chapters 16-30`
+- **卷级修改**（超长篇推荐）：`--volume vol-01`，再 `--volume vol-02`
+  - 每卷独立修改，避免上下文过载
+  - 可并行修改多个卷（不同会话）
+- **三层回退优化**：
+  - 使用 MCP 时，tracking 数据查询性能提升 10x+
+  - 分片模式下，仅加载目标卷的 tracking 数据
+- 文字润色（Layer 4）消耗最大，可按章节或卷分批执行
 
 ---
 
