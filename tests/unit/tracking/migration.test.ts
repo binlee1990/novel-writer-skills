@@ -3,12 +3,22 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 
-const scriptPath = path.resolve(__dirname, '../../../templates/scripts/powershell/migrate-tracking.ps1');
+// 根据平台选择脚本路径和执行命令
+const isWindows = process.platform === 'win32';
+const scriptPath = isWindows
+  ? path.resolve(__dirname, '../../../templates/scripts/powershell/migrate-tracking.ps1')
+  : path.resolve(__dirname, '../../../templates/scripts/bash/migrate-tracking.sh');
 
-// PowerShell tests only run on Windows
-const describeOnWindows = process.platform === 'win32' ? describe : describe.skip;
+// 构建执行命令的辅助函数
+function buildCommand(mode: string, json = true): string {
+  if (isWindows) {
+    return `powershell -File "${scriptPath}" -Mode ${mode}${json ? ' -Json' : ''}`;
+  } else {
+    return `bash "${scriptPath}" --mode ${mode}${json ? ' --json' : ''}`;
+  }
+}
 
-describeOnWindows('migrate-tracking.ps1', () => {
+describe('migrate-tracking script', () => {
   let tempDir: string;
   let trackingDir: string;
 
@@ -27,7 +37,7 @@ describeOnWindows('migrate-tracking.ps1', () => {
       fs.writeJsonSync(path.join(trackingDir, 'character-state.json'), { protagonist: { name: 'test' } });
 
       const output = execSync(
-        `powershell -File "${scriptPath}" -Mode check -Json`,
+        buildCommand('check'),
         { cwd: tempDir, encoding: 'utf-8' }
       );
 
@@ -43,7 +53,7 @@ describeOnWindows('migrate-tracking.ps1', () => {
       fs.writeJsonSync(path.join(trackingDir, 'character-state.json'), largeData);
 
       const output = execSync(
-        `powershell -File "${scriptPath}" -Mode check -Json`,
+        buildCommand('check'),
         { cwd: tempDir, encoding: 'utf-8' }
       );
 
@@ -57,7 +67,7 @@ describeOnWindows('migrate-tracking.ps1', () => {
       fs.ensureDirSync(path.join(trackingDir, 'volumes', 'vol-02'));
 
       const output = execSync(
-        `powershell -File "${scriptPath}" -Mode check -Json`,
+        buildCommand('check'),
         { cwd: tempDir, encoding: 'utf-8' }
       );
 
@@ -68,7 +78,7 @@ describeOnWindows('migrate-tracking.ps1', () => {
 
     it('should handle no tracking files gracefully', () => {
       const output = execSync(
-        `powershell -File "${scriptPath}" -Mode check -Json`,
+        buildCommand('check'),
         { cwd: tempDir, encoding: 'utf-8' }
       );
 
@@ -86,7 +96,7 @@ describeOnWindows('migrate-tracking.ps1', () => {
       fs.writeJsonSync(path.join(trackingDir, 'plot-tracker.json'), { plots: [] });
 
       const output = execSync(
-        `powershell -File "${scriptPath}" -Mode backup -Json`,
+        buildCommand('backup'),
         { cwd: tempDir, encoding: 'utf-8' }
       );
 
@@ -101,7 +111,7 @@ describeOnWindows('migrate-tracking.ps1', () => {
       fs.writeJsonSync(path.join(trackingDir, 'story-facts.json'), { facts: [] });
 
       const output = execSync(
-        `powershell -File "${scriptPath}" -Mode backup -Json`,
+        buildCommand('backup'),
         { cwd: tempDir, encoding: 'utf-8' }
       );
 
@@ -115,7 +125,7 @@ describeOnWindows('migrate-tracking.ps1', () => {
       fs.writeJsonSync(path.join(trackingDir, 'character-state.json'), { test: true });
 
       const output = execSync(
-        `powershell -File "${scriptPath}" -Mode auto -Json`,
+        buildCommand('auto'),
         { cwd: tempDir, encoding: 'utf-8' }
       );
 
@@ -130,7 +140,7 @@ describeOnWindows('migrate-tracking.ps1', () => {
       fs.ensureDirSync(path.join(trackingDir, 'volumes', 'vol-01'));
 
       const output = execSync(
-        `powershell -File "${scriptPath}" -Mode auto -Json`,
+        buildCommand('auto'),
         { cwd: tempDir, encoding: 'utf-8' }
       );
 
