@@ -2,6 +2,7 @@
 name: character
 description: "统一角色管理 — 创建、查看、更新角色档案，管理角色关系，设定对话指纹"
 argument-hint: [子命令] [角色名或参数] [--volume vol-XX]
+recommended-model: claude-sonnet-4-5-20250929 # 角色设定中等复杂度；复杂角色可用 opus
 allowed-tools: Read, Write, Glob, Grep, Edit
 ---
 

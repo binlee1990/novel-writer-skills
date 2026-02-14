@@ -1,6 +1,7 @@
 ---
 description: 系统性修改润色：四层修改流程（结构→节奏→一致性→文字），支持分层修改、指定范围、快速模式
 argument-hint: [--layer=structure|pacing|consistency|polish] [--chapters=1-10] [--chapter=5] [--volume vol-XX] [--quick]
+recommended-model: claude-sonnet-4-5-20250929 # 修改任务；重大改写可用 opus
 allowed-tools: Bash(find:*), Bash(wc:*), Bash(grep:*), Read(//**), Write(//stories/**), Bash(*)
 ---
 

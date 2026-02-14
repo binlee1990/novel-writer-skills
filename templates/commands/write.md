@@ -1,6 +1,7 @@
 ---
 description: 基于任务清单执行章节写作，自动加载上下文和验证规则
 argument-hint: [章节编号或任务ID] [--fast] [--batch N] [--volume vol-XX]
+recommended-model: claude-opus-4-6 # 创作质量最高；--fast 时可用 sonnet
 allowed-tools: Read(//**), Write(//stories/**/content/**), Bash(ls:*), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
 scripts:
   sh: .specify/scripts/bash/check-writing-state.sh

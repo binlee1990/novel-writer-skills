@@ -2,6 +2,7 @@
 name: search
 description: 全文搜索章节内容和 tracking 数据（支持中文分词、正则表达式、范围过滤）
 argument-hint: <关键词> [--type=content|tracking|all] [--volume vol-XX] [--fuzzy] [--regex]
+recommended-model: claude-haiku-4-5-20251001 # 简单查询，速度优先
 allowed-tools: Read, Grep, Bash
 ---
 

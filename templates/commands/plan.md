@@ -1,6 +1,7 @@
 ---
 description: 基于故事规格制定技术实现方案
 argument-hint: [技术偏好和选择] [--detail vol-XX]
+recommended-model: claude-opus-4-6 # 需要创意和规划能力
 allowed-tools: Read(//stories/**/specification.md), Read(//stories/**/specification.md), Read(//stories/**/creative-plan.md), Read(//stories/**/creative-plan.md), Read(//plugins/**), Read(//plugins/**), Write(//stories/**/creative-plan.md), Write(//stories/**/creative-plan.md), Read(//.specify/memory/constitution.md), Read(//.specify/memory/constitution.md), Bash(find:*), Bash(grep:*), Bash(*)
 scripts:
   sh: .specify/scripts/bash/plan-story.sh

@@ -2,6 +2,7 @@
 name: track
 description: 综合追踪小说创作进度和内容
 argument-hint: [--brief | --plot | --stats | --check [--volume vol-XX] | --fix | --sync [--incremental] | --migrate [--auto | --volumes "1-100,101-200"] | --log]
+recommended-model: claude-haiku-4-5-20251001 # --sync 数据更新速度优先；--check 深度检查可用 sonnet
 allowed-tools: Read(//spec/tracking/**), Read(//spec/tracking/**), Read(//stories/**), Read(//stories/**), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
 scripts:
   sh: .specify/scripts/bash/track-progress.sh

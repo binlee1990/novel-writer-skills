@@ -2,6 +2,7 @@
 name: help-me
 description: "通过自然语言描述需求，AI推荐最合适的命令并给出使用示例"
 argument-hint: <你的需求描述>
+recommended-model: claude-haiku-4-5-20251001 # 命令推荐，速度优先
 allowed-tools: Read, Glob
 ---
 

@@ -1,6 +1,7 @@
 ---
 description: 智能分析：自动选择框架分析（write前）或内容分析（write后），支持 --type 手动指定
 argument-hint: [--type=framework|content] [--range ch-XXX-YYY | --volume vol-XX | --volume-report vol-XX]
+recommended-model: claude-sonnet-4-5-20250929 # 分析任务，质量与速度平衡；深度分析可用 opus
 allowed-tools: Bash(find:*), Bash(wc:*), Bash(grep:*), Read(//**), Read(//plugins/**), Read(//plugins/**), Write(//stories/**/analysis-report.md), Bash(*)
 scripts:
   sh: .specify/scripts/bash/check-analyze-stage.sh --json
