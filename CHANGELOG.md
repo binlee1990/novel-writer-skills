@@ -5,6 +5,63 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-02-15
+
+### Added
+
+#### Phase 1: 创作质量核心 - AI 去味智能化
+
+- **writing-balance Skill** - 6 维度写作平衡评分系统
+  - 句长分布、词汇丰富度、描写层次、成语使用、句式变化、自然度
+  - 从"禁止列表"转向"智能平衡"，保留创作自由度
+  - 量化评分 + 改进建议，替代一刀切禁用
+- **writing-techniques Skill** - 8 模块写作技巧教学
+  - 标点艺术、句式变化、描写手法、对话真实化、节奏控制、留白艺术、词汇丰富化、AI 模式规避
+- **anti-ai-v5-balanced 规则** - 平衡版去 AI 规范，替代旧版 anti-ai-v4
+- **`/write` 命令集成** - 写作时自动调用 writing-balance 评分
+
+#### Phase 2: 用户体验提升
+
+- **`/help-me` 命令** - 自然语言命令发现
+  - 50+ 场景映射，用自然语言描述需求即可找到最佳命令
+  - 支持模糊匹配和多关键词组合
+- **`/guide` 命令增强** - 上下文感知推荐引擎
+  - 基于项目当前状态智能推荐，提升推荐精准度
+- **统一错误处理框架** - 4 个新错误类
+  - `CommandNotFoundError`、`InvalidArgumentError`、`ProjectStateError`、`TrackingDataError`
+  - 每个错误附带修复建议和相关命令提示
+- **诊断系统** - `ProjectDiagnostics` 类
+  - 5 项自动检查：项目结构、tracking 文件、项目模式、MCP 状态、文件完整性
+  - 自动生成修复命令建议
+
+#### Phase 3: 功能扩展与优化
+
+- **5 个新 genre 知识库**
+  - `horror.md` - 恐怖（氛围营造、恐惧递进、心理恐怖）
+  - `youth.md` - 青春（校园、成长、青涩情感）
+  - `military.md` - 军事（战争、军旅、战术谋略）
+  - `sports.md` - 竞技（体育、比赛、热血成长）
+  - `workplace.md` - 职场（商战、职场博弈、行业深耕）
+- **AI 模型智能选择** - 8 个命令模板添加 `recommended-model` 字段
+  - opus：深度分析任务（analyze --type=framework、plan、revise）
+  - sonnet：平衡任务（write、track --check、character）
+  - haiku：速度优先（track --sync、search、help-me）
+
+### Changed
+
+- **anti-ai 规则升级** - v4 禁止列表 → v5 智能平衡评分
+- **`/track` 命令 Token 优化** - 1,080 行 → 704 行（精简 35%），保留所有核心功能
+
+### Technical
+
+- **测试增长** - 275 → 312 个测试（+37 个）
+- **测试结果** - 312 个测试全部通过，21 个 test suites，零回归
+- **新增 Skills** - writing-balance、writing-techniques（共 2 个）
+- **新增命令** - `/help-me`（共 1 个）
+- **新增 genre** - horror、youth、military、sports、workplace（共 5 个）
+
+---
+
 ## [3.0.0] - 2026-02-14
 
 ### Added

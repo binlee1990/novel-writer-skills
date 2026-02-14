@@ -20,6 +20,18 @@
   - ❌ `ls "D:\repository\cursor\novel-writer-skills\docs\plans\"`
 - 路径中包含空格时使用双引号，但避免路径以 `\` 结尾再紧跟 `"`
 
+### Glob 工具使用优化
+- Glob 工具**不会自动排除** `node_modules`、`dist`、`.git` 等目录，搜索 `**/*.md` 这类宽泛 pattern 时结果会被淹没
+- **优化策略**：
+  1. **指定精确的 path 参数**：搜索项目文件时，用 `path` 限定到具体子目录（如 `docs/`、`src/`、`templates/`），避免扫描 `node_modules`
+  2. **避免 `**/` 递归通配**：如果目标文件在项目根目录，直接用 `README.md` 而非 `**/README.md`
+  3. **优先用 Grep 搜索代码内容**：Grep 工具默认尊重 `.gitignore`，不会搜索 `node_modules`
+  4. **已知文件直接 Read**：如果已知文件路径（如 `README.md`、`CHANGELOG.md`），直接用 Read 工具读取，不需要先 Glob 确认存在
+- **示例**：
+  - ✅ `Glob pattern="README.md" path="D:/repository/cursor/novel-writer-skills"` （只搜根目录）
+  - ✅ `Glob pattern="*.md" path="D:/repository/cursor/novel-writer-skills/docs"` （限定子目录）
+  - ❌ `Glob pattern="**/README.md"` （会扫描 node_modules，结果被淹没）
+
 ### Bash 最小化原则
 - **禁止用 Bash 执行文件读写操作**，必须使用专用工具替代：
   - 读取文件：用 `Read` 工具，**禁止** `cat`/`head`/`tail`
