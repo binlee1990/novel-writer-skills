@@ -110,6 +110,48 @@ export class PluginAlreadyInstalledError extends NovelWriterError {
   }
 }
 
+/** 文件缺失错误（带修复建议） */
+export class MissingFileError extends NovelWriterError {
+  constructor(filePath: string, suggestion: string) {
+    super(
+      `文件不存在: ${filePath}\n\n💡 修复建议: ${suggestion}`,
+      'MISSING_FILE'
+    );
+  }
+}
+
+/** 模式不匹配错误 */
+export class ModeMismatchError extends NovelWriterError {
+  constructor(expectedMode: string, actualMode: string, action: string) {
+    super(
+      `模式不匹配: 当前项目使用 ${actualMode} 模式，但 ${action} 需要 ${expectedMode} 模式\n\n` +
+      `💡 修复建议: 运行 /track --migrate --target ${expectedMode}`,
+      'MODE_MISMATCH'
+    );
+  }
+}
+
+/** 数据完整性错误 */
+export class DataIntegrityError extends NovelWriterError {
+  constructor(issue: string, autoFixed: boolean) {
+    super(
+      `数据完整性问题: ${issue}\n\n` +
+      (autoFixed ? '✅ 已自动修复' : '⚠️ 需要手动检查'),
+      'DATA_INTEGRITY'
+    );
+  }
+}
+
+/** 依赖缺失错误 */
+export class DependencyMissingError extends NovelWriterError {
+  constructor(dependency: string, installCmd: string) {
+    super(
+      `缺少依赖: ${dependency}\n\n💡 安装方法: ${installCmd}`,
+      'DEPENDENCY_MISSING'
+    );
+  }
+}
+
 /**
  * CLI 全局错误处理
  * 将 NovelWriterError 格式化为用户友好的输出，非预期错误输出堆栈

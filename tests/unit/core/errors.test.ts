@@ -9,6 +9,10 @@ import {
   PlatformError,
   ConfigError,
   PluginAlreadyInstalledError,
+  MissingFileError,
+  ModeMismatchError,
+  DataIntegrityError,
+  DependencyMissingError,
   handleError,
 } from '../../../src/core/errors.js';
 
@@ -132,6 +136,64 @@ describe('core/errors.ts', () => {
       const err = new PluginAlreadyInstalledError('test-plugin');
       expect(err.code).toBe('PLUGIN_ALREADY_INSTALLED');
       expect(err.message).toContain('test-plugin');
+    });
+  });
+
+  describe('MissingFileError', () => {
+    it('should create with suggestion', () => {
+      const err = new MissingFileError(
+        'spec/tracking/character-state.json',
+        '运行 /track-init 初始化追踪系统'
+      );
+      expect(err).toBeInstanceOf(NovelWriterError);
+      expect(err.message).toContain('spec/tracking/character-state.json');
+      expect(err.message).toContain('💡 修复建议');
+      expect(err.message).toContain('/track-init');
+      expect(err.name).toBe('MissingFileError');
+      expect(err.code).toBe('MISSING_FILE');
+    });
+  });
+
+  describe('ModeMismatchError', () => {
+    it('should create with migration suggestion', () => {
+      const err = new ModeMismatchError('mcp', 'single-file', '/search');
+      expect(err).toBeInstanceOf(NovelWriterError);
+      expect(err.message).toContain('single-file');
+      expect(err.message).toContain('mcp');
+      expect(err.message).toContain('/search');
+      expect(err.message).toContain('/track --migrate');
+      expect(err.name).toBe('ModeMismatchError');
+      expect(err.code).toBe('MODE_MISMATCH');
+    });
+  });
+
+  describe('DataIntegrityError', () => {
+    it('should show auto-fix message when fixed', () => {
+      const err = new DataIntegrityError('character-state.json 格式错误', true);
+      expect(err).toBeInstanceOf(NovelWriterError);
+      expect(err.message).toContain('character-state.json');
+      expect(err.message).toContain('✅ 已自动修复');
+      expect(err.name).toBe('DataIntegrityError');
+      expect(err.code).toBe('DATA_INTEGRITY');
+    });
+
+    it('should show manual check message when not fixed', () => {
+      const err = new DataIntegrityError('timeline.json 数据冲突', false);
+      expect(err.message).toContain('⚠️ 需要手动检查');
+    });
+  });
+
+  describe('DependencyMissingError', () => {
+    it('should create with install instructions', () => {
+      const err = new DependencyMissingError(
+        'MCP服务器',
+        '检查 .claude/config.json 中的 mcpServers 配置'
+      );
+      expect(err).toBeInstanceOf(NovelWriterError);
+      expect(err.message).toContain('MCP服务器');
+      expect(err.message).toContain('.claude/config.json');
+      expect(err.name).toBe('DependencyMissingError');
+      expect(err.code).toBe('DEPENDENCY_MISSING');
     });
   });
 
