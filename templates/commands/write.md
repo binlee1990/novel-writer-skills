@@ -8,6 +8,28 @@ scripts:
 ---
 
 基于七步方法论流程执行章节写作。
+
+---
+
+## 自动激活的Skills
+
+本命令自动激活以下Skills：
+
+1. **writing-balance** - 智能写作平衡监控
+   - 文件: @templates/skills/writing-techniques/writing-balance/SKILL.md
+   - 功能: 写作完成后自动评估6个维度平衡度
+   - 输出: 平衡度评估报告 + 改进建议
+
+2. **writing-techniques** - 写作技巧教学
+   - 文件: @templates/skills/writing-techniques/writing-techniques/SKILL.md
+   - 功能: 应用8个模块的写作技巧
+   - 效果: 提升文字自然度、层次感、节奏变化
+
+**说明**:
+- 这两个Skills协同工作，替代了旧的 anti-ai-v4 禁止列表
+- 用户无需手动激活，AI会自动应用
+- 如需自定义配置，可在 specification.md 中添加 `writing_balance_config`
+
 ---
 
 ## 写作前准备（推荐）
