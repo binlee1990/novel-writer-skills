@@ -14,7 +14,7 @@ describe('Phase 1: Writing Balance Integration', () => {
     expect(content).toContain('句长分布平衡度');
     expect(content).toContain('词汇丰富度');
     expect(content).toContain('描写层次感');
-    expect(content).toContain('成语使用度');
+    expect(content).toContain('成语/四字词使用度');
     expect(content).toContain('句式变化度');
     expect(content).toContain('自然度评分');
   });
