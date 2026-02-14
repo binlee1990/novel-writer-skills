@@ -18,7 +18,7 @@ describe('novelws init', () => {
     } catch {
       // ignore cleanup errors on Windows
     }
-  });
+  }, 30_000);
 
   it('should create project with correct directory structure', () => {
     const projectName = 'test-novel';

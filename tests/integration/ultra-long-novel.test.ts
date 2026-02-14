@@ -18,7 +18,7 @@ describe('Ultra-long novel support - integration', () => {
     } catch {
       // ignore cleanup errors on Windows
     }
-  });
+  }, 30_000);
 
   describe('init --scale large', () => {
     it('should create complete sharded directory structure', () => {
