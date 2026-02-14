@@ -1,3 +1,9 @@
+---
+name: writing-balance-monitor
+description: "Use when writing to monitor writing balance across 6 dimensions - provides real-time scoring and improvement suggestions to avoid AI-like patterns"
+allowed-tools: Read
+---
+
 # Writing Balance - 智能写作平衡监控
 
 ## Skill类型
