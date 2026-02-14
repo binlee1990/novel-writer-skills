@@ -29,3 +29,51 @@ allowed-tools: Read
 ## 核心指标（6个维度）
 
 ### 1. 句长分布平衡度 (Sentence Length Distribution)
+
+**检测标准**:
+- 短句（<12字）: 30-40%
+- 中句（12-25字）: 40-50%
+- 长句（>25字）: 10-20%
+
+**评分算法**:
+
+```python
+# 伪代码示例
+def score_sentence_length(sentences):
+    short = count(len(s) < 12 for s in sentences)
+    medium = count(12 <= len(s) <= 25 for s in sentences)
+    long = count(len(s) > 25 for s in sentences)
+
+    total = len(sentences)
+    short_pct = short / total
+    medium_pct = medium / total
+    long_pct = long / total
+
+    # 理想分布：短35% 中50% 长15%
+    ideal = (0.35, 0.50, 0.15)
+    actual = (short_pct, medium_pct, long_pct)
+
+    # 计算偏差（欧氏距离）
+    deviation = sqrt(sum((a - i)^2 for a, i in zip(actual, ideal)))
+
+    # 转换为分数（0-100）
+    score = max(0, 100 - deviation * 200)
+    return score
+```
+
+**示例输出**:
+```yaml
+句长分布：85/100 ✅
+  短句: 38% (目标30-40%)
+  中句: 48% (目标40-50%)
+  长句: 14% (目标10-20%)
+
+改进建议: 当前分布良好，保持节奏变化
+```
+
+**常见问题**:
+- ❌ 短句过多（>60%）→ 节奏单一，缺乏张力
+- ❌ 长句过多（>30%）→ 读者容易疲劳
+- ✅ 平衡分布 → 节奏自然，适合长篇阅读
+
+---
