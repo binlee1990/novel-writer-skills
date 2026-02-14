@@ -1,4 +1,16 @@
-# AI 去味规则 v4.0（激进版）
+> **⚠️ 此版本已废弃**
+>
+> **替代方案**:
+> - 新版平衡规则: `anti-ai-v5-balanced.md`
+> - 智能评估Skill: `templates/skills/writing-techniques/writing-balance/SKILL.md`
+>
+> **保留原因**: 作为参考文档，供需要极端去AI的用户使用
+>
+> **启用方式**: 在 `specification.md` 中设置 `writing_balance_config.strictness: strict` 并启用 `anti-ai-v4-mode: true`
+
+---
+
+# AI 去味规则 v4.0（激进版 - 已废弃）
 
 ## 设计理念
 
