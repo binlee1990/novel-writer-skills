@@ -51,3 +51,6 @@ Thumbs.db
 
 other/
 .claude/
+
+# docs
+.docs
