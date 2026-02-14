@@ -20,6 +20,116 @@ allowed-tools: Read, Glob, Grep
 
 ---
 
+## 上下文感知推荐引擎
+
+在给出推荐前，先检测项目当前状态：
+
+### 检测清单
+
+1. **文件存在性检测**:
+```javascript
+const hasSpec = fileExists('specification.md')
+const hasPlan = fileExists('creative-plan.md')
+const hasTasks = fileExists('tasks.md')
+const chapterCount = countFiles('stories/*/content/*.md')
+const hasTracking = fileExists('spec/tracking/character-state.json')
+```
+
+2. **模式检测**:
+```javascript
+const isSingleFileMode = fileExists('spec/tracking/character-state.json')
+const isShardedMode = dirExists('spec/tracking/volumes')
+const isMCPMode = fileExists('spec/tracking/novel-tracking.db')
+```
+
+3. **问题检测**:
+```javascript
+const trackingSize = getFileSize('spec/tracking/character-state.json')
+const needMigration = trackingSize > 50 * 1024  // >50KB
+const mcpAvailable = isMCPMode && chapterCount > 300
+```
+
+### 决策逻辑
+
+```yaml
+IF not hasSpec:
+  推荐: /specify 或 /constitution
+  原因: 缺少故事规格文件
+
+ELSE IF hasSpec and not hasPlan:
+  推荐: /plan
+  原因: 有规格但无计划
+
+ELSE IF hasPlan and not hasTasks:
+  推荐: /tasks
+  原因: 有计划但无任务分解
+
+ELSE IF hasTasks and chapterCount == 0:
+  推荐: /write
+  原因: 任务已分解，可以开始写作
+
+ELSE IF chapterCount > 0:
+  推荐: /analyze 或 /track --sync
+  原因: 已有内容，建议分析或同步
+
+IF needMigration:
+  警告: /track --migrate --target sharded
+  原因: 追踪文件过大(>50KB)
+
+IF chapterCount > 300 and not isMCPMode:
+  提示: 考虑启用MCP模式获得更好性能
+  命令: /track --migrate --target mcp
+```
+
+---
+
+## 新手引导模式
+
+检测用户是否为新手（通过历史命令数量或配置文件）：
+
+### 首次使用（显示完整流程图）
+
+```
+📖 七步方法论完整流程
+
+1. /constitution ─┐
+                  ├─→ 定义创作原则和风格
+2. /specify ──────┘
+
+3. /clarify ─────→ 澄清关键决策
+
+4. /plan ────────→ 制定创作计划
+
+5. /tasks ───────→ 分解任务清单
+
+6. /write ───────→ 执行写作
+
+7. /analyze ─────→ 质量验证
+
+当前位置: ● 1 ○ 2 ○ 3 ○ 4 ○ 5 ○ 6 ○ 7
+```
+
+### 第2-5次使用（简化提示）
+
+```
+📍 当前进度: 已完成 specification.md
+
+下一步:
+  🎯 /plan - 制定创作计划
+  💡 /clarify - 如有疑问可先澄清
+
+进度: ● ● ○ ○ ○ ○ ○
+```
+
+### 熟练用户（仅显示异常）
+
+```
+⚠️ 异常提醒:
+- spec/tracking/ 目录为空 → 建议运行 /track-init
+```
+
+---
+
 ## 数据加载策略
 
 本命令在检测项目状态时，采用 **三层回退** 机制：
