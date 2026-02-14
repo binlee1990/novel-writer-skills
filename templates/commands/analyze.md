@@ -16,105 +16,38 @@ scripts:
 
 ### 1. 智能阶段检测
 
-运行 `{SCRIPT}` 获取当前创作状态：
-
-```json
-{
-  "analyze_type": "framework|content",
-  "chapter_count": 0,
-  "has_spec": true,
-  "has_plan": true,
-  "has_tasks": true,
-  "story_dir": "/path/to/story",
-  "reason": "原因说明"
-}
-```
+运行 `{SCRIPT}` 获取当前创作状态（返回 `analyze_type`, `chapter_count`, `has_spec/plan/tasks`, `story_dir`, `reason`）。
 
 ### 2. 决策逻辑
 
-解析用户参数 `$ARGUMENTS`：
+解析用户参数 `$ARGUMENTS`，按优先级：
 
-**手动指定模式**（优先级最高）：
-- 包含 `--type=framework` → 强制框架分析
-- 包含 `--type=content` → 强制内容分析
-
-**批量范围分析**：
-- `--range ch-XX-YY` → 指定章节范围分析
-- `--range vol-XX` → 指定卷分析
-- `--range vol-XX-YY` → 多卷范围分析（含跨卷对比）
-- `--volume vol-XX` → 等同于 `--range vol-XX`
-- `--volume-report vol-XX` → 生成指定卷的综合分析报告（见下方详细说明）
-
-**专项分析模式**：
-- `--focus=opening` → 开篇专项分析（前3章）
-- `--focus=pacing` → 节奏专项分析（爽点/冲突分布）
-- `--focus=character` → 人物专项分析（人物弧光）
-- `--focus=foreshadow` → 伏笔专项分析（埋设与回收）
-- `--focus=logic` → 逻辑专项分析（逻辑漏洞）
-- `--focus=style` → 风格专项分析（文笔一致性）
-- `--focus=reader` → 读者体验分析（爽点密度、钩子强度、信息投喂、期待管理）
-- `--focus=hook` → 钩子专项分析（每章结尾钩子类型、强度、兑现率）
-- `--focus=power` → 力量体系专项分析（力量等级一致性、战力对比合理性、升级节奏）
-- `--focus=voice` → 对话一致性分析（检测各角色对话是否符合语言指纹设定）
-
-**自动判断模式**：
-- 章节数 < 3 → **框架分析**
-- 章节数 ≥ 3 → **内容分析**
+1. **手动指定**：`--type=framework` 或 `--type=content`
+2. **范围分析**：`--range ch-XX-YY` / `--range vol-XX[-YY]` / `--volume vol-XX` / `--volume-report vol-XX`
+3. **专项分析 `--focus=`**：`opening`(前3章) | `pacing`(爽点/冲突) | `character`(人物弧光) | `foreshadow`(伏笔) | `logic`(逻辑漏洞) | `style`(文笔一致性) | `reader`(读者体验) | `hook`(钩子强度) | `power`(力量体系) | `voice`(对话一致性)
+4. **自动判断**：章节数 < 3 → 框架分析，≥ 3 → 内容分析
 
 ### 4. 数据加载策略（三层 Fallback）
 
-当执行 `--range` 或 `--volume` 分析时，按以下优先级加载数据：
+`--range` / `--volume` 分析时，按优先级加载：
 
-**Layer 1: MCP 查询（优先）**
-- 调用 `query_characters --volume=vol-XX` 获取该卷角色数据
-- 调用 `query_plot --volume=vol-XX` 获取该卷情节数据
-- 调用 `query_timeline --chapter_from=X --chapter_to=Y` 获取时间线
-- 调用 `stats_volume --volume=vol-XX` 获取卷统计数据
-
-**Layer 2: 分片 JSON（次优）**
-- 检测 `spec/tracking/volumes/vol-XX/` 是否存在
-- 读取该卷的 4 个分片文件
-- 读取 `spec/tracking/summary/volume-summaries.json` 获取卷元信息
-
-**Layer 3: 单文件 JSON（兜底）**
-- 读取 `spec/tracking/` 下的单文件
-- 根据章节范围手动过滤数据
+1. **Layer 1: MCP 查询**：`query_characters`、`query_plot`、`query_timeline`、`stats_volume`（均传 `--volume=vol-XX`）
+2. **Layer 2: 分片 JSON**：`spec/tracking/volumes/vol-XX/` 下 4 个分片 + `summary/volume-summaries.json`
+3. **Layer 3: 单文件 JSON**：`spec/tracking/` 下单文件，按章节范围手动过滤
 
 ### 5. --volume-report 综合报告
 
-当使用 `--volume-report vol-XX` 时，生成该卷的完整分析报告，包含：
+`--volume-report vol-XX` 生成该卷完整分析报告，包含：卷概览、情节分析、角色发展、节奏评估、一致性检查、跨卷对比、改进建议（P0/P1/P2）。
 
-**报告结构：**
-1. **卷概览**：章节范围、总字数、关键事件、主要角色
-2. **情节分析**：该卷的情节线推进、伏笔埋设与回收、高潮设计
-3. **角色发展**：该卷中角色的成长弧线、关系变化
-4. **节奏评估**：爽点分布、钩子强度、情绪曲线
-5. **一致性检查**：逻辑漏洞、时间线问题、角色行为一致性
-6. **跨卷对比**：与前卷的衔接、与后卷的铺垫
-7. **改进建议**：分级建议（P0/P1/P2）
-
-**数据来源：**
-- 优先使用 MCP `stats_volume` 获取预计算的统计数据
-- 读取该卷的章节文件（`stories/[current]/content/chapter-XXX.md`）
-- 读取该卷的 tracking 数据（分片或单文件）
+数据来源：MCP `stats_volume` → 章节文件（`stories/[current]/content/chapter-XXX.md`）→ tracking 数据（分片或单文件）。
 
 ### 6. 资源加载
 
-**参考 CLAUDE.md 中的资源加载规则**，加载以下基准文档：
-- 宪法文件：`.specify/memory/constitution.md`
-- 规格文件：`stories/*/specification.md`
-- 计划文件：`stories/*/creative-plan.md`
-- 任务文件：`stories/*/tasks.md`
+**基准文档**（参考 CLAUDE.md 资源加载规则）：`.specify/memory/constitution.md`、`stories/*/specification.md`、`stories/*/creative-plan.md`、`stories/*/tasks.md`
 
-**分析专用资源**（Layer 1 默认加载）：
-- `templates/knowledge-base/craft/` 下所有 craft 知识库（用于质量对照检查）
-- `templates/skills/quality-assurance/` 下的 QA skills（用于一致性验证）
+**分析专用**：`templates/knowledge-base/craft/` 全部 + `templates/skills/quality-assurance/` QA skills
 
-**Layer 2: 配置覆盖**：如果 `specification.md` 配置了 `resource-loading.analysis`，按配置加载。
-
-**Layer 3: 关键词触发**：读取 `specification.md` 的 `resource-loading.keyword-triggers.enabled`，扫描 `--check` 参数值动态加载 skills。
-
-**会话级资源复用**：本次对话中已加载的资源直接复用，不重复读取。
+**覆盖与触发**：`specification.md` 的 `resource-loading.analysis` 配置覆盖默认加载；`keyword-triggers.enabled` 扫描 `--check` 参数动态加载 skills。会话级资源复用，不重复读取。
 
 ---
 
@@ -144,27 +77,10 @@ scripts:
 
 ### A4. 准备就绪评估
 
-```markdown
-## 准备就绪评估
-
-### 必要条件 (P0)
-- [ ] 规格完整且明确
-- [ ] 计划覆盖所有 P0 需求
-- [ ] 任务分解完整
-- [ ] 无致命逻辑矛盾
-
-### 建议条件 (P1)
-- [ ] 角色档案完善
-- [ ] 世界观设定文档详细
-- [ ] 时间线规划清晰
-
-### 总体评分：[X]/10
-
-**建议**：
-1. 🔴 必须修复：[P0问题]
-2. 🟡 建议优化：[P1问题]
-3. 🟢 可选：[P2问题]
-```
+输出总体评分 [X]/10，包含：
+- **P0 必要条件**：规格完整、计划覆盖 P0 需求、任务分解完整、无致命逻辑矛盾
+- **P1 建议条件**：角色档案完善、世界观设定详细、时间线规划清晰
+- **建议**：🔴 必须修复(P0) / 🟡 建议优化(P1) / 🟢 可选(P2)
 
 ---
 
