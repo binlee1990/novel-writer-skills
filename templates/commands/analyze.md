@@ -4,8 +4,8 @@ argument-hint: [--type=framework|content] [--range ch-XXX-YYY | --volume vol-XX 
 recommended-model: claude-sonnet-4-5-20250929 # 分析任务，质量与速度平衡；深度分析可用 opus
 allowed-tools: Bash(find:*), Bash(wc:*), Bash(grep:*), Read(//**), Read(//plugins/**), Read(//plugins/**), Write(//stories/**/analysis-report.md), Bash(*)
 scripts:
-  sh: .specify/scripts/bash/check-analyze-stage.sh --json
-  ps: .specify/scripts/powershell/check-analyze-stage.ps1 -Json
+  sh: resources/scripts/bash/check-analyze-stage.sh --json
+  ps: resources/scripts/powershell/check-analyze-stage.ps1 -Json
 ---
 
 对小说项目进行智能化综合分析。根据当前创作阶段，自动选择执行**框架一致性分析**（write 之前）或**内容质量分析**（write 之后）。
@@ -32,8 +32,8 @@ scripts:
 `--range` / `--volume` 分析时，按优先级加载：
 
 1. **Layer 1: MCP 查询**：`query_characters`、`query_plot`、`query_timeline`、`stats_volume`（均传 `--volume=vol-XX`）
-2. **Layer 2: 分片 JSON**：`spec/tracking/volumes/vol-XX/` 下 4 个分片 + `summary/volume-summaries.json`
-3. **Layer 3: 单文件 JSON**：`spec/tracking/` 下单文件，按章节范围手动过滤
+2. **Layer 2: 分片 JSON**：`tracking/volumes/vol-XX/` 下 4 个分片 + `summary/volume-summaries.json`
+3. **Layer 3: 单文件 JSON**：`tracking/` 下单文件，按章节范围手动过滤
 
 ### 5. --volume-report 综合报告
 
@@ -43,9 +43,9 @@ scripts:
 
 ### 6. 资源加载
 
-**基准文档**（参考 CLAUDE.md 资源加载规则）：`.specify/memory/constitution.md`、`stories/*/specification.md`、`stories/*/creative-plan.md`、`stories/*/tasks.md`
+**基准文档**（参考 CLAUDE.md 资源加载规则）：`resources/memory/constitution.md`、`stories/*/specification.md`、`stories/*/creative-plan.md`、`stories/*/tasks.md`
 
-**分析专用**：`templates/knowledge-base/craft/` 全部 + `templates/skills/quality-assurance/` QA skills
+**分析专用**：`resources/craft/` 全部 + `templates/skills/quality-assurance/` QA skills
 
 **覆盖与触发**：`specification.md` 的 `resource-loading.analysis` 配置覆盖默认加载；`keyword-triggers.enabled` 扫描 `--check` 参数动态加载 skills。会话级资源复用，不重复读取。
 
@@ -202,15 +202,15 @@ scripts:
 应用后追加更新记录到 `tracking-log.md`。
 
 **分片模式写入协议**：
-- 如果检测到 `spec/tracking/volumes/` 存在，确定章节所属卷
-- 更新该卷的分片文件（如 `spec/tracking/volumes/vol-03/character-state.json`）
-- 同步更新全局摘要文件（如 `spec/tracking/summary/characters-summary.json`）
+- 如果检测到 `tracking/volumes/` 存在，确定章节所属卷
+- 更新该卷的分片文件（如 `tracking/volumes/vol-03/character-state.json`）
+- 同步更新全局摘要文件（如 `tracking/summary/characters-summary.json`）
 - 如果 MCP 可用，调用 `sync_from_json` 同步到 SQLite
 
 **错误处理**：
 - tracking 文件不存在 → 建议运行 `/track --init`
 - JSON 格式错误 → 提示手动修复
-- tracking 目录不存在 → 建议创建 `spec/tracking/`
+- tracking 目录不存在 → 建议创建 `tracking/`
 
 ---
 

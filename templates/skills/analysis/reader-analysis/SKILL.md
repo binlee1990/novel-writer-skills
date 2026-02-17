@@ -5,7 +5,7 @@
 **前置加载**：
 - 加载 Skill：`templates/skills/writing-techniques/reader-expectation/SKILL.md`
 - 加载 Expert：`templates/skills/writing-techniques/reader-expectation/experts/expectation-analyst.md`
-- 加载知识库：`templates/knowledge-base/craft/hook-design.md`（如存在）
+- 加载知识库：`resources/craft/hook-design.md`（如存在）
 - 加载 tracking 数据：`plot-tracker.json`、`character-state.json`
 
 **分析维度**：

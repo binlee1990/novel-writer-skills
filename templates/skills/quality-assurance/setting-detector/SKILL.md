@@ -32,7 +32,7 @@ allowed-tools: Read
 触发词：言情、爱情、恋爱、浪漫、感情线、关系弧、CP、甜文、虐文、
        HE、BE、双洁、破镜重圆、先婚后爱、契约关系
 
-激活：templates/knowledge-base/genres/romance.md
+激活：resources/genres/romance.md
 ```
 
 **悬疑推理**（mystery）：
@@ -40,7 +40,7 @@ allowed-tools: Read
 触发词：悬疑、推理、侦探、破案、谜团、线索、真相、凶手、犯罪、
        密室、诡计、不在场证明、推理小说
 
-激活：templates/knowledge-base/genres/mystery.md
+激活：resources/genres/mystery.md
 ```
 
 **历史小说**（historical）：
@@ -48,7 +48,7 @@ allowed-tools: Read
 触发词：历史、古代、朝代、考据、时代背景、历史小说、古言、
        穿越、重生古代、架空历史、宫斗、宅斗
 
-激活：templates/knowledge-base/genres/historical.md
+激活：resources/genres/historical.md
 ```
 
 **复仇爽文**（revenge）：
@@ -56,7 +56,7 @@ allowed-tools: Read
 触发词：复仇、报仇、打脸、爽文、逆袭、反击、重生复仇、
        穿越复仇、系统、金手指、女主爽文、男主爽文
 
-激活：templates/knowledge-base/genres/revenge.md
+激活：resources/genres/revenge.md
 ```
 
 **武侠小说**（wuxia）：
@@ -64,7 +64,7 @@ allowed-tools: Read
 触发词：武侠、江湖、武功、侠客、门派、武学、剑客、
        轻功、内功、武林、江湖恩仇、侠义
 
-激活：templates/knowledge-base/genres/wuxia.md
+激活：resources/genres/wuxia.md
 ```
 
 **科幻小说**（sci-fi）：
@@ -72,7 +72,7 @@ allowed-tools: Read
 触发词：科幻、sci-fi、未来、太空、宇宙、星际、赛博朋克、
        人工智能、AI、机器人、末日、后末日、时间旅行
 
-激活：templates/knowledge-base/genres/sci-fi.md
+激活：resources/genres/sci-fi.md
 ```
 
 **惊悚小说**（thriller）：
@@ -80,7 +80,7 @@ allowed-tools: Read
 触发词：惊悚、thriller、紧张、追杀、逃亡、绑架、暗杀、
        阴谋、倒计时、生存、威胁、危机
 
-激活：templates/knowledge-base/genres/thriller.md
+激活：resources/genres/thriller.md
 ```
 
 #### 参考资料库（References）
@@ -90,7 +90,7 @@ allowed-tools: Read
 触发词：1920、民国、军阀、北洋、穿越民国、二十年代、
        民国时期、军阀混战
 
-激活：templates/knowledge-base/references/china-1920s/
+激活：resources/references/china-1920s/
 ```
 
 **唐朝**（tang-dynasty）：
@@ -98,7 +98,7 @@ allowed-tools: Read
 触发词：唐朝、唐代、长安、大唐、贞观、开元、安史之乱、
        科举、盛唐、李世民、武则天、唐诗
 
-激活：templates/knowledge-base/references/tang-dynasty/
+激活：resources/references/tang-dynasty/
 ```
 
 **现代职场**（modern-workplace）：
@@ -106,7 +106,7 @@ allowed-tools: Read
 触发词：职场、公司、互联网、大厂、996、办公室、同事、
        上班、KPI、OKR、跳槽、内卷
 
-激活：templates/knowledge-base/references/modern-workplace/
+激活：resources/references/modern-workplace/
 ```
 
 **修仙世界**（cultivation-world）：
@@ -114,7 +114,7 @@ allowed-tools: Read
 触发词：修仙、修真、炼气、筑基、金丹、元婴、宗门、
        灵根、渡劫、飞升、法宝、灵石
 
-激活：templates/knowledge-base/references/cultivation-world/
+激活：resources/references/cultivation-world/
 ```
 
 ---
@@ -394,15 +394,15 @@ Token消耗：约1650 tokens
 
 ### 添加新知识库
 
-1. 在`templates/knowledge-base/`对应目录创建文件
-2. 更新`templates/knowledge-base/README.md`的关键词映射表
+1. 在`resources/`对应目录创建文件
+2. 更新`resources/README.md`的关键词映射表
 3. setting-detector会自动识别（无需修改本文件）
 
 **示例**：添加奇幻知识库
 
 ```bash
 # 1. 创建文件
-touch templates/knowledge-base/genres/fantasy.md
+touch resources/genres/fantasy.md
 
 # 2. 更新README.md关键词映射
 fantasy:
@@ -607,5 +607,5 @@ setting-detector是Novel Writer Skills的**大脑**：
 
 **本Skill版本**: v1.0
 **最后更新**: 2025-10-18
-**依赖**: templates/knowledge-base/ 系统
+**依赖**: resources/ 系统
 **协作**: consistency-checker, workflow-guide, genre-specific skills

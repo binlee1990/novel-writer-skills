@@ -146,7 +146,7 @@ allowed-tools: Read, Glob
   /character update 李明
 
 这个命令会：
-1. 读取当前角色卡片（spec/knowledge/characters/李明.md）
+1. 读取当前角色卡片（resources/knowledge/characters/李明.md）
 2. 让你修改性格、背景、能力等信息
 3. 自动更新文件
 4. 同步更新 tracking 数据（如已启用）
@@ -171,7 +171,7 @@ allowed-tools: Read, Glob
   /timeline
 
 这个命令会：
-1. 读取 spec/tracking/timeline.json
+1. 读取 tracking/timeline.json
 2. 可视化时间线（按时间顺序排列所有事件）
 3. 自动检测时间冲突（同一时间多个事件）
 4. 标记可疑的时间跳跃

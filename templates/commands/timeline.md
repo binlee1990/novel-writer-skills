@@ -2,10 +2,10 @@
 name: timeline
 description: 管理和验证故事时间线
 argument-hint: [add | check | show | sync] [--volume vol-XX | --recent N]
-allowed-tools: Read(//spec/tracking/timeline.json), Read(//spec/tracking/timeline.json), Write(//spec/tracking/timeline.json), Write(//spec/tracking/timeline.json), Read(//stories/**/content/**), Read(//stories/**/content/**), Bash(find:*), Bash(*)
+allowed-tools: Read(//tracking/timeline.json), Read(//tracking/timeline.json), Write(//tracking/timeline.json), Write(//tracking/timeline.json), Read(//stories/**/content/**), Read(//stories/**/content/**), Bash(find:*), Bash(*)
 scripts:
-  sh: .specify/scripts/bash/check-timeline.sh
-  ps: .specify/scripts/powershell/check-timeline.ps1
+  sh: resources/scripts/bash/check-timeline.sh
+  ps: resources/scripts/powershell/check-timeline.ps1
 ---
 
 # 时间线管理
@@ -53,8 +53,8 @@ const events = await mcp.call('novelws-mcp/query_timeline', {
 ### Layer 2: 分片 JSON（次优）
 
 ```bash
-# 当 spec/tracking/volumes/ 存在时
-timeline_data=$(cat spec/tracking/volumes/vol-03/timeline.json)
+# 当 tracking/volumes/ 存在时
+timeline_data=$(cat tracking/volumes/vol-03/timeline.json)
 ```
 
 **适用场景**：
@@ -66,7 +66,7 @@ timeline_data=$(cat spec/tracking/volumes/vol-03/timeline.json)
 
 ```bash
 # 传统模式，加载完整文件
-timeline_data=$(cat spec/tracking/timeline.json)
+timeline_data=$(cat tracking/timeline.json)
 ```
 
 **向下兼容**：小型项目（< 300 章）继续使用单文件模式
@@ -109,7 +109,7 @@ timeline_data=$(cat spec/tracking/timeline.json)
 
 ## 时间线数据
 
-时间线信息存储在 `spec/tracking/timeline.json` 中：
+时间线信息存储在 `tracking/timeline.json` 中：
 - 故事内时间（年/月/日）
 - 章节对应关系
 - 重要事件标记
@@ -136,7 +136,7 @@ timeline_data=$(cat spec/tracking/timeline.json)
 
 时间线数据更新遵循以下协议：
 
-### 分片模式（spec/tracking/volumes/ 存在）
+### 分片模式（tracking/volumes/ 存在）
 
 1. **确定目标卷**：
    - 如果命令指定 `--volume vol-XX`，写入对应卷
@@ -150,13 +150,13 @@ timeline_data=$(cat spec/tracking/timeline.json)
 2. **写入分片文件**：
    ```bash
    # 写入指定卷的 timeline.json
-   Write(spec/tracking/volumes/${target_volume}/timeline.json)
+   Write(tracking/volumes/${target_volume}/timeline.json)
    ```
 
 3. **更新全局摘要**（如果事件跨度影响摘要统计）：
    ```bash
    # 更新 timeline-summary.json 的统计信息
-   Write(spec/tracking/summary/timeline-summary.json)
+   Write(tracking/summary/timeline-summary.json)
    ```
 
 4. **触发 MCP 同步**（如果启用）：
@@ -171,7 +171,7 @@ timeline_data=$(cat spec/tracking/timeline.json)
 
 直接写入完整 `timeline.json`：
 ```bash
-Write(spec/tracking/timeline.json)
+Write(tracking/timeline.json)
 ```
 
 ### 写入示例
@@ -184,8 +184,8 @@ const targetVolume = `vol-${String(volumeNum).padStart(2, '0')}`;
 
 // 读取目标卷的 timeline 分片
 const timelinePath = isSharded
-  ? `spec/tracking/volumes/${targetVolume}/timeline.json`
-  : 'spec/tracking/timeline.json';
+  ? `tracking/volumes/${targetVolume}/timeline.json`
+  : 'tracking/timeline.json';
 
 const timeline = JSON.parse(fs.readFileSync(timelinePath));
 

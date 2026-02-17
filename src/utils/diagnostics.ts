@@ -7,7 +7,7 @@
 
 import fs from 'fs-extra';
 import path from 'path';
-import { DIRS, getProjectPaths } from '../core/config.js';
+import { getProjectPaths } from '../core/config.js';
 
 /** 单项检查结果 */
 export interface CheckResult {
@@ -66,7 +66,7 @@ export class ProjectDiagnostics {
   async checkProjectStructure(projectRoot: string): Promise<CheckResult> {
     const paths = getProjectPaths(projectRoot);
     const requiredDirs = [
-      { path: paths.specify, label: '.specify' },
+      { path: paths.resources, label: 'resources' },
       { path: paths.claude, label: '.claude' },
       { path: paths.commands, label: '.claude/commands' },
     ];
@@ -100,7 +100,7 @@ export class ProjectDiagnostics {
       return {
         name: 'Tracking 文件',
         passed: false,
-        message: 'spec/tracking 目录不存在',
+        message: 'tracking 目录不存在',
         fix: '/track --sync',
       };
     }
@@ -157,8 +157,9 @@ export class ProjectDiagnostics {
    * 检查 4: MCP 服务器状态
    */
   async checkMCPStatus(projectRoot: string): Promise<CheckResult> {
-    const dbPath = path.join(projectRoot, 'novel-tracking.db');
-    const mcpConfigPath = path.join(projectRoot, '.claude', 'mcp.json');
+    const paths = getProjectPaths(projectRoot);
+    const dbPath = paths.trackingDb;
+    const mcpConfigPath = paths.mcpServers;
 
     const hasDb = await fs.pathExists(dbPath);
     const hasMcpConfig = await fs.pathExists(mcpConfigPath);
@@ -230,7 +231,7 @@ export class ProjectDiagnostics {
    */
   async detectProjectMode(projectRoot: string): Promise<ProjectMode> {
     const paths = getProjectPaths(projectRoot);
-    const dbPath = path.join(projectRoot, 'novel-tracking.db');
+    const dbPath = paths.trackingDb;
 
     if (await fs.pathExists(dbPath)) {
       return 'mcp';

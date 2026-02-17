@@ -32,19 +32,19 @@ const hasSpec = fileExists('specification.md')
 const hasPlan = fileExists('creative-plan.md')
 const hasTasks = fileExists('tasks.md')
 const chapterCount = countFiles('stories/*/content/*.md')
-const hasTracking = fileExists('spec/tracking/character-state.json')
+const hasTracking = fileExists('tracking/character-state.json')
 ```
 
 2. **模式检测**:
 ```javascript
-const isSingleFileMode = fileExists('spec/tracking/character-state.json')
-const isShardedMode = dirExists('spec/tracking/volumes')
-const isMCPMode = fileExists('spec/tracking/novel-tracking.db')
+const isSingleFileMode = fileExists('tracking/character-state.json')
+const isShardedMode = dirExists('tracking/volumes')
+const isMCPMode = fileExists('tracking/novel-tracking.db')
 ```
 
 3. **问题检测**:
 ```javascript
-const trackingSize = getFileSize('spec/tracking/character-state.json')
+const trackingSize = getFileSize('tracking/character-state.json')
 const needMigration = trackingSize > 50 * 1024  // >50KB
 const mcpAvailable = isMCPMode && chapterCount > 300
 ```
@@ -125,7 +125,7 @@ IF chapterCount > 300 and not isMCPMode:
 
 ```
 ⚠️ 异常提醒:
-- spec/tracking/ 目录为空 → 建议运行 /track-init
+- tracking/ 目录为空 → 建议运行 /track-init
 ```
 
 ---
@@ -150,10 +150,10 @@ const consistencyStats = await mcp.call('novelws-mcp/stats_consistency', {});
 ### Layer 2: 分片 JSON（次优）
 
 ```bash
-# 当 spec/tracking/volumes/ 存在时
+# 当 tracking/volumes/ 存在时
 # 读取 summary/ 文件夹的摘要数据
-character_summary=$(cat spec/tracking/summary/characters-summary.json)
-plot_summary=$(cat spec/tracking/summary/plot-summary.json)
+character_summary=$(cat tracking/summary/characters-summary.json)
+plot_summary=$(cat tracking/summary/plot-summary.json)
 ```
 
 **适用场景**：
@@ -165,8 +165,8 @@ plot_summary=$(cat spec/tracking/summary/plot-summary.json)
 
 ```bash
 # 传统模式，加载完整文件
-character_state=$(cat spec/tracking/character-state.json)
-plot_tracker=$(cat spec/tracking/plot-tracker.json)
+character_state=$(cat tracking/character-state.json)
+plot_tracker=$(cat tracking/plot-tracker.json)
 ```
 
 **向下兼容**：小型项目（< 300 章）继续使用单文件模式
@@ -175,7 +175,7 @@ plot_tracker=$(cat spec/tracking/plot-tracker.json)
 
 ```javascript
 // 1. 检测分片模式
-is_sharded = exists('spec/tracking/volumes/')
+is_sharded = exists('tracking/volumes/')
 
 // 2. 检测 MCP
 has_mcp = exists('mcp-servers.json')
@@ -213,26 +213,26 @@ chapters = Glob('stories/*/content/*.md')
   → 统计已写章节数
 
 // 2. 检测分片模式
-is_sharded = exists('spec/tracking/volumes/')
+is_sharded = exists('tracking/volumes/')
 has_mcp = exists('mcp-servers.json') // MCP 是否配置
 
 // 3. Tracking 文件检测（仅检测存在性和修改时间）
 // 分片模式：检测 summary/ 和 volumes/
 // 单文件模式：检测根目录 JSON
 if (is_sharded) {
-  write_checkpoint = exists('spec/tracking/summary/write-checkpoint.json')
-  character_state = exists('spec/tracking/summary/characters-summary.json')
-  plot_tracker = exists('spec/tracking/summary/plot-summary.json')
-  timeline = exists('spec/tracking/summary/timeline-summary.json')
-  story_facts = exists('spec/tracking/summary/story-facts-summary.json')
-  tracking_log = exists('spec/tracking/summary/tracking-log-summary.md')
+  write_checkpoint = exists('tracking/summary/write-checkpoint.json')
+  character_state = exists('tracking/summary/characters-summary.json')
+  plot_tracker = exists('tracking/summary/plot-summary.json')
+  timeline = exists('tracking/summary/timeline-summary.json')
+  story_facts = exists('tracking/summary/story-facts-summary.json')
+  tracking_log = exists('tracking/summary/tracking-log-summary.md')
 } else {
-  write_checkpoint = exists('spec/tracking/write-checkpoint.json')
-  character_state = exists('spec/tracking/character-state.json')
-  plot_tracker = exists('spec/tracking/plot-tracker.json')
-  timeline = exists('spec/tracking/timeline.json')
-  story_facts = exists('spec/tracking/story-facts.json')
-  tracking_log = exists('spec/tracking/tracking-log.md')
+  write_checkpoint = exists('tracking/write-checkpoint.json')
+  character_state = exists('tracking/character-state.json')
+  plot_tracker = exists('tracking/plot-tracker.json')
+  timeline = exists('tracking/timeline.json')
+  story_facts = exists('tracking/story-facts.json')
+  tracking_log = exists('tracking/tracking-log.md')
 }
 
 // 4. 性能优化

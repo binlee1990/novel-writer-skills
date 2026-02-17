@@ -309,7 +309,7 @@ Step 5: 最终检查
 - □ 角色外貌/称呼描述一致
 ```
 
-**配合工具**：参考 `consistency-checker` Skill 和 `spec/tracking/` 下的追踪文件。
+**配合工具**：参考 `consistency-checker` Skill 和 `tracking/` 下的追踪文件。
 
 ---
 

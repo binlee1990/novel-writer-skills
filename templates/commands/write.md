@@ -4,8 +4,8 @@ argument-hint: [章节编号或任务ID] [--fast] [--batch N] [--volume vol-XX]
 recommended-model: claude-opus-4-6 # 创作质量最高；--fast 时可用 sonnet
 allowed-tools: Read(//**), Write(//stories/**/content/**), Bash(ls:*), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
 scripts:
-  sh: .specify/scripts/bash/check-writing-state.sh
-  ps: .specify/scripts/powershell/check-writing-state.ps1
+  sh: resources/scripts/bash/check-writing-state.sh
+  ps: resources/scripts/powershell/check-writing-state.ps1
 ---
 
 基于七步方法论流程执行章节写作。
@@ -77,26 +77,71 @@ powershell -File {SCRIPT} -Json
 3. 按顺序加载 `resources.knowledge-base` 和 `resources.skills`
 4. 跳过 `resources.disabled` 中的资源
 
+### 增量缓存加载（性能优化核心）
+
+⚠️ **此机制大幅减少重复加载，连续写作时跳过未变化的资源。**
+
+**步骤 0: 检查缓存**
+
+```
+1. 读取 .claude/.cache/resource-digest.json
+   ├─ 不存在 → 首次加载（全量），生成 digest + context
+   └─ 存在 → 进入增量检查
+
+2. 对比每个已缓存文件的 mtime（用 Bash stat 命令）
+   ├─ 全部未变 → 直接复用 .claude/.cache/write-context.json，跳到 L0 加载
+   └─ 有变化 → 只重新读取变化的文件
+
+3. 更新 write-context.json 中变化的部分
+   ├─ L1 文件变化 → 重新生成该文件的摘要（200-300字）
+   └─ L2 文件变化 → 重新缓存全文
+
+4. 写回更新后的 resource-digest.json + write-context.json
+```
+
+**资源分级**：
+
+| 级别 | 内容 | 策略 |
+|------|------|------|
+| L0 必读 | tasks.md、上一章最后500字、当前活跃角色 | 每次读取全文，不缓存 |
+| L1 摘要 | constitution.md、specification.md、creative-plan.md、plot-tracker.json、relationships.json | 首次读全文生成摘要，后续只在 mtime 变化时重新生成 |
+| L2 按需 | craft/、genres/、styles/、requirements/、skills/ | 仅在关键词触发或配置指定时加载，加载后缓存全文 |
+
+**缓存复用判定**：
+- 如果 `write-context.json` 存在且 `digest_version` 与 `resource-digest.json` 的 `version` 一致 → 复用 L1 摘要 + L2 缓存
+- 如果 `digest_version` 不一致 → 全量重建
+- 用户删除 `.claude/.cache/` → 下次全量重建
+
+**首次加载（无缓存）**：按下方完整查询协议执行，完成后生成两个缓存文件。
+
+**后续加载（有缓存且未过期）**：
+1. 直接使用 `write-context.json` 中的 `l1_summaries` 作为 L1 上下文
+2. 直接使用 `l2_loaded` 中的缓存资源
+3. 仅实时加载 L0 资源（tasks.md、上一章、活跃角色）
+4. 合并 L0 + L1 缓存 + L2 缓存 → 进入写作
+
+---
+
 ### 查询协议（必读顺序 + 三层资源加载）
 
-⚠️ **严格按以下顺序查询文档**：
+⚠️ **严格按以下顺序查询文档**（首次加载或缓存失效时执行完整流程）：
 
-1. **先查（最高优先级）**：
+1. **先查（最高优先级）**【L1 — 缓存摘要】：
    - `memory/constitution.md`（创作宪法）
    - `memory/personal-voice.md`（个人风格指南 - 如有）
    - `memory/style-reference.md`（风格参考 - 如有）
 
-2. **再查（规格和计划）**：
+2. **再查（规格和计划）**【L1 — 缓存摘要】：
    - `stories/*/specification.md`（故事规格）
    - `stories/*/creative-plan.md`（创作计划）
-   - `stories/*/tasks.md`（当前任务）
+   - `stories/*/tasks.md`（当前任务）【L0 — 每次必读】
 
 2.1. **风格学习前置检查**：
    - 如果 `memory/personal-voice.md` 不存在且已写 ≥ 3 章，提示用户执行 `/style-learning`
 
 2.5. **自动加载写作风格和规范（基于配置）**：
    - 读取 `specification.md` 的 YAML frontmatter
-   - 如配置了 `writing-style`，加载 `.specify/templates/knowledge-base/styles/[name].md`
+   - 如配置了 `writing-style`，加载 `resources/styles/[name].md`
    - 如配置了 `writing-requirements`，加载对应规范文档
 
 2.6. **第三层智能资源加载（三层机制）**
@@ -108,11 +153,11 @@ powershell -File {SCRIPT} -Json
 如果 specification.md 未配置 `resource-loading`，自动加载：
 
 **Knowledge-base (craft)**:
-- `templates/knowledge-base/craft/dialogue.md`
-- `templates/knowledge-base/craft/scene-structure.md`
-- `templates/knowledge-base/craft/character-arc.md`
-- `templates/knowledge-base/craft/pacing.md`
-- `templates/knowledge-base/craft/show-not-tell.md`
+- `resources/craft/dialogue.md`
+- `resources/craft/scene-structure.md`
+- `resources/craft/character-arc.md`
+- `resources/craft/pacing.md`
+- `resources/craft/show-not-tell.md`
 
 **Skills (writing-techniques)**:
 - `templates/skills/writing-techniques/dialogue-techniques/SKILL.md`
@@ -151,7 +196,7 @@ resource-loading:
 
 **执行流程**:
 1. 收集待扫描文本（命令参数 + 任务描述 + 用户输入）
-2. 读取 `templates/config/keyword-mappings.json` 映射表
+2. 读取 `resources/config/keyword-mappings.json` 映射表
 3. 合并 specification.md 中的自定义映射
 4. 执行关键词匹配，跳过已加载资源
 5. 如有匹配，提示用户确认加载：
@@ -169,28 +214,28 @@ resource-loading:
 
 > **性能优化**：参见 CLAUDE.md 中的「会话级资源复用」章节。
 
-3. **再查（状态和数据 — 三层 Fallback）**：
+3. **再查（状态和数据 — 三层 Fallback）**【L0/L1 混合】：
 
    按以下优先级加载 tracking 数据：
 
-   **Layer 1: MCP 查询（优先）**
+   **Layer 1: MCP 查询（优先）**【L0 — 每次查询】
    - `query_characters --status=active --limit=20` → 活跃角色
    - `query_relationships --volume=[当前卷号]` → 当前卷关系
    - `query_plot --status=active` → 活跃伏笔
    - `query_facts` → 设定事实
    - 如果指定了 `--volume vol-XX`，所有查询限定到该卷
 
-   **Layer 2: 分片 JSON（次优，检测 spec/tracking/volumes/ 是否存在）**
+   **Layer 2: 分片 JSON（次优，检测 tracking/volumes/ 是否存在）**【L1 — 缓存摘要】
    - 确定当前章节属于哪个卷（从 volume-summaries.json 的 chapters 范围判断）
-   - 读取该卷的分片文件：`spec/tracking/volumes/[currentVolume]/character-state.json` 等
-   - 读取全局摘要：`spec/tracking/summary/characters-summary.json`（活跃角色概览）
+   - 读取该卷的分片文件：`tracking/volumes/[currentVolume]/character-state.json` 等
+   - 读取全局摘要：`tracking/summary/characters-summary.json`（活跃角色概览）
 
-   **Layer 3: 单文件 JSON（兜底，现有逻辑）**
-   - `spec/tracking/character-state.json`（角色状态）
-   - `spec/tracking/relationships.json`（关系网络）
-   - `spec/tracking/plot-tracker.json`（情节追踪 - 如有）
-   - `spec/tracking/validation-rules.json`（验证规则 - 如有）
-   - `spec/tracking/story-facts.json`（设定事实 - 如有）
+   **Layer 3: 单文件 JSON（兜底，现有逻辑）**【L1 — 缓存摘要】
+   - `tracking/character-state.json`（角色状态）
+   - `tracking/relationships.json`（关系网络）
+   - `tracking/plot-tracker.json`（情节追踪 - 如有）
+   - `tracking/validation-rules.json`（验证规则 - 如有）
+   - `tracking/story-facts.json`（设定事实 - 如有）
 
    **📋 本章引用的设定事实**（如当前章节已有 `<!-- story-facts: ... -->` 注释）：
 
@@ -210,17 +255,17 @@ resource-loading:
 
    - **快写模式（--fast）**: 跳过详细展示，但保留数据加载
 
-4. **再查（知识库）**：
-   - `spec/knowledge/` 相关文件（世界观、角色档案等）
+4. **再查（知识库）**【L2 — 按需缓存】：
+   - `resources/knowledge/` 相关文件（世界观、角色档案等）
    - `stories/*/content/`（前文内容 - 了解前情）
 
-5. **再查（写作规范）**：
+5. **再查（写作规范）**【L2 — 按需缓存】：
    - `memory/personal-voice.md`（个人语料 - 如有）
-   - `spec/knowledge/natural-expression.md`（自然化表达 - 如有）
-   - **⚠️ 必须加载**：`templates/knowledge-base/requirements/anti-ai-v4.md`（禁用词与替换策略权威参考）
+   - `resources/knowledge/natural-expression.md`（自然化表达 - 如有）
+   - **⚠️ 必须加载**：`resources/requirements/anti-ai-v4.md`（禁用词与替换策略权威参考）
 
 6. **条件查询（前三章专用）**：
-   - **如果章节编号 ≤ 3 或总字数 < 10000字**，额外查询 `spec/presets/golden-opening.md`
+   - **如果章节编号 ≤ 3 或总字数 < 10000字**，额外查询 `resources/presets/golden-opening.md`
 
 ### ⚠️ 强制完成确认
 
@@ -233,7 +278,7 @@ resource-loading:
 ✓ 2. stories/*/specification.md - 故事规格
 ✓ 3. stories/*/creative-plan.md - 创作计划
 ✓ 4. stories/*/tasks.md - 当前任务
-✓ 5. spec/tracking/ - 角色状态、关系、情节
+✓ 5. tracking/ - 角色状态、关系、情节
 
 🆕 三层资源加载：
 ✓ Layer 1-3 加载完成
@@ -243,6 +288,48 @@ resource-loading:
 ```
 
 ⚠️ **禁止跳过此步骤**：这是防止AI在长篇创作中失焦的核心机制。
+
+### 缓存写回
+
+**首次加载或有文件变化时**，将加载结果写入缓存：
+
+1. **生成 resource-digest.json**：记录所有已读文件的 mtime 和 size
+```json
+{
+  "version": 1,
+  "updated_at": "[ISO时间]",
+  "files": {
+    "resources/memory/constitution.md": { "mtime": [毫秒时间戳], "size": [字节] },
+    "tracking/character-state.json": { "mtime": [毫秒时间戳], "size": [字节] }
+  }
+}
+```
+
+2. **生成 write-context.json**：保存 L1 摘要和 L2 缓存状态
+```json
+{
+  "version": 1,
+  "story": "[故事目录名]",
+  "last_chapter": [章节号],
+  "generated_at": "[ISO时间]",
+  "digest_version": 1,
+  "context": {
+    "l1_summaries": {
+      "constitution": "[200字摘要]",
+      "specification": "[300字摘要]",
+      "creative_plan": "[200字摘要]",
+      "active_plots": [{"id": "", "name": "", "status": "", "progress": ""}],
+      "active_relationships": [{"from": "", "to": "", "type": "", "tension": ""}]
+    },
+    "l2_loaded": {
+      "resources/craft/dialogue.md": "已缓存",
+      "resources/requirements/anti-ai-v5-balanced.md": "已缓存"
+    }
+  }
+}
+```
+
+3. 使用 `Write` 工具写入 `.claude/.cache/resource-digest.json` 和 `.claude/.cache/write-context.json`
 
 <!-- PLUGIN_HOOK: genre-knowledge-write -->
 
@@ -259,7 +346,7 @@ resource-loading:
 **仅加载以下 3 项**（跳过三层资源加载）：
 1. **当前任务**：`stories/*/tasks.md` 中 `pending` 或 `in_progress` 的任务
 2. **上一章内容**：最近完成的章节文件（最后 500 字）
-3. **角色状态**：`spec/tracking/character-state.json`（仅当前活跃角色）
+3. **角色状态**：`tracking/character-state.json`（仅当前活跃角色）
 
 ### Fast-2. 极简写作提醒
 
@@ -290,7 +377,7 @@ resource-loading:
 
 ### 恢复检测
 
-在开始写作前，检查 `spec/tracking/write-checkpoint.json`：
+在开始写作前，检查 `tracking/write-checkpoint.json`：
 - 如存在且 `status` 为 `in_progress` 且未过期（24小时内）→ 提示恢复
 - 用户选择「继续写作」→ 从断点恢复
 - 用户选择「重新开始」→ 删除 checkpoint，正常流程
@@ -380,7 +467,7 @@ resource-loading:
 **📋 禁用词与替换策略**：
 
 > **引用外部规范**：完整的禁用词黑名单（200+ 词）和替换策略表，请参阅：
-> `templates/knowledge-base/requirements/anti-ai-v4.md`
+> `resources/requirements/anti-ai-v4.md`
 >
 > ⚠️ **写作时必须加载此文件**，作为禁用词和替换的权威参考。
 
@@ -415,7 +502,7 @@ resource-loading:
 
 写完一段后，主动识别并替换抽象表达。
 
-> **完整清单和示例**：首次写作时读取 `templates/knowledge-base/requirements/concretization.md`
+> **完整清单和示例**：首次写作时读取 `resources/requirements/concretization.md`
 >
 > 核心要点：
 > - 时间具体化（避免"最近"、"很久"）
@@ -437,7 +524,7 @@ resource-loading:
 
 **字数统计**：使用项目提供的脚本验证：
 ```bash
-source .specify/scripts/bash/common.sh
+source resources/scripts/bash/common.sh
 count_chinese_words "stories/*/content/第X章.md"
 ```
 ⚠️ 不要使用 `wc -w` 统计中文字数。
@@ -471,12 +558,12 @@ count_chinese_words "stories/*/content/第X章.md"
 3. **合并更新**：将新内容增量合并到现有数据
 4. **写入 tracking 数据**：
    - **分片模式**：确定当前章节所属卷，更新该卷的分片文件，同步更新全局摘要
-   - **单文件模式**：直接更新 `spec/tracking/` 下的文件
+   - **单文件模式**：直接更新 `tracking/` 下的文件
 5. **MCP 同步**（如果可用）：
    - `log_writing_session` — 记录本次写作的章节号、字数
    - `sync_from_json` — 将更新后的 tracking 数据同步到 SQLite
    - 更新 FTS 索引 — 将新章节内容索引到全文检索
-6. **记录日志**：追加到 `spec/tracking/tracking-log.md`
+6. **记录日志**：追加到 `tracking/tracking-log.md`
 
 > **详细格式和示例**：参见 `.claude/skills/auto-tracking/SKILL.md`
 

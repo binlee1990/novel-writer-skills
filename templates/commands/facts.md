@@ -1,10 +1,10 @@
 ---
 description: 管理和校验故事设定事实的一致性
 argument-hint: [check | update <fact-id> | add | remove <fact-id>] [--volume vol-XX | --range ch-XXX-YYY]
-allowed-tools: Read(//spec/tracking/**), Read(//stories/**/content/**), Write(//spec/tracking/story-facts.json), Bash(bash:*), Bash(powershell:*)
+allowed-tools: Read(//tracking/**), Read(//stories/**/content/**), Write(//tracking/story-facts.json), Bash(bash:*), Bash(powershell:*)
 scripts:
-  sh: .specify/scripts/bash/check-facts.sh
-  ps: .specify/scripts/powershell/check-facts.ps1
+  sh: resources/scripts/bash/check-facts.sh
+  ps: resources/scripts/powershell/check-facts.ps1
 ---
 
 # /facts - 故事设定事实管理
@@ -15,7 +15,7 @@ scripts:
 
 ## 数据源：story-facts.json
 
-**单一数据源原则**：所有可量化的设定事实都应注册在 `spec/tracking/story-facts.json` 中，作为唯一可信来源（Single Source of Truth）。
+**单一数据源原则**：所有可量化的设定事实都应注册在 `tracking/story-facts.json` 中，作为唯一可信来源（Single Source of Truth）。
 
 ### 数据结构示例
 
@@ -125,12 +125,12 @@ scripts:
 - 支持 `--range ch-XXX-YYY` 过滤：`query_facts --chapter_from=XXX --chapter_to=YYY`
 
 **Layer 2: 分片 JSON（次优）**
-- 检测 `spec/tracking/volumes/` 是否存在
-- 无 --volume 参数：读取 `spec/tracking/story-facts.json`（全局事实文件，不按卷分片）
+- 检测 `tracking/volumes/` 是否存在
+- 无 --volume 参数：读取 `tracking/story-facts.json`（全局事实文件，不按卷分片）
 - 有 --volume 参数：读取全局事实文件，按 `source` 字段过滤属于该卷的事实
 
 **Layer 3: 单文件 JSON（兜底）**
-- 读取 `spec/tracking/story-facts.json`
+- 读取 `tracking/story-facts.json`
 
 ### 章节扫描范围
 
@@ -148,7 +148,7 @@ scripts:
 
 #### 执行步骤
 
-1. 读取 `spec/tracking/story-facts.json`
+1. 读取 `tracking/story-facts.json`
 2. 按 category 分组展示所有已注册事实
 3. 展示 rules 列表及当前校验状态（算术是否成立）
 4. 提示用户可用操作：add / remove / update
@@ -418,7 +418,7 @@ scripts:
       当前: "每月收入仅有五百灵石"
       修改为: "每月收入仅有八百灵石"
 
-   3. spec/tracking/plot-tracker.json
+   3. tracking/plot-tracker.json
       当前: "finance-monthly-income": 500
       修改为: "finance-monthly-income": 800
    ```

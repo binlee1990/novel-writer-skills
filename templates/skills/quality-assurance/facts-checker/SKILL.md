@@ -8,7 +8,7 @@ allowed-tools: Read, Grep
 
 ## 职责范围
 
-本 skill 负责校验故事中**可量化的设定事实**（数字、名称、枚举值）与单一数据源 `spec/tracking/story-facts.json` 的一致性。
+本 skill 负责校验故事中**可量化的设定事实**（数字、名称、枚举值）与单一数据源 `tracking/story-facts.json` 的一致性。
 
 ### 与 consistency-checker 的分工
 
@@ -41,7 +41,7 @@ allowed-tools: Read, Grep
    - 如果未找到注释，跳过校验（不报错）
 
 2. **加载事实数据源**
-   - 读取 `spec/tracking/story-facts.json`
+   - 读取 `tracking/story-facts.json`
    - 提取声明的 fact ID 对应的当前值
 
 3. **扫描正文内容**

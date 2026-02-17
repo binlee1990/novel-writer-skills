@@ -30,12 +30,19 @@ export function registerUpgradeCommand(program: Command): void {
       const templates = getTemplateSourcePaths();
 
       try {
-        if (!await fs.pathExists(paths.specifyConfig)) {
+        // 检测项目：先查新路径，再查旧路径判断是否需要迁移
+        const isNewStructure = await fs.pathExists(paths.resourcesConfig);
+        const isLegacy = !isNewStructure && await fs.pathExists(paths._legacy_specify);
+
+        if (!isNewStructure && !isLegacy) {
           console.log(chalk.red('❌ 当前目录不是 novel-writer-skills 项目'));
           process.exit(1);
         }
 
-        const config = await fs.readJson(paths.specifyConfig);
+        const configPath = isNewStructure
+          ? paths.resourcesConfig
+          : path.join(paths._legacy_specify, 'config.json');
+        const config = await fs.readJson(configPath);
         const projectVersion = config.version || '未知';
 
         console.log(chalk.cyan('\n📦 NovelWrite 项目升级\n'));
@@ -90,15 +97,73 @@ export function registerUpgradeCommand(program: Command): void {
 
         if (updateScripts) {
           spinner.text = '更新脚本文件...';
-          if (await fs.pathExists(templates.scripts)) {
-            await fs.ensureDir(paths.specifyScripts);
-            await fs.copy(templates.scripts, paths.specifyScripts, { overwrite: true });
+          if (await fs.pathExists(templates.resources)) {
+            const scriptsSource = path.join(templates.resources, 'scripts');
+            if (await fs.pathExists(scriptsSource)) {
+              await fs.ensureDir(paths.resourcesScripts);
+              await fs.copy(scriptsSource, paths.resourcesScripts, { overwrite: true });
+            }
           }
         }
 
+        // v3→v4 迁移
+        if (isLegacy) {
+          spinner.text = '检测到 v3 项目结构，执行迁移...';
+
+          // 创建新目录
+          await fs.ensureDir(paths.resources);
+          await fs.ensureDir(paths.tracking);
+          await fs.ensureDir(paths.cache);
+          await fs.ensureDir(path.join(paths.resources, 'config'));
+
+          // 移动文件（按设计文档映射表）
+          const migrations = [
+            { from: path.join(paths._legacy_specify, 'memory'), to: paths.resourcesMemory },
+            { from: path.join(paths._legacy_specify, 'templates', 'knowledge-base', 'craft'), to: path.join(paths.resources, 'craft') },
+            { from: path.join(paths._legacy_specify, 'templates', 'knowledge-base', 'genres'), to: path.join(paths.resources, 'genres') },
+            { from: path.join(paths._legacy_specify, 'templates', 'knowledge-base', 'styles'), to: path.join(paths.resources, 'styles') },
+            { from: path.join(paths._legacy_specify, 'templates', 'knowledge-base', 'requirements'), to: path.join(paths.resources, 'requirements') },
+            { from: path.join(paths._legacy_specify, 'templates', 'knowledge-base', 'emotional-beats'), to: path.join(paths.resources, 'emotional-beats') },
+            { from: path.join(paths._legacy_specify, 'templates', 'knowledge-base', 'character-archetypes'), to: path.join(paths.resources, 'character-archetypes') },
+            { from: path.join(paths._legacy_specify, 'templates', 'knowledge-base', 'references'), to: path.join(paths.resources, 'references') },
+            { from: path.join(paths._legacy_specify, 'templates', 'config'), to: path.join(paths.resources, 'config') },
+            { from: path.join(paths._legacy_specify, 'scripts'), to: paths.resourcesScripts },
+            { from: path.join(paths._legacy_spec, 'tracking'), to: paths.tracking },
+            { from: path.join(paths._legacy_spec, 'knowledge'), to: paths.resourcesKnowledge },
+            { from: path.join(paths._legacy_spec, 'presets'), to: path.join(paths.resources, 'presets') },
+          ];
+
+          for (const { from, to } of migrations) {
+            if (await fs.pathExists(from)) {
+              await fs.move(from, to, { overwrite: true });
+            }
+          }
+
+          // 迁移 config.json
+          const oldConfig = path.join(paths._legacy_specify, 'config.json');
+          if (await fs.pathExists(oldConfig)) {
+            await fs.ensureDir(path.dirname(paths.resourcesConfig));
+            await fs.move(oldConfig, paths.resourcesConfig, { overwrite: true });
+          }
+
+          // 清理空旧目录
+          for (const dir of [paths._legacy_specify, paths._legacy_spec]) {
+            if (await fs.pathExists(dir)) {
+              await fs.remove(dir);
+            }
+          }
+
+          // 清除缓存
+          if (await fs.pathExists(paths.cache)) {
+            await fs.remove(paths.cache);
+            await fs.ensureDir(paths.cache);
+          }
+
+          spinner.text = 'v3→v4 迁移完成...';
+        }
 
         config.version = getVersion();
-        await fs.writeJson(paths.specifyConfig, config, { spaces: 2 });
+        await fs.writeJson(paths.resourcesConfig, config, { spaces: 2 });
 
         // 检测 tracking 文件大小，提示迁移
         const MIGRATION_THRESHOLD = 50 * 1024; // 50KB

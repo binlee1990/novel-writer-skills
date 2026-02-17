@@ -12,7 +12,7 @@ export interface SyncResult {
 }
 
 export function syncFromJson(db: Database.Database, projectRoot: string): SyncResult {
-  const trackingDir = path.join(projectRoot, 'spec', 'tracking');
+  const trackingDir = path.join(projectRoot, 'tracking');
   const volumesDir = path.join(trackingDir, 'volumes');
   const isSharded = fs.existsSync(volumesDir);
 

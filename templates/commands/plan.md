@@ -2,10 +2,10 @@
 description: 基于故事规格制定技术实现方案
 argument-hint: [技术偏好和选择] [--detail vol-XX]
 recommended-model: claude-opus-4-6 # 需要创意和规划能力
-allowed-tools: Read(//stories/**/specification.md), Read(//stories/**/specification.md), Read(//stories/**/creative-plan.md), Read(//stories/**/creative-plan.md), Read(//plugins/**), Read(//plugins/**), Write(//stories/**/creative-plan.md), Write(//stories/**/creative-plan.md), Read(//.specify/memory/constitution.md), Read(//.specify/memory/constitution.md), Bash(find:*), Bash(grep:*), Bash(*)
+allowed-tools: Read(//stories/**/specification.md), Read(//stories/**/specification.md), Read(//stories/**/creative-plan.md), Read(//stories/**/creative-plan.md), Read(//plugins/**), Read(//plugins/**), Write(//stories/**/creative-plan.md), Write(//stories/**/creative-plan.md), Read(//resources/memory/constitution.md), Read(//resources/memory/constitution.md), Bash(find:*), Bash(grep:*), Bash(*)
 scripts:
-  sh: .specify/scripts/bash/plan-story.sh
-  ps: .specify/scripts/powershell/plan-story.ps1
+  sh: resources/scripts/bash/plan-story.sh
+  ps: resources/scripts/powershell/plan-story.ps1
 ---
 
 用户输入：$ARGUMENTS
@@ -28,7 +28,7 @@ scripts:
 ### 1. 加载前置文档
 
 **运行脚本** `{SCRIPT}` 检查并加载：
-- 宪法文件：`.specify/memory/constitution.md`
+- 宪法文件：`resources/memory/constitution.md`
 - 规格文件：`stories/*/specification.md`
 - 澄清记录（如果已运行 `/clarify`）
 
@@ -49,10 +49,10 @@ powershell -File {SCRIPT} -Json
 #### Layer 1: 默认推断
 
 未配置 resource-loading 或 `auto-load: true` 时，自动加载：
-- `.specify/templates/knowledge-base/craft/scene-structure.md`
-- `.specify/templates/knowledge-base/craft/character-arc.md`
-- `.specify/templates/knowledge-base/craft/pacing.md`
-- `.specify/templates/skills/planning/story-structure/SKILL.md`（如存在）
+- `resources/craft/scene-structure.md`
+- `resources/craft/character-arc.md`
+- `resources/craft/pacing.md`
+- `.claude/skills/planning/story-structure/SKILL.md`（如存在）
 
 #### Layer 2: 配置覆盖
 
@@ -74,12 +74,12 @@ powershell -File {SCRIPT} -Json
 **条件加载：黄金开篇法则**：
 
 如果总字数 < 10000字 或规划范围包含第1-3章：
-- 检查 `spec/presets/golden-opening.md` 是否存在
+- 检查 `resources/presets/golden-opening.md` 是否存在
 - 如存在则读取，在规划前三章时应用五大黄金法则
 
 **条件加载：节奏配置**：
 
-如果 `spec/presets/rhythm-config.json` 存在：
+如果 `resources/presets/rhythm-config.json` 存在：
 - 读取并应用对标作品的节奏参数（章节字数、爽点间隔、内容比例）
 - 参数优先级：用户即时指令 > rhythm-config.json > 类型知识库 > 默认值
 
@@ -109,14 +109,14 @@ const plotData = await mcp.call('novelws-mcp/query_plot', {
 ### Layer 2: 分片 JSON（次优）
 
 ```bash
-# 当 spec/tracking/volumes/ 存在时
+# 当 tracking/volumes/ 存在时
 if [[ -n "$VOLUME_FILTER" ]]; then
   # 仅读取指定卷的 plot-tracker
-  cat "spec/tracking/volumes/$VOLUME_FILTER/plot-tracker.json"
+  cat "tracking/volumes/$VOLUME_FILTER/plot-tracker.json"
 else
   # 读取全局摘要 + 所有卷数据
-  cat "spec/tracking/summary/plot-summary.json"
-  for vol in spec/tracking/volumes/vol-*/; do
+  cat "tracking/summary/plot-summary.json"
+  for vol in tracking/volumes/vol-*/; do
     cat "$vol/plot-tracker.json"
   done
 fi
@@ -131,14 +131,14 @@ fi
 
 ```bash
 # 传统模式，加载完整文件
-cat spec/tracking/plot-tracker.json
+cat tracking/plot-tracker.json
 ```
 
 **向下兼容**：小型项目（< 300 章）继续使用单文件模式
 
 ### 数据写入协议
 
-**分片模式**（spec/tracking/volumes/ 存在）：
+**分片模式**（tracking/volumes/ 存在）：
 
 1. **确定目标卷**：
    - 如果指定 `--detail vol-XX`，写入该卷
@@ -146,13 +146,13 @@ cat spec/tracking/plot-tracker.json
 
 2. **写入分片文件**：
    ```bash
-   Write(spec/tracking/volumes/${target_volume}/plot-tracker.json)
+   Write(tracking/volumes/${target_volume}/plot-tracker.json)
    ```
 
 3. **更新全局摘要**：
    ```bash
    # 更新 plot-summary.json 的伏笔统计
-   Write(spec/tracking/summary/plot-summary.json)
+   Write(tracking/summary/plot-summary.json)
    ```
 
 4. **触发 MCP 同步**（如果启用）：
@@ -167,7 +167,7 @@ cat spec/tracking/plot-tracker.json
 
 直接写入完整 `plot-tracker.json`：
 ```bash
-Write(spec/tracking/plot-tracker.json)
+Write(tracking/plot-tracker.json)
 ```
 
 ---
@@ -186,7 +186,7 @@ Write(spec/tracking/plot-tracker.json)
 - **混合方法**：主线+支线使用不同方法
 - **类型专用结构**：如爽文的"爽点分布结构"、悬疑的"线索布局结构"等
 
-**网文专用结构**：如果类型为网文类（玄幻、都市、言情、游戏文等），加载 `.specify/templates/knowledge-base/craft/story-structures.md`，从升级流/副本流/任务流/日常流中选择适合的结构模板。
+**网文专用结构**：如果类型为网文类（玄幻、都市、言情、游戏文等），加载 `resources/craft/story-structures.md`，从升级流/副本流/任务流/日常流中选择适合的结构模板。
 
 记录选择理由和应用方式。
 
@@ -263,7 +263,7 @@ Write(spec/tracking/plot-tracker.json)
 
 **触发条件**：`$ARGUMENTS` 包含 `--detail vol-XX` 或 `--detail vol-XX-YY`
 
-加载 `.specify/templates/skills/planning/volume-detail/SKILL.md`，按其流程执行：
+加载 `.claude/skills/planning/volume-detail/SKILL.md`，按其流程执行：
 - 单卷：卷概要确认 → 逐章规划 → 节奏总览 → 写入 → 生成 tasks.md → 灵感分配
 - 多卷：范围确认 → 逐卷规划 → 跨卷节奏对比 → 批量生成 tasks.md
 
@@ -410,14 +410,14 @@ Write(spec/tracking/plot-tracker.json)
 1. 从 `creative-plan.md` 提取情节线定义、章节分配、伏笔规划
 2. 按三层 Fallback 读取现有 plot-tracker 数据：
    - **MCP 查询（优先）**：`query_plot` 获取现有情节线和伏笔
-   - **分片 JSON（次优）**：读取 `spec/tracking/volumes/` 下各卷的 `plot-tracker.json`
-   - **单文件 JSON（兜底）**：读取 `spec/tracking/plot-tracker.json`
+   - **分片 JSON（次优）**：读取 `tracking/volumes/` 下各卷的 `plot-tracker.json`
+   - **单文件 JSON（兜底）**：读取 `tracking/plot-tracker.json`
 3. 生成或合并 plot-tracker 数据（保留已有 progress）
 4. 写入 tracking 数据：
-   - **分片模式**：按卷写入 `spec/tracking/volumes/vol-XX/plot-tracker.json`，同步更新 `spec/tracking/summary/plot-summary.json`
-   - **单文件模式**：直接写入 `spec/tracking/plot-tracker.json`
+   - **分片模式**：按卷写入 `tracking/volumes/vol-XX/plot-tracker.json`，同步更新 `tracking/summary/plot-summary.json`
+   - **单文件模式**：直接写入 `tracking/plot-tracker.json`
 5. 如果 MCP 可用，调用 `sync_from_json` 同步到 SQLite
-6. 追加更新记录到 `spec/tracking/tracking-log.md`（使用 diff 格式）
+6. 追加更新记录到 `tracking/tracking-log.md`（使用 diff 格式）
 7. 验证 JSON 格式有效性
 
 **错误处理**：

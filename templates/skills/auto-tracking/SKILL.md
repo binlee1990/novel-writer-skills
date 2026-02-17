@@ -156,7 +156,7 @@
 
 ### Step 4: 记录到 tracking-log.md
 
-追加更新记录到 `spec/tracking/tracking-log.md`。
+追加更新记录到 `tracking/tracking-log.md`。
 
 **日志格式**:
 ```markdown

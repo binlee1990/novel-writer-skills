@@ -32,14 +32,14 @@ describe('novelws init', () => {
 
     // 验证核心目录
     expect(fs.existsSync(path.join(projectPath, '.claude'))).toBe(true);
-    expect(fs.existsSync(path.join(projectPath, '.specify'))).toBe(true);
+    expect(fs.existsSync(path.join(projectPath, 'resources'))).toBe(true);
     expect(fs.existsSync(path.join(projectPath, 'stories'))).toBe(true);
-    expect(fs.existsSync(path.join(projectPath, 'spec'))).toBe(true);
+    expect(fs.existsSync(path.join(projectPath, 'tracking'))).toBe(true);
 
     // 验证子目录
     expect(fs.existsSync(path.join(projectPath, '.claude', 'commands'))).toBe(true);
     expect(fs.existsSync(path.join(projectPath, '.claude', 'skills'))).toBe(true);
-    expect(fs.existsSync(path.join(projectPath, 'spec', 'tracking'))).toBe(true);
+    expect(fs.existsSync(path.join(projectPath, 'tracking'))).toBe(true);
   });
 
   it('should create valid config.json', () => {
@@ -50,7 +50,7 @@ describe('novelws init', () => {
       stdio: 'pipe',
     });
 
-    const configPath = path.join(testDir, projectName, '.specify', 'config.json');
+    const configPath = path.join(testDir, projectName, 'resources', 'config', 'config.json');
     expect(fs.existsSync(configPath)).toBe(true);
 
     const config = fs.readJsonSync(configPath);
@@ -117,7 +117,7 @@ describe('novelws init', () => {
     const projectPath = path.join(testDir, projectName);
 
     // 验证 summary 目录和文件
-    const summaryDir = path.join(projectPath, 'spec', 'tracking', 'summary');
+    const summaryDir = path.join(projectPath, 'tracking', 'summary');
     expect(fs.existsSync(summaryDir)).toBe(true);
     expect(fs.existsSync(path.join(summaryDir, 'characters-summary.json'))).toBe(true);
     expect(fs.existsSync(path.join(summaryDir, 'plot-summary.json'))).toBe(true);
@@ -125,7 +125,7 @@ describe('novelws init', () => {
     expect(fs.existsSync(path.join(summaryDir, 'volume-summaries.json'))).toBe(true);
 
     // 验证 volumes 目录
-    const volumesDir = path.join(projectPath, 'spec', 'tracking', 'volumes');
+    const volumesDir = path.join(projectPath, 'tracking', 'volumes');
     expect(fs.existsSync(volumesDir)).toBe(true);
     expect(fs.existsSync(path.join(volumesDir, 'vol-01'))).toBe(true);
   });
@@ -139,8 +139,8 @@ describe('novelws init', () => {
     });
 
     const projectPath = path.join(testDir, projectName);
-    const summaryDir = path.join(projectPath, 'spec', 'tracking', 'summary');
-    const volumesDir = path.join(projectPath, 'spec', 'tracking', 'volumes');
+    const summaryDir = path.join(projectPath, 'tracking', 'summary');
+    const volumesDir = path.join(projectPath, 'tracking', 'volumes');
 
     expect(fs.existsSync(summaryDir)).toBe(false);
     expect(fs.existsSync(volumesDir)).toBe(false);
@@ -154,7 +154,7 @@ describe('novelws init', () => {
       stdio: 'pipe',
     });
 
-    const configPath = path.join(testDir, projectName, '.specify', 'config.json');
+    const configPath = path.join(testDir, projectName, 'resources', 'config', 'config.json');
     const config = fs.readJsonSync(configPath);
     expect(config.scale).toBe('large');
   });
@@ -167,7 +167,7 @@ describe('novelws init', () => {
       stdio: 'pipe',
     });
 
-    const configPath = path.join(testDir, projectName, '.specify', 'config.json');
+    const configPath = path.join(testDir, projectName, 'resources', 'config', 'config.json');
     const config = fs.readJsonSync(configPath);
     expect(config.mcp).toBe(true);
   });
@@ -181,7 +181,7 @@ describe('novelws init', () => {
     });
 
     const projectPath = path.join(testDir, projectName);
-    const summaryDir = path.join(projectPath, 'spec', 'tracking', 'summary');
+    const summaryDir = path.join(projectPath, 'tracking', 'summary');
     expect(fs.existsSync(summaryDir)).toBe(true);
   });
 

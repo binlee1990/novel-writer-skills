@@ -55,8 +55,8 @@ const timeline = await mcp.call('novelws-mcp/query_timeline', {
 ### Layer 2: 分片 JSON（次优）
 
 ```bash
-# 当 spec/tracking/volumes/ 存在时
-VOLUME_DIR="spec/tracking/volumes/vol-03"
+# 当 tracking/volumes/ 存在时
+VOLUME_DIR="tracking/volumes/vol-03"
 
 # 读取该卷所有 tracking 数据
 cat "$VOLUME_DIR/character-state.json"
@@ -75,7 +75,7 @@ cat "$VOLUME_DIR/story-facts.json"
 
 ```bash
 # 传统模式，加载完整文件后手动过滤卷
-character_state=$(cat spec/tracking/character-state.json | jq ".characters | map(select(.volume == \"vol-03\"))")
+character_state=$(cat tracking/character-state.json | jq ".characters | map(select(.volume == \"vol-03\"))")
 ```
 
 **向下兼容**：小型项目（< 300 章）继续使用单文件模式，摘要覆盖全书
@@ -102,7 +102,7 @@ const shouldExport = args.export || false;
 ### Step 2: 检测数据模式
 
 ```javascript
-const isSharded = fs.existsSync('spec/tracking/volumes/');
+const isSharded = fs.existsSync('tracking/volumes/');
 const hasMCP = fs.existsSync('mcp-servers.json');
 
 // 选择数据源
@@ -129,7 +129,7 @@ const data = await loadVolumeDataFromMCP(volumeId);
 #### 分片模式
 
 ```bash
-VOLUME_DIR="spec/tracking/volumes/${volumeId}"
+VOLUME_DIR="tracking/volumes/${volumeId}"
 
 if [[ ! -d "$VOLUME_DIR" ]]; then
   echo "错误：卷目录不存在：$VOLUME_DIR"
@@ -406,7 +406,7 @@ JSON 数据可用于：
 用户：/volume-summary vol-05
 助手：检测到分片模式...
 
-数据来源：spec/tracking/volumes/vol-05/
+数据来源：tracking/volumes/vol-05/
 ✓ character-state.json
 ✓ relationships.json
 ✓ plot-tracker.json

@@ -1,10 +1,10 @@
 ---
 name: track-init
 description: 初始化追踪系统，基于故事大纲设置追踪数据
-allowed-tools: Read(//stories/**/specification.md), Read(//stories/**/specification.md), Read(//stories/**/creative-plan.md), Read(//stories/**/creative-plan.md), Write(//spec/tracking/**), Write(//spec/tracking/**), Bash(find:*), Bash(grep:*), Bash(wc:*), Bash(*)
+allowed-tools: Read(//stories/**/specification.md), Read(//stories/**/specification.md), Read(//stories/**/creative-plan.md), Read(//stories/**/creative-plan.md), Write(//tracking/**), Write(//tracking/**), Bash(find:*), Bash(grep:*), Bash(wc:*), Bash(*)
 scripts:
-  sh: .specify/scripts/bash/init-tracking.sh
-  ps: .specify/scripts/powershell/init-tracking.ps1
+  sh: resources/scripts/bash/init-tracking.sh
+  ps: resources/scripts/powershell/init-tracking.ps1
 ---
 
 # 初始化追踪系统
@@ -38,13 +38,13 @@ resource-loading:
 1. **读取基础数据**
    - 读取 `stories/*/specification.md` 获取故事设定
    - 读取 `stories/*/creative-plan.md` 获取章节规划
-   - 读取 `.specify/config.json` 获取写作方法
+   - 读取 `resources/config/config.json` 获取写作方法
 
 2. **初始化追踪文件**
 
    **重要**：优先从 `specification.md` 第五章读取线索管理规格，填充到追踪文件。
 
-   创建或更新 `spec/tracking/plot-tracker.json`：
+   创建或更新 `tracking/plot-tracker.json`：
    - 从 `specification.md 5.1节` 读取所有线索定义
    - 从 `specification.md 5.3节` 读取所有交汇点
    - 从 `specification.md 5.4节` 读取所有伏笔
@@ -111,15 +111,15 @@ resource-loading:
    }
    ```
 
-   创建或更新 `spec/tracking/timeline.json`：
+   创建或更新 `tracking/timeline.json`：
    - 根据章节规划设置时间节点
    - 标记重要时间事件
 
-   创建或更新 `spec/tracking/relationships.json`：
+   创建或更新 `tracking/relationships.json`：
    - 从角色设定提取初始关系
    - 设置派系分组
 
-   创建或更新 `spec/tracking/character-state.json`：
+   创建或更新 `tracking/character-state.json`：
    - 初始化角色状态
    - 设置起始位置
 

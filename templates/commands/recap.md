@@ -65,27 +65,27 @@ allowed-tools: Read(//**), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
 
 如果任一 MCP 调用失败，回退到 Layer 2。
 
-**Layer 2: 分片 JSON（检测 spec/tracking/volumes/ 是否存在）**
+**Layer 2: 分片 JSON（检测 tracking/volumes/ 是否存在）**
 
 **--brief 模式：**
-- 只读 `spec/tracking/summary/volume-summaries.json`
-- 只读 `spec/tracking/summary/characters-summary.json`（仅 active 部分）
+- 只读 `tracking/summary/volume-summaries.json`
+- 只读 `tracking/summary/characters-summary.json`（仅 active 部分）
 
 **默认模式：**
-- 读 `spec/tracking/summary/volume-summaries.json` → 获取前卷摘要
-- 读 `spec/tracking/summary/characters-summary.json` → 活跃角色概览
-- 读 `spec/tracking/summary/plot-summary.json` → 未解决伏笔
-- 读当前卷详情：`spec/tracking/volumes/[currentVolume]/` 下的 4 个文件
+- 读 `tracking/summary/volume-summaries.json` → 获取前卷摘要
+- 读 `tracking/summary/characters-summary.json` → 活跃角色概览
+- 读 `tracking/summary/plot-summary.json` → 未解决伏笔
+- 读当前卷详情：`tracking/volumes/[currentVolume]/` 下的 4 个文件
 
 **--full vol-XX 模式：**
-- 读 `spec/tracking/volumes/vol-XX/` 下的 4 个文件（完整数据）
-- 读 `spec/tracking/summary/volume-summaries.json` → 该卷前后的摘要
+- 读 `tracking/volumes/vol-XX/` 下的 4 个文件（完整数据）
+- 读 `tracking/summary/volume-summaries.json` → 该卷前后的摘要
 
 **Layer 3: 单文件 JSON（兜底，现有逻辑）**
-- 读 `spec/tracking/character-state.json`
-- 读 `spec/tracking/plot-tracker.json`
-- 读 `spec/tracking/relationships.json`
-- 读 `spec/tracking/timeline.json`
+- 读 `tracking/character-state.json`
+- 读 `tracking/plot-tracker.json`
+- 读 `tracking/relationships.json`
+- 读 `tracking/timeline.json`
 
 #### 创作基础文件（第二优先级）
 
@@ -103,8 +103,8 @@ allowed-tools: Read(//**), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
 
 #### 辅助文件（第四优先级，可选）
 
-9. `.specify/memory/constitution.md` - 创作宪法
-10. `spec/tracking/validation-rules.json` - 验证规则
+9. `resources/memory/constitution.md` - 创作宪法
+10. `tracking/validation-rules.json` - 验证规则
 
 **数据缺失处理**：
 
@@ -123,7 +123,7 @@ allowed-tools: Read(//**), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
 ```
 ⚠️ 追踪数据缺失
 
-未找到任何追踪文件（spec/tracking/）。
+未找到任何追踪文件（tracking/）。
 本简报将基于现有章节内容和规格文件生成简化版。
 
 建议：

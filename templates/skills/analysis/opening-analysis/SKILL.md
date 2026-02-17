@@ -9,7 +9,7 @@
 
 ### 黄金法则检查
 
-**如果存在 `spec/presets/golden-opening.md`，自动读取并应用五大法则**
+**如果存在 `resources/presets/golden-opening.md`，自动读取并应用五大法则**
 
 #### 法则1：动态场景切入
 - ✅ 第一章开场方式：[动作/对话/冲突] 直接切入

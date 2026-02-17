@@ -347,13 +347,13 @@ const mentions = await mcp.call('novelws-mcp/search_content', {
 
 ```bash
 # 读取摘要
-character_summary=$(cat spec/tracking/summary/characters-summary.json)
-plot_summary=$(cat spec/tracking/summary/plot-summary.json)
+character_summary=$(cat tracking/summary/characters-summary.json)
+plot_summary=$(cat tracking/summary/plot-summary.json)
 
 # 读取特定卷
 if [[ -n "$VOLUME" ]]; then
-  character_state=$(cat "spec/tracking/volumes/$VOLUME/character-state.json")
-  plot_tracker=$(cat "spec/tracking/volumes/$VOLUME/plot-tracker.json")
+  character_state=$(cat "tracking/volumes/$VOLUME/character-state.json")
+  plot_tracker=$(cat "tracking/volumes/$VOLUME/plot-tracker.json")
 fi
 
 # Grep 搜索
@@ -371,9 +371,9 @@ grep -rn "青云宗" stories/*/content/
 
 ```bash
 # 读取完整 tracking 数据
-character_state=$(cat spec/tracking/character-state.json)
-plot_tracker=$(cat spec/tracking/plot-tracker.json)
-story_facts=$(cat spec/tracking/story-facts.json)
+character_state=$(cat tracking/character-state.json)
+plot_tracker=$(cat tracking/plot-tracker.json)
+story_facts=$(cat tracking/story-facts.json)
 
 # Grep 搜索
 grep -rn "天魂珠" stories/*/content/

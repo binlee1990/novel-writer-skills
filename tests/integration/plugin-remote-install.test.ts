@@ -13,7 +13,7 @@ describe('Plugin Remote Installation', () => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nws-test-remote-'));
     projectRoot = path.join(tmpDir, 'test-project');
     await fs.ensureDir(projectRoot);
-    await fs.ensureDir(path.join(projectRoot, '.specify'));
+    await fs.ensureDir(path.join(projectRoot, 'resources', 'config'));
     manager = new PluginManager(projectRoot);
   });
 
@@ -71,7 +71,7 @@ describe('Plugin Remote Installation', () => {
       );
 
       // 手动添加到注册表
-      const registryPath = path.join(projectRoot, '.specify', 'plugins.json');
+      const registryPath = path.join(projectRoot, 'resources', 'config', 'plugins.json');
       await fs.writeJson(registryPath, {
         version: '1.0.0',
         plugins: [
@@ -97,7 +97,7 @@ describe('Plugin Remote Installation', () => {
   describe('installRemotePlugin', () => {
     it('should reject duplicate installation', async () => {
       // 先手动添加到注册表
-      const registryPath = path.join(projectRoot, '.specify', 'plugins.json');
+      const registryPath = path.join(projectRoot, 'resources', 'config', 'plugins.json');
       await fs.writeJson(registryPath, {
         version: '1.0.0',
         plugins: [

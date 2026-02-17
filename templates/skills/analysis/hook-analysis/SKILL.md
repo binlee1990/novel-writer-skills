@@ -5,7 +5,7 @@
 **前置加载**：
 - 加载 Skill：`templates/skills/quality-assurance/hook-checker/SKILL.md`
 - 加载 Expert：`templates/skills/quality-assurance/hook-checker/experts/hook-analyst.md`
-- 加载知识库：`templates/knowledge-base/craft/hook-design.md`
+- 加载知识库：`resources/craft/hook-design.md`
 - 读取所有已写章节内容
 
 **分析流程**：
@@ -106,6 +106,6 @@
 4. 卷末钩子（第 [N] 章）建议提升至 ⭐⭐⭐⭐ 以上
 
 📚 参考资源：
-- 钩子设计指南：templates/knowledge-base/craft/hook-design.md
+- 钩子设计指南：resources/craft/hook-design.md
 - 六种钩子类型详解和示例
 ```

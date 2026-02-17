@@ -30,21 +30,21 @@ describe('Ultra-long novel support - integration', () => {
       const projectPath = path.join(testDir, 'large-novel');
 
       // Summary files
-      const summaryDir = path.join(projectPath, 'spec', 'tracking', 'summary');
+      const summaryDir = path.join(projectPath, 'tracking', 'summary');
       expect(fs.existsSync(path.join(summaryDir, 'characters-summary.json'))).toBe(true);
       expect(fs.existsSync(path.join(summaryDir, 'plot-summary.json'))).toBe(true);
       expect(fs.existsSync(path.join(summaryDir, 'timeline-summary.json'))).toBe(true);
       expect(fs.existsSync(path.join(summaryDir, 'volume-summaries.json'))).toBe(true);
 
       // Volume directory
-      const vol01Dir = path.join(projectPath, 'spec', 'tracking', 'volumes', 'vol-01');
+      const vol01Dir = path.join(projectPath, 'tracking', 'volumes', 'vol-01');
       expect(fs.existsSync(path.join(vol01Dir, 'character-state.json'))).toBe(true);
       expect(fs.existsSync(path.join(vol01Dir, 'plot-tracker.json'))).toBe(true);
       expect(fs.existsSync(path.join(vol01Dir, 'timeline.json'))).toBe(true);
       expect(fs.existsSync(path.join(vol01Dir, 'relationships.json'))).toBe(true);
 
       // Config should record scale
-      const config = fs.readJsonSync(path.join(projectPath, '.specify', 'config.json'));
+      const config = fs.readJsonSync(path.join(projectPath, 'resources', 'config', 'config.json'));
       expect(config.scale).toBe('large');
     });
 
@@ -56,7 +56,7 @@ describe('Ultra-long novel support - integration', () => {
 
       const projectPath = path.join(testDir, 'compat-novel');
       // Standard tracking files should still exist (copied by default init logic)
-      expect(fs.existsSync(path.join(projectPath, 'spec', 'tracking', 'character-state.json'))).toBe(true);
+      expect(fs.existsSync(path.join(projectPath, 'tracking', 'character-state.json'))).toBe(true);
     });
   });
 
@@ -68,11 +68,11 @@ describe('Ultra-long novel support - integration', () => {
       });
 
       const projectPath = path.join(testDir, 'mcp-novel');
-      const config = fs.readJsonSync(path.join(projectPath, '.specify', 'config.json'));
+      const config = fs.readJsonSync(path.join(projectPath, 'resources', 'config', 'config.json'));
       expect(config.mcp).toBe(true);
 
       // Should have summary dir (implied --scale large)
-      expect(fs.existsSync(path.join(projectPath, 'spec', 'tracking', 'summary'))).toBe(true);
+      expect(fs.existsSync(path.join(projectPath, 'tracking', 'summary'))).toBe(true);
     });
   });
 
@@ -133,7 +133,7 @@ describe('Ultra-long novel support - integration', () => {
   describe('migrate-tracking.ps1 exists', () => {
     it('should exist in templates/scripts/powershell/', () => {
       const filePath = path.resolve(__dirname,
-        '../../templates/scripts/powershell/migrate-tracking.ps1');
+        '../../templates/resources/scripts/powershell/migrate-tracking.ps1');
       expect(fs.existsSync(filePath)).toBe(true);
     });
   });

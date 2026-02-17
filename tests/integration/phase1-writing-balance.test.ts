@@ -36,7 +36,7 @@ describe('Phase 1: Writing Balance Integration', () => {
   it('should have deprecated anti-ai-v4', () => {
     const oldPath = path.resolve(
       __dirname,
-      '../../templates/knowledge-base/requirements/anti-ai-v4-deprecated.md'
+      '../../templates/resources/requirements/anti-ai-v4-deprecated.md'
     );
     expect(fs.existsSync(oldPath)).toBe(true);
 
@@ -47,7 +47,7 @@ describe('Phase 1: Writing Balance Integration', () => {
   it('should have new anti-ai-v5-balanced', () => {
     const newPath = path.resolve(
       __dirname,
-      '../../templates/knowledge-base/requirements/anti-ai-v5-balanced.md'
+      '../../templates/resources/requirements/anti-ai-v5-balanced.md'
     );
     expect(fs.existsSync(newPath)).toBe(true);
 

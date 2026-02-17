@@ -5,7 +5,7 @@
 **前置加载**：
 - 加载 Skill：`templates/skills/quality-assurance/voice-consistency-checker/SKILL.md`
 - 加载 Expert：`templates/skills/quality-assurance/voice-consistency-checker/experts/voice-analyst.md`
-- 读取 `spec/tracking/character-state.json` 中所有角色的 `voice` 字段
+- 读取 `tracking/character-state.json` 中所有角色的 `voice` 字段
 - 读取所有已写章节内容
 
 **分析流程**：

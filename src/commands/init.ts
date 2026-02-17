@@ -59,17 +59,16 @@ export function registerInitCommand(program: Command): void {
         // 创建基础项目结构
         const paths = getProjectPaths(projectPath);
         const baseDirs = [
-          paths.specify,
-          paths.specifyMemory,
-          paths.specifyTemplates,
           paths.claude,
           paths.commands,
           paths.skills,
-          paths.stories,
-          paths.spec,
+          paths.cache,
+          paths.resources,
+          path.join(paths.resources, 'config'),
+          paths.resourcesMemory,
+          paths.resourcesScripts,
           paths.tracking,
-          paths.knowledge,
-          paths.specifyScripts,
+          paths.stories,
         ];
 
         for (const dir of baseDirs) {
@@ -87,7 +86,7 @@ export function registerInitCommand(program: Command): void {
           ...(options.withMcp && { mcp: true }),
         };
 
-        await fs.writeJson(paths.specifyConfig, config, { spaces: 2 });
+        await fs.writeJson(paths.resourcesConfig, config, { spaces: 2 });
 
         // 从 novel-writer-skills 包复制模板文件
         const templates = getTemplateSourcePaths();
@@ -117,37 +116,28 @@ export function registerInitCommand(program: Command): void {
           }
         }
 
-        // 复制模板文件到 .specify/templates（排除 scripts，scripts 单独复制到 .specify/scripts/）
-        if (await fs.pathExists(templates.all)) {
-          const scriptsDir = path.normalize(templates.scripts);
-          await fs.copy(templates.all, paths.specifyTemplates, {
-            overwrite: false,
-            filter: (src: string) => !path.normalize(src).startsWith(scriptsDir),
-          });
-        }
-
-        // 复制 memory 文件
-        if (await fs.pathExists(templates.memory)) {
-          await fs.copy(templates.memory, paths.specifyMemory);
+        // 复制 resources/ 模板（一次性：memory, config, scripts, craft, genres, styles 等）
+        if (await fs.pathExists(templates.resources)) {
+          await fs.copy(templates.resources, paths.resources);
+          spinner.text = '已安装资源文件...';
         }
 
         // 复制追踪文件模板（非 large 模式排除 summary 子目录）
         if (await fs.pathExists(templates.tracking)) {
           const summaryDir = path.normalize(templates.trackingSummary);
-          await fs.copy(templates.tracking, paths.tracking, {
-            filter: (src: string) => !path.normalize(src).startsWith(summaryDir),
-          });
+          if (options.scale === 'large') {
+            await fs.copy(templates.tracking, paths.tracking);
+          } else {
+            await fs.copy(templates.tracking, paths.tracking, {
+              filter: (src: string) => !path.normalize(src).startsWith(summaryDir),
+            });
+          }
         }
 
         // 大型项目：创建分片目录结构
         if (options.scale === 'large') {
           await fs.ensureDir(paths.trackingSummary);
           await fs.ensureDir(path.join(paths.trackingVolumes, 'vol-01'));
-
-          // 复制 summary 模板
-          if (await fs.pathExists(templates.trackingSummary)) {
-            await fs.copy(templates.trackingSummary, paths.trackingSummary);
-          }
 
           // 复制 tracking 模板到 vol-01 作为初始卷
           const trackingFiles = ['character-state.json', 'plot-tracker.json', 'timeline.json', 'relationships.json'];
@@ -162,15 +152,24 @@ export function registerInitCommand(program: Command): void {
           spinner.text = '已创建大型项目分片结构...';
         }
 
-        // 复制知识库模板（项目特定）
+        // 复制知识库模板（项目特定）→ resources/knowledge/
         if (await fs.pathExists(templates.knowledge)) {
-          await fs.copy(templates.knowledge, paths.knowledge);
+          await fs.copy(templates.knowledge, paths.resourcesKnowledge);
         }
 
-        // 复制脚本文件到 .specify/scripts/
-        if (await fs.pathExists(templates.scripts)) {
-          await fs.copy(templates.scripts, paths.specifyScripts);
-          spinner.text = '已安装脚本文件...';
+        // MCP 配置生成
+        if (options.withMcp) {
+          const mcpConfig = {
+            mcpServers: {
+              novelws: {
+                command: 'npx',
+                args: ['novelws-mcp', '.'],
+                env: {},
+              },
+            },
+          };
+          await fs.writeJson(paths.mcpServers, mcpConfig, { spaces: 2 });
+          spinner.text = '已生成 MCP 服务器配置...';
         }
 
 

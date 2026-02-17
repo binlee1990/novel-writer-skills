@@ -554,7 +554,7 @@ multi-thread-narrative Skill → 建议线程分配和交织模式
 
 ### narrative-threads.json 数据结构
 
-多线叙事的追踪数据存储在 `spec/tracking/narrative-threads.json` 中，由 `/track` 运行时生成和更新：
+多线叙事的追踪数据存储在 `tracking/narrative-threads.json` 中，由 `/track` 运行时生成和更新：
 
 ```json
 {

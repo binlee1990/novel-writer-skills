@@ -454,7 +454,7 @@ AI自动评估:
 ## 参考资料
 
 - 设计文档: `docs/plans/2026-02-14-optimization-design.md`
-- 替代规则: `templates/knowledge-base/requirements/anti-ai-v4-deprecated.md`
+- 替代规则: `resources/requirements/anti-ai-v4-deprecated.md`
 - 协同Skill: `templates/skills/writing-techniques/writing-techniques/SKILL.md`
 
 ---

@@ -273,9 +273,9 @@ describe('Template Files Validation', () => {
   });
 
   describe('Knowledge Base', () => {
-    const kbDir = path.join(TEMPLATES_DIR, 'knowledge-base');
+    const kbDir = path.join(TEMPLATES_DIR, 'resources');
 
-    it('should have knowledge-base directory', () => {
+    it('should have resources directory', () => {
       expect(fs.existsSync(kbDir)).toBe(true);
     });
 
@@ -286,8 +286,9 @@ describe('Template Files Validation', () => {
       }
     });
 
-    it('should have README.md', () => {
-      expect(fs.existsSync(path.join(kbDir, 'README.md'))).toBe(true);
+    it('should have README.md in subdirectories', () => {
+      expect(fs.existsSync(path.join(kbDir, 'requirements', 'README.md'))).toBe(true);
+      expect(fs.existsSync(path.join(kbDir, 'styles', 'README.md'))).toBe(true);
     });
 
     it('should have non-empty knowledge files', () => {
@@ -306,7 +307,7 @@ describe('Template Files Validation', () => {
   });
 
   describe('Script Templates', () => {
-    const scriptsDir = path.join(TEMPLATES_DIR, 'scripts');
+    const scriptsDir = path.join(TEMPLATES_DIR, 'resources', 'scripts');
 
     it('should have scripts directory', () => {
       expect(fs.existsSync(scriptsDir)).toBe(true);

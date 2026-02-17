@@ -4,8 +4,8 @@ argument-hint: [关键词或焦点领域]
 allowed-tools: Read(//stories/**), Read(//stories/**), Read(//plugins/**), Read(plugins/**), Write(//stories/*/specification.md), Write(//stories/*/specification.md), Bash(ls:*), Bash(find:*), Bash(*)
 disable-model-invocation: false
 scripts:
-  sh: .specify/scripts/bash/clarify-story.sh --json --paths-only
-  ps: .specify/scripts/powershell/clarify-story.ps1 -Json -PathsOnly
+  sh: resources/scripts/bash/clarify-story.sh --json --paths-only
+  ps: resources/scripts/powershell/clarify-story.ps1 -Json -PathsOnly
 ---
 
 焦点区域（可选）：$ARGUMENTS
