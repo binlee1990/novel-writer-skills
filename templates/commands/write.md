@@ -289,6 +289,48 @@ resource-loading:
 
 ⚠️ **禁止跳过此步骤**：这是防止AI在长篇创作中失焦的核心机制。
 
+### 缓存写回
+
+**首次加载或有文件变化时**，将加载结果写入缓存：
+
+1. **生成 resource-digest.json**：记录所有已读文件的 mtime 和 size
+```json
+{
+  "version": 1,
+  "updated_at": "[ISO时间]",
+  "files": {
+    "resources/memory/constitution.md": { "mtime": [毫秒时间戳], "size": [字节] },
+    "tracking/character-state.json": { "mtime": [毫秒时间戳], "size": [字节] }
+  }
+}
+```
+
+2. **生成 write-context.json**：保存 L1 摘要和 L2 缓存状态
+```json
+{
+  "version": 1,
+  "story": "[故事目录名]",
+  "last_chapter": [章节号],
+  "generated_at": "[ISO时间]",
+  "digest_version": 1,
+  "context": {
+    "l1_summaries": {
+      "constitution": "[200字摘要]",
+      "specification": "[300字摘要]",
+      "creative_plan": "[200字摘要]",
+      "active_plots": [{"id": "", "name": "", "status": "", "progress": ""}],
+      "active_relationships": [{"from": "", "to": "", "type": "", "tension": ""}]
+    },
+    "l2_loaded": {
+      "resources/craft/dialogue.md": "已缓存",
+      "resources/requirements/anti-ai-v5-balanced.md": "已缓存"
+    }
+  }
+}
+```
+
+3. 使用 `Write` 工具写入 `.claude/.cache/resource-digest.json` 和 `.claude/.cache/write-context.json`
+
 <!-- PLUGIN_HOOK: genre-knowledge-write -->
 
 ---
