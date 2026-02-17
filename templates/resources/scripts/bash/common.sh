@@ -6,7 +6,7 @@ get_project_root() {
     if [ -f "resources/config/config.json" ]; then
         pwd
     else
-        # 向上查找包含 .specify 的目录
+        # 向上查找包含 resources 的目录
         current=$(pwd)
         while [ "$current" != "/" ]; do
             if [ -f "$current/resources/config/config.json" ]; then

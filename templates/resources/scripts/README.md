@@ -57,10 +57,10 @@ constitution.sh
 cd my-novel
 
 # 使用脚本（示例：创建宪法）
-.\.specify\templates\scripts\powershell\constitution.ps1
+.\resources\scripts\powershell\constitution.ps1
 
 # 或者添加到环境变量
-$env:PATH += ";$(Get-Location)\.specify\templates\scripts\powershell"
+$env:PATH += ";$(Get-Location)\resources\scripts\powershell"
 constitution.ps1
 ```
 

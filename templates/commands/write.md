@@ -77,19 +77,64 @@ powershell -File {SCRIPT} -Json
 3. 按顺序加载 `resources.knowledge-base` 和 `resources.skills`
 4. 跳过 `resources.disabled` 中的资源
 
+### 增量缓存加载（性能优化核心）
+
+⚠️ **此机制大幅减少重复加载，连续写作时跳过未变化的资源。**
+
+**步骤 0: 检查缓存**
+
+```
+1. 读取 .claude/.cache/resource-digest.json
+   ├─ 不存在 → 首次加载（全量），生成 digest + context
+   └─ 存在 → 进入增量检查
+
+2. 对比每个已缓存文件的 mtime（用 Bash stat 命令）
+   ├─ 全部未变 → 直接复用 .claude/.cache/write-context.json，跳到 L0 加载
+   └─ 有变化 → 只重新读取变化的文件
+
+3. 更新 write-context.json 中变化的部分
+   ├─ L1 文件变化 → 重新生成该文件的摘要（200-300字）
+   └─ L2 文件变化 → 重新缓存全文
+
+4. 写回更新后的 resource-digest.json + write-context.json
+```
+
+**资源分级**：
+
+| 级别 | 内容 | 策略 |
+|------|------|------|
+| L0 必读 | tasks.md、上一章最后500字、当前活跃角色 | 每次读取全文，不缓存 |
+| L1 摘要 | constitution.md、specification.md、creative-plan.md、plot-tracker.json、relationships.json | 首次读全文生成摘要，后续只在 mtime 变化时重新生成 |
+| L2 按需 | craft/、genres/、styles/、requirements/、skills/ | 仅在关键词触发或配置指定时加载，加载后缓存全文 |
+
+**缓存复用判定**：
+- 如果 `write-context.json` 存在且 `digest_version` 与 `resource-digest.json` 的 `version` 一致 → 复用 L1 摘要 + L2 缓存
+- 如果 `digest_version` 不一致 → 全量重建
+- 用户删除 `.claude/.cache/` → 下次全量重建
+
+**首次加载（无缓存）**：按下方完整查询协议执行，完成后生成两个缓存文件。
+
+**后续加载（有缓存且未过期）**：
+1. 直接使用 `write-context.json` 中的 `l1_summaries` 作为 L1 上下文
+2. 直接使用 `l2_loaded` 中的缓存资源
+3. 仅实时加载 L0 资源（tasks.md、上一章、活跃角色）
+4. 合并 L0 + L1 缓存 + L2 缓存 → 进入写作
+
+---
+
 ### 查询协议（必读顺序 + 三层资源加载）
 
-⚠️ **严格按以下顺序查询文档**：
+⚠️ **严格按以下顺序查询文档**（首次加载或缓存失效时执行完整流程）：
 
-1. **先查（最高优先级）**：
+1. **先查（最高优先级）**【L1 — 缓存摘要】：
    - `memory/constitution.md`（创作宪法）
    - `memory/personal-voice.md`（个人风格指南 - 如有）
    - `memory/style-reference.md`（风格参考 - 如有）
 
-2. **再查（规格和计划）**：
+2. **再查（规格和计划）**【L1 — 缓存摘要】：
    - `stories/*/specification.md`（故事规格）
    - `stories/*/creative-plan.md`（创作计划）
-   - `stories/*/tasks.md`（当前任务）
+   - `stories/*/tasks.md`（当前任务）【L0 — 每次必读】
 
 2.1. **风格学习前置检查**：
    - 如果 `memory/personal-voice.md` 不存在且已写 ≥ 3 章，提示用户执行 `/style-learning`
@@ -169,23 +214,23 @@ resource-loading:
 
 > **性能优化**：参见 CLAUDE.md 中的「会话级资源复用」章节。
 
-3. **再查（状态和数据 — 三层 Fallback）**：
+3. **再查（状态和数据 — 三层 Fallback）**【L0/L1 混合】：
 
    按以下优先级加载 tracking 数据：
 
-   **Layer 1: MCP 查询（优先）**
+   **Layer 1: MCP 查询（优先）**【L0 — 每次查询】
    - `query_characters --status=active --limit=20` → 活跃角色
    - `query_relationships --volume=[当前卷号]` → 当前卷关系
    - `query_plot --status=active` → 活跃伏笔
    - `query_facts` → 设定事实
    - 如果指定了 `--volume vol-XX`，所有查询限定到该卷
 
-   **Layer 2: 分片 JSON（次优，检测 tracking/volumes/ 是否存在）**
+   **Layer 2: 分片 JSON（次优，检测 tracking/volumes/ 是否存在）**【L1 — 缓存摘要】
    - 确定当前章节属于哪个卷（从 volume-summaries.json 的 chapters 范围判断）
    - 读取该卷的分片文件：`tracking/volumes/[currentVolume]/character-state.json` 等
    - 读取全局摘要：`tracking/summary/characters-summary.json`（活跃角色概览）
 
-   **Layer 3: 单文件 JSON（兜底，现有逻辑）**
+   **Layer 3: 单文件 JSON（兜底，现有逻辑）**【L1 — 缓存摘要】
    - `tracking/character-state.json`（角色状态）
    - `tracking/relationships.json`（关系网络）
    - `tracking/plot-tracker.json`（情节追踪 - 如有）
@@ -210,11 +255,11 @@ resource-loading:
 
    - **快写模式（--fast）**: 跳过详细展示，但保留数据加载
 
-4. **再查（知识库）**：
+4. **再查（知识库）**【L2 — 按需缓存】：
    - `resources/knowledge/` 相关文件（世界观、角色档案等）
    - `stories/*/content/`（前文内容 - 了解前情）
 
-5. **再查（写作规范）**：
+5. **再查（写作规范）**【L2 — 按需缓存】：
    - `memory/personal-voice.md`（个人语料 - 如有）
    - `resources/knowledge/natural-expression.md`（自然化表达 - 如有）
    - **⚠️ 必须加载**：`resources/requirements/anti-ai-v4.md`（禁用词与替换策略权威参考）

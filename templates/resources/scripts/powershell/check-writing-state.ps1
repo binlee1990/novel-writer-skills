@@ -50,7 +50,7 @@ function Mark-ResourceLoaded {
 # 防御性设计：缓存目录不存在时直接返回
 
 function Cleanup-OldCache {
-    $cacheDir = Join-Path $ProjectRoot ".specify" ".cache"
+    $cacheDir = Join-Path $ProjectRoot ".claude" ".cache"
 
     # 缓存目录不存在，无需清理
     if (-not (Test-Path $cacheDir)) {
@@ -301,7 +301,7 @@ Write-Host ""
 function Test-MethodologyDocs {
     $missing = @()
 
-    if (-not (Test-Path ".specify\memory\constitution.md")) {
+    if (-not (Test-Path "resources\memory\constitution.md")) {
         $missing += "宪法"
     }
     if (-not (Test-Path "$StoryDir\specification.md")) {
