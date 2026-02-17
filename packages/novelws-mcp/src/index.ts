@@ -26,7 +26,7 @@ import { queryAnalysisHistory } from './tools/query-analysis-history.js';
 import { queryWritingStats } from './tools/query-writing-stats.js';
 
 const projectRoot = process.argv[2] || process.cwd();
-const dbPath = path.join(projectRoot, 'spec', 'tracking', 'novel-tracking.db');
+const dbPath = path.join(projectRoot, 'tracking', 'novel-tracking.db');
 
 const dbManager = new DatabaseManager(dbPath);
 dbManager.open();

@@ -8,7 +8,7 @@
         "regex": "对话|台词|说话|对白|conversation|dialogue",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/craft/dialogue.md",
+          "resources/craft/dialogue.md",
           "templates/skills/writing-techniques/dialogue-techniques/SKILL.md"
         ],
         "priority": 1
@@ -18,7 +18,7 @@
         "regex": "场景|镜头|画面|scene|structure",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/craft/scene-structure.md",
+          "resources/craft/scene-structure.md",
           "templates/skills/writing-techniques/scene-structure/SKILL.md"
         ],
         "priority": 1
@@ -28,7 +28,7 @@
         "regex": "角色成长|角色弧线|弧线|转变|成长|character\\s*arc|transformation",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/craft/character-arc.md",
+          "resources/craft/character-arc.md",
           "templates/skills/writing-techniques/character-arc/SKILL.md"
         ],
         "priority": 1
@@ -38,7 +38,7 @@
         "regex": "节奏|拖沓|太快|太慢|过快|过慢|pacing|rhythm",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/craft/pacing.md",
+          "resources/craft/pacing.md",
           "templates/skills/writing-techniques/pacing-control/SKILL.md"
         ],
         "priority": 1
@@ -48,7 +48,7 @@
         "regex": "展示|描写|tell|show|showing|telling",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/craft/show-not-tell.md"
+          "resources/craft/show-not-tell.md"
         ],
         "priority": 1
       },
@@ -57,7 +57,7 @@
         "regex": "钩子|悬念|章末|hook|cliffhanger|结尾",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/craft/hook-design.md"
+          "resources/craft/hook-design.md"
         ],
         "priority": 1
       },
@@ -66,7 +66,7 @@
         "regex": "力量体系|战力|境界|等级|power\\s*system|combat",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/craft/power-system.md"
+          "resources/craft/power-system.md"
         ],
         "priority": 1
       },
@@ -75,7 +75,7 @@
         "regex": "紧张感|张力|信息差|时间压力|两难|tension|dilemma",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/craft/tension-management.md"
+          "resources/craft/tension-management.md"
         ],
         "priority": 1
       }
@@ -86,7 +86,7 @@
         "regex": "言情|恋爱|感情|爱情|romance|love",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/genres/romance.md",
+          "resources/genres/romance.md",
           "templates/skills/genre-knowledge/romance/SKILL.md"
         ],
         "priority": 2
@@ -96,7 +96,7 @@
         "regex": "悬疑|推理|线索|mystery|detective|clue",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/genres/mystery.md",
+          "resources/genres/mystery.md",
           "templates/skills/genre-knowledge/mystery/SKILL.md"
         ],
         "priority": 2
@@ -106,7 +106,7 @@
         "regex": "武侠|江湖|侠客|武功|wuxia|martial\\s*arts",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/genres/wuxia.md"
+          "resources/genres/wuxia.md"
         ],
         "priority": 2
       },
@@ -115,7 +115,7 @@
         "regex": "历史|古代|朝代|宫廷|historical|dynasty",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/genres/historical.md"
+          "resources/genres/historical.md"
         ],
         "priority": 2
       },
@@ -124,7 +124,7 @@
         "regex": "科幻|未来|太空|星际|sci-fi|science\\s*fiction",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/genres/sci-fi.md"
+          "resources/genres/sci-fi.md"
         ],
         "priority": 2
       },
@@ -133,7 +133,7 @@
         "regex": "惊悚|恐怖|紧张|thriller|horror|suspense",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/genres/thriller.md"
+          "resources/genres/thriller.md"
         ],
         "priority": 2
       },
@@ -142,7 +142,7 @@
         "regex": "复仇|报仇|仇恨|revenge|vengeance",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/genres/revenge.md"
+          "resources/genres/revenge.md"
         ],
         "priority": 2
       },
@@ -151,7 +151,7 @@
         "regex": "玄幻|修仙|修炼|境界|灵气|宗门|xuanhuan|cultivation",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/genres/xuanhuan.md"
+          "resources/genres/xuanhuan.md"
         ],
         "priority": 2
       },
@@ -160,7 +160,7 @@
         "regex": "都市|现代|城市|职场|urban|modern|city",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/genres/urban.md"
+          "resources/genres/urban.md"
         ],
         "priority": 2
       },
@@ -169,7 +169,7 @@
         "regex": "游戏|系统|面板|副本|game|system|dungeon",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/genres/game-lit.md"
+          "resources/genres/game-lit.md"
         ],
         "priority": 2
       },
@@ -178,7 +178,7 @@
         "regex": "重生|穿越|回到过去|前世|rebirth|reincarnation|transmigration",
         "regex_flags": "i",
         "resources": [
-          "templates/knowledge-base/genres/rebirth.md"
+          "resources/genres/rebirth.md"
         ],
         "priority": 2
       }

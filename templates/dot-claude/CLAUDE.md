@@ -9,7 +9,7 @@
 - **句式**：短句优先（15-25 字），白话替代文绉绉
 - **描写**：删除装饰性形容词，一个准确细节胜过三个堆砌
 - **禁止**：「然而」「殊不知」「缓缓」「深邃」「仿佛...一般」等 AI 高频词
-- **完整规范**：`.specify/templates/knowledge-base/requirements/anti-ai-v4.md`
+- **完整规范**：`resources/requirements/anti-ai-v4.md`
 
 ## 段落格式规范
 
@@ -44,7 +44,7 @@
 **补充上下文来源**（不依赖前文全文）：
 - `creative-plan.md`：章节大纲和情节走向
 - `tasks.md`：当前章节具体写作任务
-- `spec/tracking/*.json`：角色状态、关系、情节线、时间线
+- `tracking/*.json`：角色状态、关系、情节线、时间线
 
 ## /compact 使用建议
 
@@ -60,7 +60,7 @@
 ### 目录结构（分片模式）
 
 ```
-spec/tracking/
+tracking/
 ├── story-facts.json          # 全局事实库
 ├── tracking-log.md           # 全局更新日志
 ├── summary/                  # 全局摘要（跨卷查询入口）
@@ -108,7 +108,7 @@ spec/tracking/
 
 **迁移流程**：
 1. **检查模式**：分析当前 tracking 文件大小
-2. **备份数据**：创建时间戳备份（`spec/tracking-backup-YYYYMMDD/`）
+2. **备份数据**：创建时间戳备份（`tracking-backup-YYYYMMDD/`）
 3. **自动分片**：
    - 创建 `summary/` 和 `volumes/` 目录
    - 按卷拆分 tracking 数据（默认每卷 50 章）
@@ -149,7 +149,7 @@ spec/tracking/
 novelws init my-novel --with-mcp
 
 # 或在现有项目中配置
-# 编辑 .specify/config.json，添加：
+# 编辑 resources/config/config.json，添加：
 {
   "mcp": true
 }
