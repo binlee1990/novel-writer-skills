@@ -3,10 +3,10 @@
 **触发条件**：`$ARGUMENTS` 包含 `--focus=power`
 
 **前置加载**：
-- 加载知识库：`templates/knowledge-base/craft/power-system.md`
+- 加载知识库：`resources/craft/power-system.md`
 - 读取 `specification.md` 中的力量体系设定（5.x 节或 worldbuilding 相关章节）
 - 读取 `creative-plan.md` 中的升级节奏规划
-- 读取 `spec/tracking/character-state.json` 中的角色能力数据
+- 读取 `tracking/character-state.json` 中的角色能力数据
 - 读取所有已写章节内容
 
 **分析流程**：
@@ -143,6 +143,6 @@
 💡 首要改进建议：[具体建议]
 
 📚 参考资源：
-- 力量体系设计指南：templates/knowledge-base/craft/power-system.md
+- 力量体系设计指南：resources/craft/power-system.md
 - 等级设计、战力平衡、升级节奏详解
 ```

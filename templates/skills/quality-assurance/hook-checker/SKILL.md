@@ -18,7 +18,7 @@ allowed-tools: Read, Grep
 
 ## 前置加载
 
-- 加载知识库：`templates/knowledge-base/craft/hook-design.md`（钩子设计参考）
+- 加载知识库：`resources/craft/hook-design.md`（钩子设计参考）
 - 读取当前章节内容（重点关注最后 500 字）
 - 读取上一章结尾（检查钩子兑现）
 - 读取 `plot-tracker.json`（检查伏笔关联）
@@ -133,7 +133,7 @@ allowed-tools: Read, Grep
 💡 改进建议：
 1. [基于章节内容的具体钩子建议]
 2. [可选的钩子类型和示例]
-3. 参考：templates/knowledge-base/craft/hook-design.md
+3. 参考：resources/craft/hook-design.md
 ```
 
 ---

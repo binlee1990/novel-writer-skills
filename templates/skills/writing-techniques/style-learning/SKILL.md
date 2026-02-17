@@ -150,13 +150,13 @@ AI："好的，我会模仿"
 **Step 5: 写入 personal-voice.md**
 ```
 生成完整的风格指南文件
-保存到：.specify/memory/personal-voice.md
+保存到：resources/memory/personal-voice.md
 ```
 
 **Step 6: 确认和调整**
 ```
 询问用户：
-"已生成风格指南，请查看 .specify/memory/personal-voice.md
+"已生成风格指南，请查看 resources/memory/personal-voice.md
 是否需要调整？"
 
 用户可以手动微调：

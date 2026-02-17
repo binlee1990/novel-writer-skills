@@ -8,7 +8,7 @@
 ## 节奏专项分析报告
 
 ### 节奏参数（如有rhythm-config.json）
-**读取 `spec/presets/rhythm-config.json`（如果存在）**：
+**读取 `resources/presets/rhythm-config.json`（如果存在）**：
 - 目标章节字数：[X]字
 - 目标小高潮间隔：[X]章
 - 目标大高潮间隔：[X]章

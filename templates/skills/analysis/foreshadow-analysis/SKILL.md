@@ -4,7 +4,7 @@
 
 **前置加载**：
 - 读取 `specification.md` 5.4节中的伏笔管理表
-- 读取 `spec/tracking/plot-tracker.json` 中的伏笔数据
+- 读取 `tracking/plot-tracker.json` 中的伏笔数据
 - 读取所有已写章节内容
 
 **分析维度**：

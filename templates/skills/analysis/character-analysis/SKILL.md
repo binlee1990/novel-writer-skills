@@ -4,7 +4,7 @@
 
 **前置加载**：
 - 读取 `specification.md` 和 `creative-plan.md` 中的人物弧光规划
-- 读取 `spec/tracking/character-state.json` 中的角色数据
+- 读取 `tracking/character-state.json` 中的角色数据
 - 读取所有已写章节内容
 
 **分析维度**：

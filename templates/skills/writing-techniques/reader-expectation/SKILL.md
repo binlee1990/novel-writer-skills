@@ -738,7 +738,7 @@ reader-expectation Skill → 建议期待满足时间点
 
 #### Step 1: 收集当前期待清单
 
-从 `spec/tracking/plot-tracker.json` 和期待识别引擎的结果中，汇总所有活跃期待。
+从 `tracking/plot-tracker.json` 和期待识别引擎的结果中，汇总所有活跃期待。
 
 #### Step 2: 体裁节奏模板匹配
 

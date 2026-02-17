@@ -89,7 +89,7 @@ allowed-tools: Read
 ### 写作前检查
 
 **在开始写一章前**：
-1. 读取 `spec/tracking/character-state.json`
+1. 读取 `tracking/character-state.json`
 2. 确认角色当前弧线阶段（1-8）
 3. 规划本章要推进到哪个阶段
 4. 设计具体的行为变化

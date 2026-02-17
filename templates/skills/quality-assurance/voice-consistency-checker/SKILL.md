@@ -18,7 +18,7 @@ allowed-tools: Read, Grep
 
 ## 前置加载
 
-- 读取 `spec/tracking/character-state.json` 中所有角色的 `voice` 字段
+- 读取 `tracking/character-state.json` 中所有角色的 `voice` 字段
 - 读取当前章节内容
 - 识别所有对话及其说话者
 

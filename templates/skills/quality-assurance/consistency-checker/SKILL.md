@@ -36,7 +36,7 @@ allowed-tools: Read, Grep
 **被动监控**：当你写作或讨论故事时，我会自动交叉参考：
 1. `characters/` 目录中的角色档案
 2. `worldbuilding/` 目录中的世界构建文档
-3. `spec/tracking/timeline.json` 中的时间线数据
+3. `tracking/timeline.json` 中的时间线数据
 4. 之前章节的内容
 
 **不需要你采取任何行动** - 监控在后台进行。

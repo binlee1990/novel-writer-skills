@@ -3,7 +3,7 @@
 **目标**：检查文笔风格一致性，对比style-reference.md
 
 **前置加载**：
-- 读取 `.specify/memory/style-reference.md`（如存在，来自 /book-internalize）
+- 读取 `resources/memory/style-reference.md`（如存在，来自 /book-internalize）
 - 读取 `specification.md` 中的风格要求
 - 读取所有已写章节内容
 

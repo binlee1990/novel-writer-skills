@@ -38,10 +38,10 @@ allowed-tools: Read, Grep
 ✓ 3. stories/*/specification.md - 故事规格
 ✓ 4. stories/*/creative-plan.md - 创作计划
 ✓ 5. stories/*/tasks.md - 当前任务
-✓ 6. spec/tracking/character-state.json - 角色状态
-✓ 7. spec/tracking/relationships.json - 关系网络
-✓ 8. spec/tracking/plot-tracker.json - 情节追踪（如有）
-✓ 9. spec/tracking/validation-rules.json - 验证规则（如有）
+✓ 6. tracking/character-state.json - 角色状态
+✓ 7. tracking/relationships.json - 关系网络
+✓ 8. tracking/plot-tracker.json - 情节追踪（如有）
+✓ 9. tracking/validation-rules.json - 验证规则（如有）
 
 📊 上下文加载状态：✅ 完成
 ```
@@ -74,10 +74,10 @@ allowed-tools: Read, Grep
 步骤3：读取 stories/*/specification.md
 步骤4：读取 stories/*/creative-plan.md
 步骤5：读取 stories/*/tasks.md
-步骤6：读取 spec/tracking/character-state.json
-步骤7：读取 spec/tracking/relationships.json
-步骤8：读取 spec/tracking/plot-tracker.json（如有）
-步骤9：读取 spec/tracking/validation-rules.json（如有）
+步骤6：读取 tracking/character-state.json
+步骤7：读取 tracking/relationships.json
+步骤8：读取 tracking/plot-tracker.json（如有）
+步骤9：读取 tracking/validation-rules.json（如有）
 
          ↓
 
@@ -124,16 +124,16 @@ allowed-tools: Read, Grep
    → 待写章节：[第X章]
    → 任务状态：[pending/in_progress]
 
-✓ 6. spec/tracking/character-state.json - 角色状态
+✓ 6. tracking/character-state.json - 角色状态
    → 主要角色：[列出角色名和当前状态]
 
-✓ 7. spec/tracking/relationships.json - 关系网络
+✓ 7. tracking/relationships.json - 关系网络
    → 核心关系：[主角与谁的关系变化]
 
-✓ 8. spec/tracking/plot-tracker.json - 情节追踪
+✓ 8. tracking/plot-tracker.json - 情节追踪
    → 活跃线索：[当前进行中的情节线]
 
-✓ 9. spec/tracking/validation-rules.json - 验证规则
+✓ 9. tracking/validation-rules.json - 验证规则
    → 自动修复：[启用/禁用]
 
 📊 上下文加载状态：✅ 完成（加载9个文件，约XXXX tokens）
@@ -151,10 +151,10 @@ allowed-tools: Read, Grep
 ✓ 3. stories/xxx/specification.md - 故事规格
 ✓ 4. stories/xxx/creative-plan.md - 创作计划
 ✓ 5. stories/xxx/tasks.md - 当前任务
-✓ 6. spec/tracking/character-state.json - 角色状态
-✓ 7. spec/tracking/relationships.json - 关系网络
-✓ 8. ⚠️ spec/tracking/plot-tracker.json - 不存在（可选文件，跳过）
-✓ 9. ⚠️ spec/tracking/validation-rules.json - 不存在（可选文件，跳过）
+✓ 6. tracking/character-state.json - 角色状态
+✓ 7. tracking/relationships.json - 关系网络
+✓ 8. ⚠️ tracking/plot-tracker.json - 不存在（可选文件，跳过）
+✓ 9. ⚠️ tracking/validation-rules.json - 不存在（可选文件，跳过）
 
 📊 上下文加载状态：✅ 完成（加载6个必须文件 + 0个可选文件）
 
@@ -275,8 +275,8 @@ allowed-tools: Read, Grep
 3. stories/*/specification.md - 故事规格
 4. stories/*/creative-plan.md - 创作计划
 5. stories/*/tasks.md - 当前任务
-6. spec/tracking/character-state.json - 角色状态
-7. spec/tracking/relationships.json - 关系网络
+6. tracking/character-state.json - 角色状态
+7. tracking/relationships.json - 关系网络
 ```
 
 **逻辑**：没有这些文件，AI不知道：
@@ -289,8 +289,8 @@ allowed-tools: Read, Grep
 
 ```
 2. memory/style-reference.md - 风格参考
-8. spec/tracking/plot-tracker.json - 情节追踪
-9. spec/tracking/validation-rules.json - 验证规则
+8. tracking/plot-tracker.json - 情节追踪
+9. tracking/validation-rules.json - 验证规则
 ```
 
 **逻辑**：这些文件增强质量，但不是最低要求：
@@ -366,8 +366,8 @@ allowed-tools: Read, Grep
 
 ```
 "检查清单请额外包含：
-- spec/knowledge/worldbuilding/magic-system.md
-- spec/knowledge/characters/protagonist-profile.md"
+- resources/knowledge/worldbuilding/magic-system.md
+- resources/knowledge/characters/protagonist-profile.md"
 ```
 
 ---
