@@ -7,13 +7,13 @@ $ErrorActionPreference = 'Stop'
 function Get-ProjectRoot {
   $current = (Get-Location).Path
   while ($true) {
-    $cfg = Join-Path $current ".specify/config.json"
+    $cfg = Join-Path $current "resources/config/config.json"
     if (Test-Path $cfg) { return $current }
     $parent = Split-Path $current -Parent
     if (-not $parent -or $parent -eq $current) { break }
     $current = $parent
   }
-  throw "未找到项目根目录（缺少 .specify/config.json）"
+  throw "未找到项目根目录（缺少 resources/config/config.json）"
 }
 
 function Get-CurrentStoryDir {

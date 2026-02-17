@@ -24,7 +24,7 @@ if [ -z "$STORY_DIR" ]; then
 fi
 
 # 文件路径
-TIMELINE="$STORY_DIR/spec/tracking/timeline.json"
+TIMELINE="$STORY_DIR/tracking/timeline.json"
 PROGRESS="$STORY_DIR/progress.json"
 
 # 命令参数（已在上面处理 checklist 模式）
@@ -34,7 +34,7 @@ PARAM2="${2:-}"
 init_timeline() {
     if [ ! -f "$TIMELINE" ]; then
         echo "⚠️  未找到时间线文件，正在创建..." >&2
-        mkdir -p "$STORY_DIR/spec/tracking"
+        mkdir -p "$STORY_DIR/tracking"
 
         if [ -f "$SCRIPT_DIR/../../templates/tracking/timeline.json" ]; then
             cp "$SCRIPT_DIR/../../templates/tracking/timeline.json" "$TIMELINE"
@@ -241,7 +241,7 @@ output_checklist() {
 # 时间线检查 Checklist
 
 **检查时间**: $(date '+%Y-%m-%d %H:%M:%S')
-**检查对象**: spec/tracking/timeline.json
+**检查对象**: tracking/timeline.json
 **记录事件数**: $event_count
 
 ---

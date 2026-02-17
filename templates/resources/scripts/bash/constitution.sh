@@ -17,7 +17,7 @@ PROJECT_ROOT=$(get_project_root)
 cd "$PROJECT_ROOT"
 
 # 定义文件路径
-CONSTITUTION_FILE=".specify/memory/constitution.md"
+CONSTITUTION_FILE="resources/memory/constitution.md"
 
 case "$COMMAND" in
     check)

@@ -22,7 +22,7 @@ if [ -z "$STORY_DIR" ]; then
 fi
 
 # 文件路径
-PLOT_TRACKER="$STORY_DIR/spec/tracking/plot-tracker.json"
+PLOT_TRACKER="$STORY_DIR/tracking/plot-tracker.json"
 OUTLINE="$STORY_DIR/creative-plan.md"
 PROGRESS="$STORY_DIR/progress.json"
 
@@ -32,7 +32,7 @@ check_required_files() {
 
     if [ ! -f "$PLOT_TRACKER" ]; then
         echo "⚠️  未找到情节追踪文件，正在创建..." >&2
-        mkdir -p "$STORY_DIR/spec/tracking"
+        mkdir -p "$STORY_DIR/tracking"
         # 复制模板
         if [ -f "$SCRIPT_DIR/../../templates/tracking/plot-tracker.json" ]; then
             cp "$SCRIPT_DIR/../../templates/tracking/plot-tracker.json" "$PLOT_TRACKER"

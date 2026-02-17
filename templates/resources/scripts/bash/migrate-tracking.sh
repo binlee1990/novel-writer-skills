@@ -31,7 +31,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # 目录路径
-TRACKING_DIR="${PWD}/spec/tracking"
+TRACKING_DIR="${PWD}/tracking"
 BACKUP_DIR="${TRACKING_DIR}/backup"
 SUMMARY_DIR="${TRACKING_DIR}/summary"
 VOLUMES_DIR="${TRACKING_DIR}/volumes"

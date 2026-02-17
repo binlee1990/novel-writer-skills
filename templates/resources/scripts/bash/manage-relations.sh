@@ -10,19 +10,19 @@ PROJECT_ROOT=$(get_project_root)
 STORY_DIR=$(get_current_story)
 
 REL_FILE=""
-if [ -n "$STORY_DIR" ] && [ -f "$STORY_DIR/spec/tracking/relationships.json" ]; then
-  REL_FILE="$STORY_DIR/spec/tracking/relationships.json"
-elif [ -f "$PROJECT_ROOT/spec/tracking/relationships.json" ]; then
-  REL_FILE="$PROJECT_ROOT/spec/tracking/relationships.json"
+if [ -n "$STORY_DIR" ] && [ -f "$STORY_DIR/tracking/relationships.json" ]; then
+  REL_FILE="$STORY_DIR/tracking/relationships.json"
+elif [ -f "$PROJECT_ROOT/tracking/relationships.json" ]; then
+  REL_FILE="$PROJECT_ROOT/tracking/relationships.json"
 else
   # 尝试用模板初始化
-  mkdir -p "$PROJECT_ROOT/spec/tracking"
-  if [ -f "$PROJECT_ROOT/.specify/templates/tracking/relationships.json" ]; then
-    cp "$PROJECT_ROOT/.specify/templates/tracking/relationships.json" "$PROJECT_ROOT/spec/tracking/relationships.json"
-    REL_FILE="$PROJECT_ROOT/spec/tracking/relationships.json"
+  mkdir -p "$PROJECT_ROOT/tracking"
+  if [ -f "$PROJECT_ROOT/tracking/relationships.json" ]; then
+    cp "$PROJECT_ROOT/tracking/relationships.json" "$PROJECT_ROOT/tracking/relationships.json"
+    REL_FILE="$PROJECT_ROOT/tracking/relationships.json"
   elif [ -f "$SCRIPT_DIR/../../templates/tracking/relationships.json" ]; then
-    cp "$SCRIPT_DIR/../../templates/tracking/relationships.json" "$PROJECT_ROOT/spec/tracking/relationships.json"
-    REL_FILE="$PROJECT_ROOT/spec/tracking/relationships.json"
+    cp "$SCRIPT_DIR/../../templates/tracking/relationships.json" "$PROJECT_ROOT/tracking/relationships.json"
+    REL_FILE="$PROJECT_ROOT/tracking/relationships.json"
   else
     echo "❌ 未找到 relationships.json，且无法从模板创建" >&2
     exit 1

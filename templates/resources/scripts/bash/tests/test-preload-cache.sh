@@ -76,7 +76,7 @@ is_file_cached() {
 echo ""
 echo "=== 测试 1: 预加载文件 ==="
 files=(
-    "templates/config/keyword-mappings.json"
+    "resources/config/keyword-mappings.json"
     "templates/scripts/bash/check-writing-state.sh"
     "templates/scripts/bash/common.sh"
 )

@@ -11,14 +11,14 @@ $storyDir = Get-CurrentStoryDir
 if (-not $storyDir) { throw "未找到故事项目（stories/*）" }
 
 $progress = Join-Path $storyDir "progress.json"
-$plot = Join-Path $storyDir "spec/tracking/plot-tracker.json"
-if (-not (Test-Path $plot)) { $plot = Join-Path $root "spec/tracking/plot-tracker.json" }
-$timeline = Join-Path $storyDir "spec/tracking/timeline.json"
-if (-not (Test-Path $timeline)) { $timeline = Join-Path $root "spec/tracking/timeline.json" }
-$rels = Join-Path $storyDir "spec/tracking/relationships.json"
-if (-not (Test-Path $rels)) { $rels = Join-Path $root "spec/tracking/relationships.json" }
-$charState = Join-Path $storyDir "spec/tracking/character-state.json"
-if (-not (Test-Path $charState)) { $charState = Join-Path $root "spec/tracking/character-state.json" }
+$plot = Join-Path $storyDir "tracking/plot-tracker.json"
+if (-not (Test-Path $plot)) { $plot = Join-Path $root "tracking/plot-tracker.json" }
+$timeline = Join-Path $storyDir "tracking/timeline.json"
+if (-not (Test-Path $timeline)) { $timeline = Join-Path $root "tracking/timeline.json" }
+$rels = Join-Path $storyDir "tracking/relationships.json"
+if (-not (Test-Path $rels)) { $rels = Join-Path $root "tracking/relationships.json" }
+$charState = Join-Path $storyDir "tracking/character-state.json"
+if (-not (Test-Path $charState)) { $charState = Join-Path $root "tracking/character-state.json" }
 
 $TOTAL=0; $PASS=0; $WARN=0; $ERR=0
 function Check([string]$name, [bool]$ok, [string]$msg) {

@@ -2,10 +2,10 @@
 name: relations
 description: 管理和追踪角色关系变化
 argument-hint: [update | show | history | check] [角色] [关系] [目标角色] [--volume vol-XX | --character-focus 角色名]
-allowed-tools: Read(//spec/tracking/relationships.json), Read(//spec/tracking/relationships.json), Write(//spec/tracking/relationships.json), Write(//spec/tracking/relationships.json), Bash(find:*), Bash(*)
+allowed-tools: Read(//tracking/relationships.json), Read(//tracking/relationships.json), Write(//tracking/relationships.json), Write(//tracking/relationships.json), Bash(find:*), Bash(*)
 scripts:
-  sh: .specify/scripts/bash/manage-relations.sh
-  ps: .specify/scripts/powershell/manage-relations.ps1
+  sh: resources/scripts/bash/manage-relations.sh
+  ps: resources/scripts/powershell/manage-relations.ps1
 ---
 
 # 角色关系管理
@@ -54,8 +54,8 @@ const relationships = await mcp.call('novelws-mcp/query_relationships', {
 ### Layer 2: 分片 JSON（次优）
 
 ```bash
-# 当 spec/tracking/volumes/ 存在时
-relationships_data=$(cat spec/tracking/volumes/vol-03/relationships.json)
+# 当 tracking/volumes/ 存在时
+relationships_data=$(cat tracking/volumes/vol-03/relationships.json)
 ```
 
 **适用场景**：
@@ -67,7 +67,7 @@ relationships_data=$(cat spec/tracking/volumes/vol-03/relationships.json)
 
 ```bash
 # 传统模式，加载完整文件
-relationships_data=$(cat spec/tracking/relationships.json)
+relationships_data=$(cat tracking/relationships.json)
 ```
 
 **向下兼容**：小型项目（< 300 章）继续使用单文件模式
@@ -120,7 +120,7 @@ relationships_data=$(cat spec/tracking/relationships.json)
 
 ## 数据存储
 
-关系数据存储在 `spec/tracking/relationships.json`：
+关系数据存储在 `tracking/relationships.json`：
 ```json
 {
   "characters": {
@@ -163,7 +163,7 @@ relationships_data=$(cat spec/tracking/relationships.json)
 
 关系数据更新遵循以下协议：
 
-### 分片模式（spec/tracking/volumes/ 存在）
+### 分片模式（tracking/volumes/ 存在）
 
 1. **确定目标卷**：
    - 如果命令指定 `--volume vol-XX`，写入对应卷
@@ -177,13 +177,13 @@ relationships_data=$(cat spec/tracking/relationships.json)
 2. **写入分片文件**：
    ```bash
    # 写入指定卷的 relationships.json
-   Write(spec/tracking/volumes/${target_volume}/relationships.json)
+   Write(tracking/volumes/${target_volume}/relationships.json)
    ```
 
 3. **更新全局摘要**（如果关系变化影响角色摘要）：
    ```bash
    # 更新 characters-summary.json 的关系统计
-   Write(spec/tracking/summary/characters-summary.json)
+   Write(tracking/summary/characters-summary.json)
    ```
 
 4. **触发 MCP 同步**（如果启用）：
@@ -198,7 +198,7 @@ relationships_data=$(cat spec/tracking/relationships.json)
 
 直接写入完整 `relationships.json`：
 ```bash
-Write(spec/tracking/relationships.json)
+Write(tracking/relationships.json)
 ```
 
 ### 写入示例
@@ -211,8 +211,8 @@ const targetVolume = `vol-${String(volumeNum).padStart(2, '0')}`;
 
 // 读取目标卷的 relationships 分片
 const relPath = isSharded
-  ? `spec/tracking/volumes/${targetVolume}/relationships.json`
-  : 'spec/tracking/relationships.json';
+  ? `tracking/volumes/${targetVolume}/relationships.json`
+  : 'tracking/relationships.json';
 
 const relationships = JSON.parse(fs.readFileSync(relPath));
 

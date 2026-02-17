@@ -7,11 +7,11 @@ echo ""
 
 # 测试文件列表
 files=(
-    "templates/config/keyword-mappings.json"
+    "resources/config/keyword-mappings.json"
     "templates/scripts/bash/check-writing-state.sh"
     "templates/scripts/bash/common.sh"
-    "templates/knowledge-base/craft/dialogue.md"
-    "templates/knowledge-base/craft/scene-structure.md"
+    "resources/craft/dialogue.md"
+    "resources/craft/scene-structure.md"
 )
 
 echo "测试文件数: ${#files[@]}"

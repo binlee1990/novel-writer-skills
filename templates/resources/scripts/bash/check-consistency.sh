@@ -23,10 +23,10 @@ fi
 
 # 文件路径
 PROGRESS="$STORY_DIR/progress.json"
-PLOT_TRACKER="$STORY_DIR/spec/tracking/plot-tracker.json"
-TIMELINE="$STORY_DIR/spec/tracking/timeline.json"
-RELATIONSHIPS="$STORY_DIR/spec/tracking/relationships.json"
-CHARACTER_STATE="$STORY_DIR/spec/tracking/character-state.json"
+PLOT_TRACKER="$STORY_DIR/tracking/plot-tracker.json"
+TIMELINE="$STORY_DIR/tracking/timeline.json"
+RELATIONSHIPS="$STORY_DIR/tracking/relationships.json"
+CHARACTER_STATE="$STORY_DIR/tracking/character-state.json"
 
 # ANSI颜色代码
 RED='\033[0;31m'
@@ -252,14 +252,14 @@ generate_report() {
     echo "检查时间: $(date '+%Y-%m-%d %H:%M:%S')"
 
     # 记录检查结果
-    if [ -f "$STORY_DIR/spec/tracking" ]; then
+    if [ -f "$STORY_DIR/tracking" ]; then
         echo "{
             \"timestamp\": \"$(date -Iseconds)\",
             \"total\": $TOTAL_CHECKS,
             \"passed\": $PASSED_CHECKS,
             \"warnings\": $WARNINGS,
             \"errors\": $ERRORS
-        }" > "$STORY_DIR/spec/tracking/.last-check.json"
+        }" > "$STORY_DIR/tracking/.last-check.json"
     fi
 }
 
@@ -308,7 +308,7 @@ output_checklist() {
 # 数据同步一致性检查 Checklist
 
 **检查时间**: $(date '+%Y-%m-%d %H:%M:%S')
-**检查对象**: spec/tracking/ 目录所有JSON文件
+**检查对象**: tracking/ 目录所有JSON文件
 **检查范围**: 文件完整性、章节同步、时间线连续性、角色状态、伏笔管理
 
 ---

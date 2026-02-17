@@ -20,14 +20,14 @@ $ErrorActionPreference = 'Stop'
 $root = Get-ProjectRoot
 $storyDir = Get-CurrentStoryDir
 $relPath = $null
-if ($storyDir -and (Test-Path (Join-Path $storyDir 'spec/tracking/relationships.json'))) {
-  $relPath = Join-Path $storyDir 'spec/tracking/relationships.json'
-} elseif (Test-Path (Join-Path $root 'spec/tracking/relationships.json')) {
-  $relPath = Join-Path $root 'spec/tracking/relationships.json'
+if ($storyDir -and (Test-Path (Join-Path $storyDir 'tracking/relationships.json'))) {
+  $relPath = Join-Path $storyDir 'tracking/relationships.json'
+} elseif (Test-Path (Join-Path $root 'tracking/relationships.json')) {
+  $relPath = Join-Path $root 'tracking/relationships.json'
 } else {
-  $tpl1 = Join-Path $root '.specify/templates/tracking/relationships.json'
+  $tpl1 = Join-Path $root 'tracking/relationships.json'
   $tpl2 = Join-Path $root 'templates/tracking/relationships.json'
-  $dest = Join-Path $root 'spec/tracking/relationships.json'
+  $dest = Join-Path $root 'tracking/relationships.json'
   New-Item -ItemType Directory -Path (Split-Path $dest -Parent) -Force | Out-Null
   if (Test-Path $tpl1) { Copy-Item $tpl1 $dest -Force; $relPath = $dest }
   elseif (Test-Path $tpl2) { Copy-Item $tpl2 $dest -Force; $relPath = $dest }

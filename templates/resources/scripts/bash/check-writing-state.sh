@@ -99,7 +99,7 @@ mark_resource_loaded() {
 # 防御性设计：缓存目录不存在时直接返回
 
 cleanup_old_cache() {
-    local cache_dir="$PROJECT_ROOT/.specify/.cache"
+    local cache_dir="$PROJECT_ROOT/.claude/.cache"
 
     # 缓存目录不存在，无需清理
     if [ ! -d "$cache_dir" ]; then
@@ -234,17 +234,17 @@ if [ "$PRELOAD_FILES_PENDING" = true ]; then
     # 构建待预加载的文件列表
     PRELOAD_FILE_LIST=(
         # 知识库文件
-        "$PROJECT_ROOT/.specify/templates/knowledge-base/craft/dialogue.md"
-        "$PROJECT_ROOT/.specify/templates/knowledge-base/craft/scene-structure.md"
-        "$PROJECT_ROOT/.specify/templates/knowledge-base/craft/character-arc.md"
-        "$PROJECT_ROOT/.specify/templates/knowledge-base/craft/pacing.md"
-        "$PROJECT_ROOT/.specify/templates/knowledge-base/craft/show-not-tell.md"
+        "$PROJECT_ROOT/resources/craft/dialogue.md"
+        "$PROJECT_ROOT/resources/craft/scene-structure.md"
+        "$PROJECT_ROOT/resources/craft/character-arc.md"
+        "$PROJECT_ROOT/resources/craft/pacing.md"
+        "$PROJECT_ROOT/resources/craft/show-not-tell.md"
         # Skill 文件
-        "$PROJECT_ROOT/.specify/templates/skills/writing-techniques/dialogue-techniques/SKILL.md"
-        "$PROJECT_ROOT/.specify/templates/skills/writing-techniques/scene-structure/SKILL.md"
-        "$PROJECT_ROOT/.specify/templates/skills/writing-techniques/character-arc/SKILL.md"
-        "$PROJECT_ROOT/.specify/templates/skills/writing-techniques/pacing-control/SKILL.md"
-        "$PROJECT_ROOT/.specify/templates/skills/quality-assurance/consistency-checker/SKILL.md"
+        "$PROJECT_ROOT/.claude/skills/writing-techniques/dialogue-techniques/SKILL.md"
+        "$PROJECT_ROOT/.claude/skills/writing-techniques/scene-structure/SKILL.md"
+        "$PROJECT_ROOT/.claude/skills/writing-techniques/character-arc/SKILL.md"
+        "$PROJECT_ROOT/.claude/skills/writing-techniques/pacing-control/SKILL.md"
+        "$PROJECT_ROOT/.claude/skills/quality-assurance/consistency-checker/SKILL.md"
         # 规格文件
         "$STORY_DIR/specification.md"
     )
@@ -261,7 +261,7 @@ cleanup_old_cache
 check_methodology_docs() {
     local missing=()
 
-    [ ! -f ".specify/memory/constitution.md" ] && missing+=("宪法")
+    [ ! -f "resources/memory/constitution.md" ] && missing+=("宪法")
     [ ! -f "$STORY_DIR/specification.md" ] && missing+=("规格")
     [ ! -f "$STORY_DIR/creative-plan.md" ] && missing+=("计划")
     [ ! -f "$STORY_DIR/tasks.md" ] && missing+=("任务")
@@ -321,7 +321,7 @@ check_pending_tasks() {
 # 检查已完成内容
 check_completed_content() {
     local content_dir="$STORY_DIR/content"
-    local validation_rules="$STORY_DIR/spec/tracking/validation-rules.json"
+    local validation_rules="$STORY_DIR/tracking/validation-rules.json"
     local min_words=2000
     local max_words=4000
 
@@ -376,7 +376,7 @@ output_checklist() {
     local max_words=4000
 
     # 检查文档
-    [ -f ".specify/memory/constitution.md" ] && has_constitution=true
+    [ -f "resources/memory/constitution.md" ] && has_constitution=true
     [ -f "$STORY_DIR/specification.md" ] && has_specification=true
     [ -f "$STORY_DIR/creative-plan.md" ] && has_plan=true
     [ -f "$STORY_DIR/tasks.md" ] && has_tasks=true
@@ -389,7 +389,7 @@ output_checklist() {
     fi
 
     # 读取验证规则
-    local validation_rules="$STORY_DIR/spec/tracking/validation-rules.json"
+    local validation_rules="$STORY_DIR/tracking/validation-rules.json"
     if [ -f "$validation_rules" ] && command -v jq >/dev/null 2>&1; then
         min_words=$(jq -r '.rules.chapterMinWords // 2000' "$validation_rules")
         max_words=$(jq -r '.rules.chapterMaxWords // 4000' "$validation_rules")
@@ -553,11 +553,11 @@ check_knowledge_base_available() {
 
     # 检查所有 craft knowledge-base
     local craft_files=(
-        ".specify/templates/knowledge-base/craft/dialogue.md"
-        ".specify/templates/knowledge-base/craft/scene-structure.md"
-        ".specify/templates/knowledge-base/craft/character-arc.md"
-        ".specify/templates/knowledge-base/craft/pacing.md"
-        ".specify/templates/knowledge-base/craft/show-not-tell.md"
+        "resources/craft/dialogue.md"
+        "resources/craft/scene-structure.md"
+        "resources/craft/character-arc.md"
+        "resources/craft/pacing.md"
+        "resources/craft/show-not-tell.md"
     )
 
     for file in "${craft_files[@]}"; do
@@ -590,10 +590,10 @@ check_skills_available() {
 
     # 检查 writing-techniques skills
     local skill_dirs=(
-        ".specify/templates/skills/writing-techniques/dialogue-techniques"
-        ".specify/templates/skills/writing-techniques/scene-structure"
-        ".specify/templates/skills/writing-techniques/character-arc"
-        ".specify/templates/skills/writing-techniques/pacing-control"
+        ".claude/skills/writing-techniques/dialogue-techniques"
+        ".claude/skills/writing-techniques/scene-structure"
+        ".claude/skills/writing-techniques/character-arc"
+        ".claude/skills/writing-techniques/pacing-control"
     )
 
     for dir in "${skill_dirs[@]}"; do
@@ -667,7 +667,7 @@ generate_load_report() {
     # 检查文件是否存在，生成警告（使用缓存 + Phase 2 去重）
     local warnings=()
     for kb in "${knowledge_base_files[@]}"; do
-        local kb_path=".specify/templates/knowledge-base/$kb"
+        local kb_path="resources/$kb"
 
         # Phase 2: 资源去重检查
         if is_resource_loaded "$kb_path"; then
@@ -685,7 +685,7 @@ generate_load_report() {
     done
 
     for skill in "${skills_files[@]}"; do
-        local skill_path=".specify/templates/skills/$skill/SKILL.md"
+        local skill_path=".claude/skills/$skill/SKILL.md"
 
         # Phase 2: 资源去重检查
         if is_resource_loaded "$skill_path"; then

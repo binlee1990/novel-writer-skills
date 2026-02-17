@@ -10,12 +10,12 @@ allowed-tools: Read, Write, Glob, Grep, Edit
 
 ## 概述
 
-统一管理故事中所有角色的档案、状态、关系和对话风格。所有角色数据存储在 `spec/tracking/` 目录下。
+统一管理故事中所有角色的档案、状态、关系和对话风格。所有角色数据存储在 `tracking/` 目录下。
 
 ## 前置条件
 
 1. 确认当前故事目录存在：`stories/*/`
-2. 确认 `spec/tracking/` 目录存在，不存在则创建
+2. 确认 `tracking/` 目录存在，不存在则创建
 3. 按三层 Fallback 加载角色数据：
 
 **Layer 1: MCP 查询（优先）**
@@ -23,13 +23,13 @@ allowed-tools: Read, Write, Glob, Grep, Edit
 - `query_relationships` → 关系网络
 - `search_content --query=[角色名]` → 角色出场章节
 
-**Layer 2: 分片 JSON（次优，检测 spec/tracking/volumes/ 是否存在）**
-- 无 --volume：读取 `spec/tracking/summary/characters-summary.json`（活跃角色概览）
-- 有 --volume：读取 `spec/tracking/volumes/vol-XX/character-state.json` 和 `relationships.json`
+**Layer 2: 分片 JSON（次优，检测 tracking/volumes/ 是否存在）**
+- 无 --volume：读取 `tracking/summary/characters-summary.json`（活跃角色概览）
+- 有 --volume：读取 `tracking/volumes/vol-XX/character-state.json` 和 `relationships.json`
 
 **Layer 3: 单文件 JSON（兜底）**
-- `spec/tracking/character-state.json`
-- `spec/tracking/relationships.json`
+- `tracking/character-state.json`
+- `tracking/relationships.json`
 
 ## 子命令决策
 
@@ -253,14 +253,14 @@ allowed-tools: Read, Write, Glob, Grep, Edit
 
 当 `/character` 更新角色数据时：
 
-**分片模式（检测到 spec/tracking/volumes/ 存在）**：
+**分片模式（检测到 tracking/volumes/ 存在）**：
 1. 确定角色最后出场章节所属的卷
 2. 更新该卷的 `character-state.json` 或 `relationships.json`
-3. 同步更新全局摘要：`spec/tracking/summary/characters-summary.json`
+3. 同步更新全局摘要：`tracking/summary/characters-summary.json`
 4. 如果 MCP 可用，调用 `sync_from_json` 同步到 SQLite
 
 **单文件模式**：
-- 直接更新 `spec/tracking/character-state.json` 和 `relationships.json`
+- 直接更新 `tracking/character-state.json` 和 `relationships.json`
 
 ### 数据校验
 

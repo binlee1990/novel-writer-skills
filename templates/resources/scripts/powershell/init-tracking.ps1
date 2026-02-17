@@ -13,7 +13,7 @@ $storyDir = Get-CurrentStoryDir
 if (-not $storyDir) { throw "请先完成 /specify 和 /plan，未找到 stories/*/ 目录" }
 
 $storyName = Split-Path $storyDir -Leaf
-$specTrack = Join-Path $root "spec/tracking"
+$specTrack = Join-Path $root "tracking"
 New-Item -ItemType Directory -Path $specTrack -Force | Out-Null
 
 Write-Host "📖 为《$storyName》初始化追踪系统..."
@@ -86,10 +86,10 @@ Write-Host ""
 Write-Host "✅ 追踪系统初始化完成！"
 Write-Host ""
 Write-Host "📊 已创建以下追踪文件："
-Write-Host "   • spec/tracking/plot-tracker.json - 情节追踪"
-Write-Host "   • spec/tracking/timeline.json - 时间线管理"
-Write-Host "   • spec/tracking/relationships.json - 关系网络"
-Write-Host "   • spec/tracking/character-state.json - 角色状态"
+Write-Host "   • tracking/plot-tracker.json - 情节追踪"
+Write-Host "   • tracking/timeline.json - 时间线管理"
+Write-Host "   • tracking/relationships.json - 关系网络"
+Write-Host "   • tracking/character-state.json - 角色状态"
 Write-Host ""
 Write-Host "💡 下一步："
 Write-Host "   1. 使用 /write 开始创作（会自动更新追踪数据）"

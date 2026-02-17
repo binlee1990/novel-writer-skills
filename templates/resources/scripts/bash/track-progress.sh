@@ -38,7 +38,7 @@ check_files() {
         has_files=true
     fi
 
-    if [[ -f "spec/tracking/plot-tracker.json" ]]; then
+    if [[ -f "tracking/plot-tracker.json" ]]; then
         has_files=true
     fi
 
@@ -61,7 +61,7 @@ show_basic_report() {
     fi
 
     # 读取情节追踪
-    if [[ -f "spec/tracking/plot-tracker.json" ]]; then
+    if [[ -f "tracking/plot-tracker.json" ]]; then
         echo -e "${BLUE}📍 情节状态${NC}"
         echo "  主线进度等待分析..."
     fi
@@ -85,7 +85,7 @@ run_deep_check() {
     echo -e "${BLUE}Phase 2: 角色深度验证${NC}"
 
     # 检查验证规则文件
-    if [[ -f "spec/tracking/validation-rules.json" ]]; then
+    if [[ -f "tracking/validation-rules.json" ]]; then
         echo "  ✅ 加载验证规则"
         echo "  扫描章节中的角色名称..."
         echo "  对比character-state.json..."
@@ -117,7 +117,7 @@ EOF
         echo -e "${GREEN}  ✅ 验证任务已生成${NC}"
     else
         echo -e "${YELLOW}  ⚠️ 未找到验证规则文件${NC}"
-        echo "  建议创建 spec/tracking/validation-rules.json"
+        echo "  建议创建 tracking/validation-rules.json"
     fi
 
     # Phase 3: 生成报告
@@ -135,7 +135,7 @@ run_auto_fix() {
     echo -e "${GREEN}🔧 执行自动修复...${NC}"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-    if [[ ! -f "spec/tracking/validation-rules.json" ]]; then
+    if [[ ! -f "tracking/validation-rules.json" ]]; then
         echo -e "${RED}❌ 需要先运行 --check 生成验证报告${NC}"
         exit 1
     fi

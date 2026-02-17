@@ -4,8 +4,8 @@ description: 生成或执行质量检查清单（规格验证 + 内容扫描）
 argument-hint: [检查类型] [--volume vol-XX | --pre-write | --post-write | --volume-end]
 allowed-tools: Read, Bash, Write, Edit, Glob, Grep
 scripts:
-  sh: .specify/scripts/bash/common.sh
-  ps: .specify/scripts/powershell/common.ps1
+  sh: resources/scripts/bash/common.sh
+  ps: resources/scripts/powershell/common.ps1
 ---
 
 # 质量检查清单（Checklist）
@@ -18,10 +18,10 @@ scripts:
 验证规划文档本身的质量（类似"需求的单元测试"）：
 
 - `大纲质量` - 检查 creative-plan.md 的完整性、清晰度、一致性
-- `角色设定` - 检查 spec/knowledge/characters.md
-- `世界观` - 检查 spec/knowledge/world-setting.md 及相关文档
+- `角色设定` - 检查 resources/knowledge/characters.md
+- `世界观` - 检查 resources/knowledge/world-setting.md 及相关文档
 - `创作计划` - 检查 creative-plan.md / specification.md
-- `伏笔管理` - 检查 spec/tracking/plot-tracker.json 的伏笔定义
+- `伏笔管理` - 检查 tracking/plot-tracker.json 的伏笔定义
 
 ### 第二类：内容验证检查（结果报告式）
 扫描已写章节，验证实际内容：
@@ -47,11 +47,11 @@ $ARGUMENTS
 ### 默认加载
 
 自动加载以下资源用于生成检查清单：
-- `.specify/memory/constitution.md`（创作宪法）
+- `resources/memory/constitution.md`（创作宪法）
 - `stories/*/specification.md`（故事规格）
 - `stories/*/tasks.md`（当前任务）
-- `spec/tracking/plot-tracker.json`（情节追踪）
-- `spec/tracking/character-state.json`（角色状态）
+- `tracking/plot-tracker.json`（情节追踪）
+- `tracking/character-state.json`（角色状态）
 
 ### 可选加载
 
@@ -118,8 +118,8 @@ const plotData = await mcp.call('novelws-mcp/query_plot', {
 ### Layer 2: 分片 JSON（次优）
 
 ```bash
-# 当 spec/tracking/volumes/ 存在时
-for volume_dir in spec/tracking/volumes/vol-*; do
+# 当 tracking/volumes/ 存在时
+for volume_dir in tracking/volumes/vol-*; do
   if [[ -n "$VOLUME_FILTER" ]] && [[ "$volume_dir" != *"$VOLUME_FILTER"* ]]; then
     continue
   fi
@@ -139,8 +139,8 @@ done
 
 ```bash
 # 传统模式，加载完整文件
-cat spec/tracking/plot-tracker.json
-cat spec/tracking/character-state.json
+cat tracking/plot-tracker.json
+cat tracking/character-state.json
 # ...
 ```
 
@@ -183,7 +183,7 @@ cat spec/tracking/character-state.json
 
 **读取文件**：
 - `creative-plan.md` 或 `stories/*/creative-plan.md`
-- `spec/tracking/plot-tracker.json`（如果存在）
+- `tracking/plot-tracker.json`（如果存在）
 
 **生成检查项维度**：
 
@@ -258,9 +258,9 @@ cat spec/tracking/character-state.json
 ##### 2.2 角色设定检查
 
 **读取文件**：
-- `spec/knowledge/characters.md`
-- `spec/tracking/character-state.json`
-- `spec/tracking/relationships.json`
+- `resources/knowledge/characters.md`
+- `tracking/character-state.json`
+- `tracking/relationships.json`
 
 **生成检查项维度**：
 
@@ -288,10 +288,10 @@ cat spec/tracking/character-state.json
 ##### 2.3 世界观检查
 
 **读取文件**：
-- `spec/knowledge/world-setting.md`
-- `spec/knowledge/locations.md`
-- `spec/knowledge/culture.md`
-- `spec/knowledge/rules.md`
+- `resources/knowledge/world-setting.md`
+- `resources/knowledge/locations.md`
+- `resources/knowledge/culture.md`
+- `resources/knowledge/rules.md`
 
 **生成检查项维度**：
 
@@ -340,7 +340,7 @@ cat spec/tracking/character-state.json
 ##### 2.5 伏笔管理检查
 
 **读取文件**：
-- `spec/tracking/plot-tracker.json`
+- `tracking/plot-tracker.json`
 - `creative-plan.md`
 
 **生成检查项维度**：
@@ -370,7 +370,7 @@ cat spec/tracking/character-state.json
 
 执行命令：
 ```bash
-bash .specify/scripts/bash/check-world.sh --checklist
+bash resources/scripts/bash/check-world.sh --checklist
 ```
 
 如果脚本不存在，提示用户该功能正在开发中。
@@ -379,21 +379,21 @@ bash .specify/scripts/bash/check-world.sh --checklist
 
 执行命令：
 ```bash
-bash .specify/scripts/bash/check-plot.sh --checklist
+bash resources/scripts/bash/check-plot.sh --checklist
 ```
 
 ##### 2.7 数据同步检查
 
 执行命令：
 ```bash
-bash .specify/scripts/bash/check-consistency.sh --checklist
+bash resources/scripts/bash/check-consistency.sh --checklist
 ```
 
 ##### 2.8 时间线检查
 
 执行命令：
 ```bash
-bash .specify/scripts/bash/check-timeline.sh check --checklist
+bash resources/scripts/bash/check-timeline.sh check --checklist
 ```
 
 ##### 2.9 写作状态检查
@@ -426,7 +426,7 @@ bash .specify/scripts/bash/check-timeline.sh check --checklist
 
 如果存在脚本，执行：
 ```bash
-bash .specify/scripts/bash/check-writing-state.sh --checklist
+bash resources/scripts/bash/check-writing-state.sh --checklist
 ```
 
 否则，手动检查上述项目并生成报告。
@@ -446,7 +446,7 @@ bash .specify/scripts/bash/check-writing-state.sh --checklist
   /style-learning
 
 或手动创建：
-  .specify/memory/personal-voice.md
+  resources/memory/personal-voice.md
 ```
 
 ### 3. 输出 Checklist

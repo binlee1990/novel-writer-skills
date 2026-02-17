@@ -19,9 +19,9 @@ scripts/
 
 | 文件 | novel-writer | novel-writer-skills |
 |------|-------------|-------------------|
-| 宪法文件 | `memory/constitution.md` | `.specify/memory/constitution.md` |
+| 宪法文件 | `memory/constitution.md` | `resources/memory/constitution.md` |
 | 故事规格 | `stories/*/specification.md` | `stories/*/specification.md` ✅ |
-| 追踪数据 | `spec/tracking/*.json` | `spec/tracking/*.json` ✅ |
+| 追踪数据 | `tracking/*.json` | `tracking/*.json` ✅ |
 
 **所有脚本已自动适配新路径**，无需手动修改！
 
@@ -43,10 +43,10 @@ scripts/
 cd my-novel
 
 # 使用脚本（示例：创建宪法）
-bash .specify/templates/scripts/bash/constitution.sh
+bash resources/scripts/bash/constitution.sh
 
 # 或者添加到 PATH
-export PATH="$PATH:$(pwd)/.specify/templates/scripts/bash"
+export PATH="$PATH:$(pwd)/resources/scripts/bash"
 constitution.sh
 ```
 
@@ -121,10 +121,10 @@ Get-ActiveStory       # 获取活跃故事名称
 
 ## ⚠️ 注意事项
 
-1. **项目根目录识别** - 脚本通过查找 `.specify/config.json` 确定项目根目录
+1. **项目根目录识别** - 脚本通过查找 `resources/config/config.json` 确定项目根目录
 2. **执行权限** - Linux/macOS 用户需要确保脚本有执行权限：
    ```bash
-   chmod +x .specify/templates/scripts/bash/*.sh
+   chmod +x resources/scripts/bash/*.sh
    ```
 3. **与 Slash Commands 的区别**：
    - Slash Commands 在 Claude Code 中使用，有 AI 交互能力

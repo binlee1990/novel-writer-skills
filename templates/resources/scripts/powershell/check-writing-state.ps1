@@ -145,17 +145,17 @@ $StoryDir = Join-Path "stories" $StoryName
 if (-not $script:PreloadCompleted) {
     $preloadFileList = @(
         # 知识库文件
-        (Join-Path $ProjectRoot ".specify/templates/knowledge-base/craft/dialogue.md")
-        (Join-Path $ProjectRoot ".specify/templates/knowledge-base/craft/scene-structure.md")
-        (Join-Path $ProjectRoot ".specify/templates/knowledge-base/craft/character-arc.md")
-        (Join-Path $ProjectRoot ".specify/templates/knowledge-base/craft/pacing.md")
-        (Join-Path $ProjectRoot ".specify/templates/knowledge-base/craft/show-not-tell.md")
+        (Join-Path $ProjectRoot "resources/craft/dialogue.md")
+        (Join-Path $ProjectRoot "resources/craft/scene-structure.md")
+        (Join-Path $ProjectRoot "resources/craft/character-arc.md")
+        (Join-Path $ProjectRoot "resources/craft/pacing.md")
+        (Join-Path $ProjectRoot "resources/craft/show-not-tell.md")
         # Skill 文件
-        (Join-Path $ProjectRoot ".specify/templates/skills/writing-techniques/dialogue-techniques/SKILL.md")
-        (Join-Path $ProjectRoot ".specify/templates/skills/writing-techniques/scene-structure/SKILL.md")
-        (Join-Path $ProjectRoot ".specify/templates/skills/writing-techniques/character-arc/SKILL.md")
-        (Join-Path $ProjectRoot ".specify/templates/skills/writing-techniques/pacing-control/SKILL.md")
-        (Join-Path $ProjectRoot ".specify/templates/skills/quality-assurance/consistency-checker/SKILL.md")
+        (Join-Path $ProjectRoot ".claude/skills/writing-techniques/dialogue-techniques/SKILL.md")
+        (Join-Path $ProjectRoot ".claude/skills/writing-techniques/scene-structure/SKILL.md")
+        (Join-Path $ProjectRoot ".claude/skills/writing-techniques/character-arc/SKILL.md")
+        (Join-Path $ProjectRoot ".claude/skills/writing-techniques/pacing-control/SKILL.md")
+        (Join-Path $ProjectRoot ".claude/skills/quality-assurance/consistency-checker/SKILL.md")
         # 规格文件
         (Join-Path $StoryDir "specification.md")
     )
@@ -182,19 +182,19 @@ function Generate-LoadReport {
 
     # 默认加载所有资源
     $knowledgeBaseFiles = @(
-        ".specify/templates/knowledge-base/craft/dialogue.md",
-        ".specify/templates/knowledge-base/craft/scene-structure.md",
-        ".specify/templates/knowledge-base/craft/character-arc.md",
-        ".specify/templates/knowledge-base/craft/pacing.md",
-        ".specify/templates/knowledge-base/craft/show-not-tell.md"
+        "resources/craft/dialogue.md",
+        "resources/craft/scene-structure.md",
+        "resources/craft/character-arc.md",
+        "resources/craft/pacing.md",
+        "resources/craft/show-not-tell.md"
     )
 
     $skillsFiles = @(
-        ".specify/templates/skills/writing-techniques/dialogue-techniques",
-        ".specify/templates/skills/writing-techniques/scene-structure",
-        ".specify/templates/skills/writing-techniques/character-arc",
-        ".specify/templates/skills/writing-techniques/pacing-control",
-        ".specify/templates/skills/quality-assurance/consistency-checker"
+        ".claude/skills/writing-techniques/dialogue-techniques",
+        ".claude/skills/writing-techniques/scene-structure",
+        ".claude/skills/writing-techniques/character-arc",
+        ".claude/skills/writing-techniques/pacing-control",
+        ".claude/skills/quality-assurance/consistency-checker"
     )
 
     $disabledResources = @()
@@ -410,11 +410,11 @@ function Check-KnowledgeBaseAvailable {
     $available = @()
 
     $craftFiles = @(
-        ".specify/templates/knowledge-base/craft/dialogue.md",
-        ".specify/templates/knowledge-base/craft/scene-structure.md",
-        ".specify/templates/knowledge-base/craft/character-arc.md",
-        ".specify/templates/knowledge-base/craft/pacing.md",
-        ".specify/templates/knowledge-base/craft/show-not-tell.md"
+        "resources/craft/dialogue.md",
+        "resources/craft/scene-structure.md",
+        "resources/craft/character-arc.md",
+        "resources/craft/pacing.md",
+        "resources/craft/show-not-tell.md"
     )
 
     foreach ($file in $craftFiles) {
@@ -445,10 +445,10 @@ function Check-SkillsAvailable {
     $available = @()
 
     $skillDirs = @(
-        ".specify/templates/skills/writing-techniques/dialogue-techniques",
-        ".specify/templates/skills/writing-techniques/scene-structure",
-        ".specify/templates/skills/writing-techniques/character-arc",
-        ".specify/templates/skills/writing-techniques/pacing-control"
+        ".claude/skills/writing-techniques/dialogue-techniques",
+        ".claude/skills/writing-techniques/scene-structure",
+        ".claude/skills/writing-techniques/character-arc",
+        ".claude/skills/writing-techniques/pacing-control"
     )
 
     foreach ($dir in $skillDirs) {

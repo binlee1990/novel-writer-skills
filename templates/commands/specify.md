@@ -1,10 +1,10 @@
 ---
 description: 定义故事规格，明确要创造什么样的作品
 argument-hint: [故事描述] [--world]
-allowed-tools: Read(//stories/**/specification.md), Read(//stories/**/specification.md), Write(//stories/**/specification.md), Write(//stories/**/specification.md), Read(//.specify/memory/constitution.md), Read(//.specify/memory/constitution.md), Bash(find:*), Bash(*)
+allowed-tools: Read(//stories/**/specification.md), Read(//stories/**/specification.md), Write(//stories/**/specification.md), Write(//stories/**/specification.md), Read(//resources/memory/constitution.md), Read(//resources/memory/constitution.md), Bash(find:*), Bash(*)
 scripts:
-  sh: .specify/scripts/bash/specify-story.sh --json
-  ps: .specify/scripts/powershell/specify-story.ps1 -Json
+  sh: resources/scripts/bash/specify-story.sh --json
+  ps: resources/scripts/powershell/specify-story.ps1 -Json
 ---
 
 用户输入：$ARGUMENTS
@@ -99,7 +99,7 @@ else:
 
 ### 2. 检查宪法合规性
 
-如果存在 `.specify/memory/constitution.md`：
+如果存在 `resources/memory/constitution.md`：
 - 加载宪法原则
 - 确保规格符合宪法价值观
 - 在规格中引用相关原则

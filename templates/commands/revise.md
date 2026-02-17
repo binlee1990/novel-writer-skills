@@ -70,14 +70,14 @@ const plotData = await mcp.call('novelws-mcp/query_plot', {
 #### Layer 2: 分片 JSON（次优）
 
 ```bash
-# 当 spec/tracking/volumes/ 存在时
+# 当 tracking/volumes/ 存在时
 if [[ -n "$VOLUME_FILTER" ]]; then
   # 仅加载指定卷的数据
-  cat spec/tracking/volumes/${VOLUME_FILTER}/character-state.json
-  cat spec/tracking/volumes/${VOLUME_FILTER}/relationships.json
+  cat tracking/volumes/${VOLUME_FILTER}/character-state.json
+  cat tracking/volumes/${VOLUME_FILTER}/relationships.json
 else
   # 加载所有卷的数据
-  for vol in spec/tracking/volumes/vol-*/; do
+  for vol in tracking/volumes/vol-*/; do
     cat "$vol/character-state.json"
     cat "$vol/relationships.json"
   done
@@ -93,8 +93,8 @@ fi
 
 ```bash
 # 传统模式，加载完整文件
-cat spec/tracking/character-state.json
-cat spec/tracking/relationships.json
+cat tracking/character-state.json
+cat tracking/relationships.json
 ```
 
 **向下兼容**：小型项目（< 300 章）继续使用单文件模式
@@ -110,24 +110,24 @@ cat spec/tracking/relationships.json
 - 创作计划：`stories/*/creative-plan.md`
 - **角色状态**（三层回退）：
   - Layer 3: `mcp.call('novelws-mcp/query_characters', {volume})`
-  - Layer 2: `spec/tracking/volumes/${volume}/character-state.json`
-  - Layer 1: `spec/tracking/character-state.json`
+  - Layer 2: `tracking/volumes/${volume}/character-state.json`
+  - Layer 1: `tracking/character-state.json`
 - **关系网络**（三层回退）：
   - Layer 3: `mcp.call('novelws-mcp/query_relationships', {volume})`
-  - Layer 2: `spec/tracking/volumes/${volume}/relationships.json`
-  - Layer 1: `spec/tracking/relationships.json`
+  - Layer 2: `tracking/volumes/${volume}/relationships.json`
+  - Layer 1: `tracking/relationships.json`
 
 **如有则加载**：
 - `/analyze` 报告：`stories/*/analysis-report.md`
-- 风格参考：`.specify/memory/style-reference.md`
-- 个人风格：`.specify/memory/personal-voice.md`
+- 风格参考：`resources/memory/style-reference.md`
+- 个人风格：`resources/memory/personal-voice.md`
 - **情节追踪**（三层回退）：
   - Layer 3: `mcp.call('novelws-mcp/query_plot', {volume})`
-  - Layer 2: `spec/tracking/volumes/${volume}/plot-tracker.json`
-  - Layer 1: `spec/tracking/plot-tracker.json`
+  - Layer 2: `tracking/volumes/${volume}/plot-tracker.json`
+  - Layer 1: `tracking/plot-tracker.json`
 
 **加载 Skill**：
-- `.specify/templates/skills/writing-techniques/revision-polish/SKILL.md`（核心修改流程）
+- `.claude/skills/writing-techniques/revision-polish/SKILL.md`（核心修改流程）
 
 ### 4. 初稿评估
 

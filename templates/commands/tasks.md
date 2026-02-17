@@ -2,8 +2,8 @@
 description: 将创作计划分解为可执行的任务清单
 allowed-tools: Read(//stories/**/creative-plan.md), Read(//stories/**/creative-plan.md), Read(//stories/**/specification.md), Read(//stories/**/specification.md), Write(//stories/**/tasks.md), Write(//stories/**/tasks.md), Bash(find:*), Bash(*)
 scripts:
-  sh: .specify/scripts/bash/tasks-story.sh
-  ps: .specify/scripts/powershell/generate-tasks.ps1
+  sh: resources/scripts/bash/tasks-story.sh
+  ps: resources/scripts/powershell/generate-tasks.ps1
 ---
 
 基于创作计划生成具体的、可执行的任务列表。
@@ -63,16 +63,16 @@ const characters = await mcp.call('novelws-mcp/query_characters', {
 ### Layer 2: 分片 JSON（次优）
 
 ```bash
-# 当 spec/tracking/volumes/ 存在时
+# 当 tracking/volumes/ 存在时
 # 读取摘要数据
-plot_summary=$(cat spec/tracking/summary/plot-summary.json)
+plot_summary=$(cat tracking/summary/plot-summary.json)
 
 # 提取未解决伏笔和紧急伏笔
 unresolved_plots=$(echo "$plot_summary" | jq '.unresolved')
 urgent_plots=$(echo "$plot_summary" | jq '.urgent')
 
 # 读取角色摘要
-character_summary=$(cat spec/tracking/summary/characters-summary.json)
+character_summary=$(cat tracking/summary/characters-summary.json)
 absent_characters=$(echo "$character_summary" | jq '.absent')
 ```
 
@@ -85,8 +85,8 @@ absent_characters=$(echo "$character_summary" | jq '.absent')
 
 ```bash
 # 传统模式，加载完整文件并手动过滤
-plot_tracker=$(cat spec/tracking/plot-tracker.json)
-character_state=$(cat spec/tracking/character-state.json)
+plot_tracker=$(cat tracking/plot-tracker.json)
+character_state=$(cat tracking/character-state.json)
 
 # 手动计算紧急度、缺席章节等
 ```
@@ -313,8 +313,8 @@ character_state=$(cat spec/tracking/character-state.json)
 4. 自动设置依赖关系（顺序依赖）
 5. 按三层 Fallback 读取 tracking 数据生成修复/维护任务：
    - **MCP 查询（优先）**：`query_plot --status=overdue` 获取延迟伏笔，`stats_volume` 获取进度
-   - **分片 JSON（次优）**：读取 `spec/tracking/summary/plot-summary.json` 获取未解决伏笔
-   - **单文件 JSON（兜底）**：读取 `spec/tracking/plot-tracker.json`
+   - **分片 JSON（次优）**：读取 `tracking/summary/plot-summary.json` 获取未解决伏笔
+   - **单文件 JSON（兜底）**：读取 `tracking/plot-tracker.json`
 6. 从 `/analyze` 反馈中提取修复任务
 7. 从 `/track --check` 中提取维护任务
 

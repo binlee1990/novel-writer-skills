@@ -7,7 +7,7 @@ echo ""
 
 # 测试 1.1: 验证 JSON 结构
 echo "测试 1.1: 验证 JSON 结构"
-version=$(jq -r '.version' templates/config/keyword-mappings.json)
+version=$(jq -r '.version' resources/config/keyword-mappings.json)
 if [[ "$version" == "1.1.0" ]]; then
     echo "✅ 版本号正确: $version"
 else
@@ -35,8 +35,8 @@ for mapping in "${mappings[@]}"; do
     category=$(echo "$mapping" | cut -d. -f1)
     name=$(echo "$mapping" | cut -d. -f2)
 
-    regex=$(jq -r ".mappings[\"$category\"][\"$name\"].regex" templates/config/keyword-mappings.json)
-    regex_flags=$(jq -r ".mappings[\"$category\"][\"$name\"].regex_flags" templates/config/keyword-mappings.json)
+    regex=$(jq -r ".mappings[\"$category\"][\"$name\"].regex" resources/config/keyword-mappings.json)
+    regex_flags=$(jq -r ".mappings[\"$category\"][\"$name\"].regex_flags" resources/config/keyword-mappings.json)
 
     if [[ -n "$regex" && "$regex" != "null" ]]; then
         echo "✅ $mapping: regex='$regex', flags='$regex_flags'"
@@ -71,7 +71,7 @@ for test_case in "${!test_cases[@]}"; do
     category=$(echo "$mapping" | cut -d. -f1)
     name=$(echo "$mapping" | cut -d. -f2)
 
-    regex=$(jq -r ".mappings[\"$category\"][\"$name\"].regex" templates/config/keyword-mappings.json)
+    regex=$(jq -r ".mappings[\"$category\"][\"$name\"].regex" resources/config/keyword-mappings.json)
 
     if echo "$keyword" | grep -iE "$regex" > /dev/null; then
         echo "✅ $mapping + '$keyword' → 匹配成功"

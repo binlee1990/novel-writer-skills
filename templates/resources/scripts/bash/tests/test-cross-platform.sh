@@ -23,7 +23,7 @@ fi
 echo ""
 echo "【路径处理测试】"
 # 测试路径分隔符处理
-test_path="templates/config/keyword-mappings.json"
+test_path="resources/config/keyword-mappings.json"
 if [[ -f "$test_path" ]]; then
     echo "✅ 路径处理正常: $test_path"
 else

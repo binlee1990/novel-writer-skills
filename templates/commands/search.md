@@ -46,15 +46,15 @@ const results = await mcp.call('novelws-mcp/search_content', {
 ### Layer 2: 分片 Grep（次优）
 
 ```bash
-# 当 spec/tracking/volumes/ 存在时
+# 当 tracking/volumes/ 存在时
 if [[ -n "$VOLUME_FILTER" ]]; then
   # 仅搜索指定卷
   grep -rn "$QUERY" "stories/*/content/" | grep "ch-$(volume_to_range $VOLUME_FILTER)"
-  grep -rn "$QUERY" "spec/tracking/volumes/$VOLUME_FILTER/"
+  grep -rn "$QUERY" "tracking/volumes/$VOLUME_FILTER/"
 else
   # 搜索所有内容
   grep -rn "$QUERY" "stories/*/content/"
-  grep -rn "$QUERY" "spec/tracking/volumes/"
+  grep -rn "$QUERY" "tracking/volumes/"
 fi
 ```
 
@@ -68,7 +68,7 @@ fi
 ```bash
 # 传统模式，搜索所有文件
 grep -rn "$QUERY" "stories/*/content/"
-grep -rn "$QUERY" "spec/tracking/"
+grep -rn "$QUERY" "tracking/"
 ```
 
 **向下兼容**：小型项目（< 300 章）使用标准 Grep
@@ -102,7 +102,7 @@ const isRegex = args.regex || false;   // 正则表达式
 ### Step 2: 检测数据模式
 
 ```javascript
-const isSharded = fs.existsSync('spec/tracking/volumes/');
+const isSharded = fs.existsSync('tracking/volumes/');
 const hasMCP = fs.existsSync('mcp-servers.json');
 
 // 选择搜索策略
@@ -179,11 +179,11 @@ if [[ -n "$VOLUME_FILTER" ]]; then
   done
 
   # 搜索 tracking 数据
-  grep -rn "$QUERY" "spec/tracking/volumes/$VOLUME_FILTER/"
+  grep -rn "$QUERY" "tracking/volumes/$VOLUME_FILTER/"
 else
   # 搜索所有内容
   grep -rn "$QUERY" "stories/*/content/"
-  grep -rn "$QUERY" "spec/tracking/volumes/"
+  grep -rn "$QUERY" "tracking/volumes/"
 fi
 ```
 
@@ -196,7 +196,7 @@ QUERY="$1"
 grep -rn "$QUERY" "stories/*/content/"
 
 # 搜索 tracking 数据
-grep -rn "$QUERY" "spec/tracking/" --exclude-dir=volumes
+grep -rn "$QUERY" "tracking/" --exclude-dir=volumes
 ```
 
 ### Step 4: 处理搜索结果
@@ -262,7 +262,7 @@ const resultsWithContext = sortedResults.map(result => ({
 
 ### 角色数据
 
-**文件**：spec/tracking/volumes/vol-03/character-state.json
+**文件**：tracking/volumes/vol-03/character-state.json
 
 **匹配项**：
 ```json
@@ -277,7 +277,7 @@ const resultsWithContext = sortedResults.map(result => ({
 
 ### 情节数据
 
-**文件**：spec/tracking/volumes/vol-03/plot-tracker.json
+**文件**：tracking/volumes/vol-03/plot-tracker.json
 
 **匹配项**：
 ```json

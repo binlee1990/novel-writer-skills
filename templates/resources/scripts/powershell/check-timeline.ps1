@@ -17,8 +17,8 @@ $root = Get-ProjectRoot
 $storyDir = Get-CurrentStoryDir
 if (-not $storyDir) { throw "未找到故事项目（stories/*）" }
 
-$timelinePath = Join-Path $storyDir "spec/tracking/timeline.json"
-if (-not (Test-Path $timelinePath)) { $timelinePath = Join-Path $root "spec/tracking/timeline.json" }
+$timelinePath = Join-Path $storyDir "tracking/timeline.json"
+if (-not (Test-Path $timelinePath)) { $timelinePath = Join-Path $root "tracking/timeline.json" }
 
 function Init-Timeline {
   if (-not (Test-Path $timelinePath)) {

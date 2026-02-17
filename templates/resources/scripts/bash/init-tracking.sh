@@ -25,7 +25,7 @@ if [ "$story_exists" = false ] || [ "$outline_exists" = false ]; then
 fi
 
 # 创建追踪目录
-mkdir -p spec/tracking
+mkdir -p tracking
 
 # 获取故事名称
 story_dir=$(dirname "$story_file")
@@ -34,9 +34,9 @@ story_name=$(basename "$story_dir")
 echo "📖 为《${story_name}》初始化追踪系统..."
 
 # 初始化 plot-tracker.json
-if [ ! -f "spec/tracking/plot-tracker.json" ]; then
+if [ ! -f "tracking/plot-tracker.json" ]; then
     echo "📝 创建 plot-tracker.json..."
-    cat > spec/tracking/plot-tracker.json <<EOF
+    cat > tracking/plot-tracker.json <<EOF
 {
   "novel": "${story_name}",
   "lastUpdated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
@@ -82,9 +82,9 @@ EOF
 fi
 
 # 初始化 timeline.json
-if [ ! -f "spec/tracking/timeline.json" ]; then
+if [ ! -f "tracking/timeline.json" ]; then
     echo "⏰ 创建 timeline.json..."
-    cat > spec/tracking/timeline.json <<EOF
+    cat > tracking/timeline.json <<EOF
 {
   "novel": "${story_name}",
   "lastUpdated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
@@ -110,9 +110,9 @@ EOF
 fi
 
 # 初始化 relationships.json
-if [ ! -f "spec/tracking/relationships.json" ]; then
+if [ ! -f "tracking/relationships.json" ]; then
     echo "👥 创建 relationships.json..."
-    cat > spec/tracking/relationships.json <<EOF
+    cat > tracking/relationships.json <<EOF
 {
   "novel": "${story_name}",
   "lastUpdated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
@@ -135,9 +135,9 @@ EOF
 fi
 
 # 初始化 character-state.json
-if [ ! -f "spec/tracking/character-state.json" ]; then
+if [ ! -f "tracking/character-state.json" ]; then
     echo "📍 创建 character-state.json..."
-    cat > spec/tracking/character-state.json <<EOF
+    cat > tracking/character-state.json <<EOF
 {
   "novel": "${story_name}",
   "lastUpdated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
@@ -170,10 +170,10 @@ echo ""
 echo "✅ 追踪系统初始化完成！"
 echo ""
 echo "📊 已创建以下追踪文件："
-echo "   • spec/tracking/plot-tracker.json - 情节追踪"
-echo "   • spec/tracking/timeline.json - 时间线管理"
-echo "   • spec/tracking/relationships.json - 关系网络"
-echo "   • spec/tracking/character-state.json - 角色状态"
+echo "   • tracking/plot-tracker.json - 情节追踪"
+echo "   • tracking/timeline.json - 时间线管理"
+echo "   • tracking/relationships.json - 关系网络"
+echo "   • tracking/character-state.json - 角色状态"
 echo ""
 echo "💡 下一步："
 echo "   1. 使用 /write 开始创作（会自动更新追踪数据）"

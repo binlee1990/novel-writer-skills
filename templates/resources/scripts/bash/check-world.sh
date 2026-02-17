@@ -22,10 +22,10 @@ if [ "$1" = "--checklist" ]; then
 fi
 
 # 文件路径
-WORLD_SETTING="$STORY_DIR/spec/knowledge/world-setting.md"
-LOCATIONS="$STORY_DIR/spec/knowledge/locations.md"
-CULTURE="$STORY_DIR/spec/knowledge/culture.md"
-RULES="$STORY_DIR/spec/knowledge/rules.md"
+WORLD_SETTING="$STORY_DIR/resources/knowledge/world-setting.md"
+LOCATIONS="$STORY_DIR/resources/knowledge/locations.md"
+CULTURE="$STORY_DIR/resources/knowledge/culture.md"
+RULES="$STORY_DIR/resources/knowledge/rules.md"
 CONTENT_DIR="$STORY_DIR/content"
 
 # ANSI颜色代码
@@ -268,7 +268,7 @@ output_checklist() {
 # 世界观一致性检查 Checklist
 
 **检查时间**: $(date '+%Y-%m-%d %H:%M:%S')
-**检查对象**: spec/knowledge/ 目录及已写章节内容
+**检查对象**: resources/knowledge/ 目录及已写章节内容
 **检查范围**: 世界观设定、地理逻辑、文化风俗、特殊规则
 
 ---

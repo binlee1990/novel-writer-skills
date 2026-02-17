@@ -10,8 +10,8 @@ $root = Get-ProjectRoot
 $storyDir = Get-CurrentStoryDir
 if (-not $storyDir) { throw "未找到故事项目（stories/*）" }
 
-$plotPath = Join-Path $storyDir "spec/tracking/plot-tracker.json"
-if (-not (Test-Path $plotPath)) { $plotPath = Join-Path $root "spec/tracking/plot-tracker.json" }
+$plotPath = Join-Path $storyDir "tracking/plot-tracker.json"
+if (-not (Test-Path $plotPath)) { $plotPath = Join-Path $root "tracking/plot-tracker.json" }
 $outlinePath = Join-Path $storyDir "creative-plan.md"
 $progressPath = Join-Path $storyDir "progress.json"
 

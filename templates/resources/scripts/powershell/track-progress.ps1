@@ -17,7 +17,7 @@ $ErrorActionPreference = 'Stop'
 $root = Get-ProjectRoot
 $storyDir = Get-CurrentStoryDir
 $progress = if ($storyDir) { Join-Path $storyDir "progress.json" } else { "" }
-$plotPath = Join-Path $root "spec/tracking/plot-tracker.json"
+$plotPath = Join-Path $root "tracking/plot-tracker.json"
 
 function Show-BasicReport {
   Write-Host "📊 小说创作综合报告"
@@ -41,7 +41,7 @@ function Run-DeepCheck {
   Write-Host "  [P] 执行关系验证..."
   Write-Host "  [P] 执行世界观验证..."
   Write-Host "Phase 2: 角色深度验证"
-  $rules = Join-Path $root "spec/tracking/validation-rules.json"
+  $rules = Join-Path $root "tracking/validation-rules.json"
   if (Test-Path $rules) {
     Write-Host "  ✅ 加载验证规则"
     Set-Content -LiteralPath "$env:TEMP/validation-tasks.md" -Encoding UTF8 -Value @"

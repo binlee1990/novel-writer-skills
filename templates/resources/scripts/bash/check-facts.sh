@@ -38,7 +38,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # 检查 story-facts.json 是否存在
-FACTS_FILE="$PROJECT_ROOT/spec/tracking/story-facts.json"
+FACTS_FILE="$PROJECT_ROOT/tracking/story-facts.json"
 if [[ ! -f "$FACTS_FILE" ]]; then
     if [[ "$OUTPUT_JSON" == true ]]; then
         echo '{"error": "story-facts.json not found", "chapters": [], "unreferenced_facts": [], "unknown_ids": []}'

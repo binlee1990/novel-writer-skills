@@ -10,8 +10,8 @@ Write-Host "----------------------------------------" -ForegroundColor Gray
 Write-Host "无缓存版本:"
 $sw1 = [Diagnostics.Stopwatch]::StartNew()
 for ($i = 1; $i -le 100; $i++) {
-    $null = Test-Path "templates/config/keyword-mappings.json" -PathType Leaf
-    $null = Get-Item "templates/config/keyword-mappings.json" -ErrorAction SilentlyContinue
+    $null = Test-Path "resources/config/keyword-mappings.json" -PathType Leaf
+    $null = Get-Item "resources/config/keyword-mappings.json" -ErrorAction SilentlyContinue
 }
 $sw1.Stop()
 Write-Host "  总时间: $($sw1.ElapsedMilliseconds) ms"
@@ -19,9 +19,9 @@ Write-Host "  总时间: $($sw1.ElapsedMilliseconds) ms"
 . .\templates\scripts\powershell\check-writing-state.ps1
 Write-Host "有缓存版本:"
 $sw2 = [Diagnostics.Stopwatch]::StartNew()
-Preload-FileMTimes -FilePathList @("templates/config/keyword-mappings.json")
+Preload-FileMTimes -FilePathList @("resources/config/keyword-mappings.json")
 for ($i = 1; $i -le 100; $i++) {
-    $null = Test-FileExistsCached "templates/config/keyword-mappings.json"
+    $null = Test-FileExistsCached "resources/config/keyword-mappings.json"
 }
 $sw2.Stop()
 Write-Host "  总时间: $($sw2.ElapsedMilliseconds) ms"
@@ -36,17 +36,17 @@ Write-Host "----------------------------------------" -ForegroundColor Gray
 # 构造文件列表（与实际脚本一致）
 $ProjectRoot = Get-Location
 $testFileList = @(
-    "templates/knowledge-base/craft/dialogue.md"
-    "templates/knowledge-base/craft/scene-structure.md"
-    "templates/knowledge-base/craft/character-arc.md"
-    "templates/knowledge-base/craft/pacing.md"
-    "templates/knowledge-base/craft/show-not-tell.md"
+    "resources/craft/dialogue.md"
+    "resources/craft/scene-structure.md"
+    "resources/craft/character-arc.md"
+    "resources/craft/pacing.md"
+    "resources/craft/show-not-tell.md"
     "templates/skills/writing-techniques/dialogue-techniques/SKILL.md"
     "templates/skills/writing-techniques/scene-structure/SKILL.md"
     "templates/skills/writing-techniques/character-arc/SKILL.md"
     "templates/skills/writing-techniques/pacing-control/SKILL.md"
     "templates/skills/quality-assurance/consistency-checker/SKILL.md"
-    "templates/config/keyword-mappings.json"  # 替代 specification.md（测试文件）
+    "resources/config/keyword-mappings.json"  # 替代 specification.md（测试文件）
 )
 
 # 无缓存版本

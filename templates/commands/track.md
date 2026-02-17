@@ -3,10 +3,10 @@ name: track
 description: 综合追踪小说创作进度和内容
 argument-hint: [--brief | --plot | --stats | --check [--volume vol-XX] | --fix | --sync [--incremental] | --migrate [--auto | --volumes "1-100,101-200"] | --log]
 recommended-model: claude-haiku-4-5-20251001 # --sync 数据更新速度优先；--check 深度检查可用 sonnet
-allowed-tools: Read(//spec/tracking/**), Read(//spec/tracking/**), Read(//stories/**), Read(//stories/**), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
+allowed-tools: Read(//tracking/**), Read(//tracking/**), Read(//stories/**), Read(//stories/**), Bash(find:*), Bash(wc:*), Bash(grep:*), Bash(*)
 scripts:
-  sh: .specify/scripts/bash/track-progress.sh
-  ps: .specify/scripts/powershell/track-progress.ps1
+  sh: resources/scripts/bash/track-progress.sh
+  ps: resources/scripts/powershell/track-progress.ps1
 ---
 
 # 综合进度追踪
@@ -53,12 +53,12 @@ resource-loading:
 
 整合多个追踪文件的信息：
 - `progress.json` - 写作进度
-- `spec/tracking/plot-tracker.json` - 情节追踪
-- `spec/tracking/timeline.json` - 时间线
-- `spec/tracking/relationships.json` - 关系网络
-- `spec/tracking/character-state.json` - 角色状态
-- `spec/tracking/narrative-threads.json` - **[新增]** 多线叙事追踪（POV调度、信息差、线程交汇）
-- `spec/tracking/validation-rules.json` - **[新增]** 验证规则（用于--check和--fix）
+- `tracking/plot-tracker.json` - 情节追踪
+- `tracking/timeline.json` - 时间线
+- `tracking/relationships.json` - 关系网络
+- `tracking/character-state.json` - 角色状态
+- `tracking/narrative-threads.json` - **[新增]** 多线叙事追踪（POV调度、信息差、线程交汇）
+- `tracking/validation-rules.json` - **[新增]** 验证规则（用于--check和--fix）
 
 ---
 
@@ -196,7 +196,7 @@ resource-loading:
 
 ### 实现逻辑
 
-1. 读取 `spec/tracking/tracking-log.md`，解析日志格式
+1. 读取 `tracking/tracking-log.md`，解析日志格式
 2. 根据过滤条件筛选，按时间倒序排列
 3. 默认仅加载摘要（轻量级），选择"查看详情"时加载完整 diff
 4. 大型日志（>1000 条）分页显示
@@ -209,7 +209,7 @@ resource-loading:
 
 ```
 ℹ️ 提示：tracking-log.md 不存在
-- 位置：spec/tracking/tracking-log.md
+- 位置：tracking/tracking-log.md
 - 原因：尚未执行过任何 tracking 更新命令
 - 建议：执行 /write 或 /plan 命令后会自动创建
 ```
@@ -335,7 +335,7 @@ resource-loading:
 **数据收集**：
 - 读取所有章节文件（`content/*.md`）
 - 读取 `tasks.md`、`creative-plan.md`
-- 读取 `spec/tracking/character-state.json`、`spec/tracking/plot-tracker.json`
+- 读取 `tracking/character-state.json`、`tracking/plot-tracker.json`
 
 #### 总览面板
 
@@ -515,7 +515,7 @@ Phase 3: 生成综合报告
 
 只处理上次同步后的新章节：
 
-1. 读取 `spec/tracking/tracking-log.md` 最后一条记录，获取 last_sync_chapter
+1. 读取 `tracking/tracking-log.md` 最后一条记录，获取 last_sync_chapter
 2. 扫描 `stories/[current]/content/` 中编号 > last_sync_chapter 的章节
 3. 只对这些新章节执行 tracking 更新
 4. 更新 tracking-log.md 记录本次同步
@@ -591,17 +591,17 @@ Phase 3: 生成综合报告
 
 读取 tracking 数据时按以下优先级：
 1. **MCP 查询（优先）**：调用对应 MCP 工具获取精确数据
-2. **分片 JSON（次优）**：读取 `spec/tracking/volumes/[currentVolume]/` 下的分片文件
-3. **单文件 JSON（兜底）**：读取 `spec/tracking/` 下的单文件
+2. **分片 JSON（次优）**：读取 `tracking/volumes/[currentVolume]/` 下的分片文件
+3. **单文件 JSON（兜底）**：读取 `tracking/` 下的单文件
 
 **分片模式写入：**
 1. 确定当前章节属于哪个卷（从 volume-summaries.json 的 chapters 范围判断）
-2. 更新该卷的分片文件（如 `spec/tracking/volumes/vol-03/character-state.json`）
+2. 更新该卷的分片文件（如 `tracking/volumes/vol-03/character-state.json`）
 3. 同步更新全局摘要文件（如 characters-summary.json 的 activeCount）
 4. 如果 MCP 可用，调用 `sync_from_json` 同步到 SQLite
 
 **单文件模式写入：**
-- 直接更新 `spec/tracking/` 下的文件（现有逻辑）
+- 直接更新 `tracking/` 下的文件（现有逻辑）
 
 ---
 
@@ -646,7 +646,7 @@ powershell -File {SCRIPT_DIR}/migrate-tracking.ps1 -Mode auto -Json
 
 按卷边界拆分 character-state / timeline / relationships / plot-tracker 四个文件：
 - 拆分原则：按 chapter 分配数据到对应卷，跨卷数据保留引用
-- 写入 `spec/tracking/volumes/vol-XX/`
+- 写入 `tracking/volumes/vol-XX/`
 
 拆分规则概要：
 | 文件 | 拆分方式 |
@@ -657,7 +657,7 @@ powershell -File {SCRIPT_DIR}/migrate-tracking.ps1 -Mode auto -Json
 | plot-tracker.json | foreshadowing 按 planted.chapter 分配（跨卷未解决伏笔保留引用）；plotlines 每卷记录进展；checkpoints 按卷分配 |
 
 **阶段 4：生成全局摘要**
-- 生成 4 个摘要文件到 `spec/tracking/summary/`：
+- 生成 4 个摘要文件到 `tracking/summary/`：
   - characters-summary.json — 活跃/归档角色统计
   - plot-summary.json — 未解决伏笔汇总、回收统计
   - timeline-summary.json — 每卷关键里程碑、故事时间范围
@@ -678,15 +678,15 @@ powershell -File {SCRIPT_DIR}/migrate-tracking.ps1 -Mode auto -Json
 ━━━━━━━━━━━━━━━━━━━
 迁移前：单文件模式，总大小 XXX KB
 迁移后：N 卷分片，每卷平均 XX KB
-备份位置：spec/tracking/backup/YYYYMMDD-HHMMSS/
+备份位置：tracking/backup/YYYYMMDD-HHMMSS/
 ```
 
 ### 错误处理
 
 任何步骤失败时，提示用户从备份恢复：
 ```
-迁移失败。备份文件在 spec/tracking/backup/YYYYMMDD-HHMMSS/
-可以手动将备份文件复制回 spec/tracking/ 恢复原状。
+迁移失败。备份文件在 tracking/backup/YYYYMMDD-HHMMSS/
+可以手动将备份文件复制回 tracking/ 恢复原状。
 ```
 不自动删除备份，由用户手动清理。
 
