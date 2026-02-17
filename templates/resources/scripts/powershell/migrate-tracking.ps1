@@ -7,7 +7,7 @@ param(
     [switch]$Json
 )
 
-$trackingDir = Join-Path (Join-Path $PWD 'spec') 'tracking'
+$trackingDir = Join-Path $PWD 'tracking'
 $backupDir = Join-Path $trackingDir 'backup'
 $summaryDir = Join-Path $trackingDir 'summary'
 $volumesDir = Join-Path $trackingDir 'volumes'

@@ -28,7 +28,7 @@ describe('Phase 5: Light Commands Adaptation', () => {
       const content = fs.readFileSync(planPath, 'utf-8');
       expect(content).toContain('数据写入协议');
       expect(content).toContain('分片模式');
-      expect(content).toContain('spec/tracking/volumes/');
+      expect(content).toContain('tracking/volumes/');
     });
   });
 
@@ -363,11 +363,11 @@ describe('Phase 5: Light Commands Adaptation', () => {
       });
     });
 
-    it('all commands should reference spec/tracking/volumes/ for sharded mode', () => {
+    it('all commands should reference tracking/volumes/ for sharded mode', () => {
       commandFiles.forEach((file) => {
         const filePath = path.join(__dirname, '../../templates/commands', file);
         const content = fs.readFileSync(filePath, 'utf-8');
-        expect(content).toMatch(/spec\/tracking\/volumes\/|分片模式|sharded/);
+        expect(content).toMatch(/tracking\/volumes\/|分片模式|sharded/);
       });
     });
   });

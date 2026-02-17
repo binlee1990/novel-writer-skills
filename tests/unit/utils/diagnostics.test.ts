@@ -22,15 +22,16 @@ describe('utils/diagnostics.ts', () => {
 
   /** 创建最小项目结构 */
   async function createMinimalProject() {
-    await fs.ensureDir(path.join(tmpDir, '.specify'));
-    await fs.writeJson(path.join(tmpDir, '.specify', 'config.json'), { name: 'test', version: '1.0.0' });
+    await fs.ensureDir(path.join(tmpDir, 'resources'));
+    await fs.ensureDir(path.join(tmpDir, 'resources', 'config'));
+    await fs.writeJson(path.join(tmpDir, 'resources', 'config', 'config.json'), { name: 'test', version: '1.0.0' });
     await fs.ensureDir(path.join(tmpDir, '.claude', 'commands'));
     await fs.ensureDir(path.join(tmpDir, 'stories'));
   }
 
   /** 创建 tracking 文件 */
   async function createTrackingFiles(valid = true) {
-    const trackingDir = path.join(tmpDir, 'spec', 'tracking');
+    const trackingDir = path.join(tmpDir, 'tracking');
     await fs.ensureDir(trackingDir);
     const files = ['character-state.json', 'plot-tracker.json', 'timeline.json', 'relationships.json'];
     for (const file of files) {
@@ -53,7 +54,7 @@ describe('utils/diagnostics.ts', () => {
     it('should fail when directories are missing', async () => {
       const result = await diagnostics.checkProjectStructure(tmpDir);
       expect(result.passed).toBe(false);
-      expect(result.message).toContain('.specify');
+      expect(result.message).toContain('resources');
       expect(result.fix).toBe('novelws init');
     });
   });
@@ -72,7 +73,7 @@ describe('utils/diagnostics.ts', () => {
     });
 
     it('should report missing tracking files', async () => {
-      const trackingDir = path.join(tmpDir, 'spec', 'tracking');
+      const trackingDir = path.join(tmpDir, 'tracking');
       await fs.ensureDir(trackingDir);
       await fs.writeJson(path.join(trackingDir, 'character-state.json'), {});
       const result = await diagnostics.checkTrackingFiles(tmpDir);
@@ -83,14 +84,14 @@ describe('utils/diagnostics.ts', () => {
 
   describe('checkProjectMode', () => {
     it('should detect single-file mode', async () => {
-      await fs.ensureDir(path.join(tmpDir, 'spec', 'tracking'));
+      await fs.ensureDir(path.join(tmpDir, 'tracking'));
       const result = await diagnostics.checkProjectMode(tmpDir);
       expect(result.passed).toBe(true);
       expect(result.message).toContain('single-file');
     });
 
     it('should detect sharded mode', async () => {
-      const volDir = path.join(tmpDir, 'spec', 'tracking', 'volumes', 'vol-01');
+      const volDir = path.join(tmpDir, 'tracking', 'volumes', 'vol-01');
       await fs.ensureDir(volDir);
       await fs.writeJson(path.join(volDir, 'character-state.json'), {});
       const result = await diagnostics.checkProjectMode(tmpDir);
@@ -99,7 +100,8 @@ describe('utils/diagnostics.ts', () => {
     });
 
     it('should detect mcp mode', async () => {
-      await fs.writeFile(path.join(tmpDir, 'novel-tracking.db'), '', 'utf-8');
+      await fs.ensureDir(path.join(tmpDir, 'tracking'));
+      await fs.writeFile(path.join(tmpDir, 'tracking', 'novel-tracking.db'), '', 'utf-8');
       const result = await diagnostics.checkProjectMode(tmpDir);
       expect(result.passed).toBe(true);
       expect(result.message).toContain('mcp');
@@ -121,7 +123,7 @@ describe('utils/diagnostics.ts', () => {
 
     it('should fail when MCP configured but db missing', async () => {
       await fs.ensureDir(path.join(tmpDir, '.claude'));
-      await fs.writeJson(path.join(tmpDir, '.claude', 'mcp.json'), {});
+      await fs.writeJson(path.join(tmpDir, '.claude', 'mcp-servers.json'), {});
       const result = await diagnostics.checkMCPStatus(tmpDir);
       expect(result.passed).toBe(false);
       expect(result.message).toContain('数据库不存在');
@@ -130,8 +132,9 @@ describe('utils/diagnostics.ts', () => {
 
     it('should pass when MCP configured and db exists', async () => {
       await fs.ensureDir(path.join(tmpDir, '.claude'));
-      await fs.writeJson(path.join(tmpDir, '.claude', 'mcp.json'), {});
-      await fs.writeFile(path.join(tmpDir, 'novel-tracking.db'), '', 'utf-8');
+      await fs.writeJson(path.join(tmpDir, '.claude', 'mcp-servers.json'), {});
+      await fs.ensureDir(path.join(tmpDir, 'tracking'));
+      await fs.writeFile(path.join(tmpDir, 'tracking', 'novel-tracking.db'), '', 'utf-8');
       const result = await diagnostics.checkMCPStatus(tmpDir);
       expect(result.passed).toBe(true);
       expect(result.message).toContain('MCP 服务正常');
@@ -229,8 +232,9 @@ describe('utils/diagnostics.ts', () => {
     });
 
     it('should prioritize mcp over sharded', async () => {
-      await fs.writeFile(path.join(tmpDir, 'novel-tracking.db'), '', 'utf-8');
-      const volDir = path.join(tmpDir, 'spec', 'tracking', 'volumes', 'vol-01');
+      await fs.ensureDir(path.join(tmpDir, 'tracking'));
+      await fs.writeFile(path.join(tmpDir, 'tracking', 'novel-tracking.db'), '', 'utf-8');
+      const volDir = path.join(tmpDir, 'tracking', 'volumes', 'vol-01');
       await fs.ensureDir(volDir);
       await fs.writeJson(path.join(volDir, 'data.json'), {});
       const mode = await diagnostics.detectProjectMode(tmpDir);

@@ -29,7 +29,7 @@ describe('novelws upgrade', () => {
 
   it('should detect large tracking files and output migration hint', () => {
     // 创建一个超过 50KB 的 character-state.json
-    const trackingPath = path.join(projectPath, 'spec', 'tracking', 'character-state.json');
+    const trackingPath = path.join(projectPath, 'tracking', 'character-state.json');
     const largeData = { characters: 'x'.repeat(60 * 1024) };
     fs.writeJsonSync(trackingPath, largeData);
 

@@ -6,8 +6,8 @@ import os from 'os';
 // 根据平台选择脚本路径和执行命令
 const isWindows = process.platform === 'win32';
 const scriptPath = isWindows
-  ? path.resolve(__dirname, '../../../templates/scripts/powershell/migrate-tracking.ps1')
-  : path.resolve(__dirname, '../../../templates/scripts/bash/migrate-tracking.sh');
+  ? path.resolve(__dirname, '../../../templates/resources/scripts/powershell/migrate-tracking.ps1')
+  : path.resolve(__dirname, '../../../templates/resources/scripts/bash/migrate-tracking.sh');
 
 // 构建执行命令的辅助函数
 function buildCommand(mode: string, json = true): string {
@@ -24,7 +24,7 @@ describe('migrate-tracking script', () => {
 
   beforeEach(() => {
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nws-migrate-'));
-    trackingDir = path.join(tempDir, 'spec', 'tracking');
+    trackingDir = path.join(tempDir, 'tracking');
     fs.ensureDirSync(trackingDir);
   });
 
