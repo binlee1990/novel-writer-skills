@@ -12,7 +12,10 @@
 
 - **18 个 Slash Commands** - 七步方法论 + 角色管理 + 智能引导 + 命令发现 + 追踪验证
 - **39 个 Agent Skills** - AI 自动激活的知识库、写作技巧、质量检查和专项分析
-- **AI 去味智能化（NEW v3.1）** - 从"禁止列表"转向"智能平衡"
+- **目录结构重组（NEW v4.0）** - 从 6+ 层嵌套扁平化为 3 目录布局，资源加载速度大幅提升
+- **增量缓存加载（NEW v4.0）** - L0/L1/L2 三层资源分层，`/write` 命令 token 消耗再降 50%+
+- **MCP 配置修复（NEW v4.0）** - `--with-mcp` 正确生成配置，MCP 模式开箱即用
+- **AI 去味智能化（v3.1）** - 从"禁止列表"转向"智能平衡"
   - **writing-balance Skill**：6 维度评分系统（句长分布、词汇丰富度、描写层次、成语使用、句式变化、自然度）
   - **writing-techniques Skill**：8 模块写作技巧教学
   - **anti-ai-v5-balanced**：平衡版去 AI 规则，替代旧版禁止列表
@@ -272,7 +275,7 @@ resource-loading:
   keyword-triggers:
     enabled: true
     custom-mappings:
-      "情感节奏": "knowledge-base/craft/pacing.md"
+      "情感节奏": "resources/craft/pacing.md"
 ```
 
 ### 关键词触发示例
@@ -283,8 +286,8 @@ resource-loading:
 你: /write chapter-3 --focus 对话和情感节奏
 
 AI: 🔍 检测到关键词触发：
-    - "对话" → templates/knowledge-base/craft/dialogue.md
-    - "节奏" → templates/knowledge-base/craft/pacing.md
+    - "对话" → resources/craft/dialogue.md
+    - "节奏" → resources/craft/pacing.md
 
     是否加载这些资源？
     [Y] 全部加载  [N] 跳过  [S] 选择性加载
@@ -400,30 +403,34 @@ my-novel/
 ├── .claude/
 │   ├── CLAUDE.md          # 共享核心规范（自动缓存）
 │   ├── commands/          # Slash Commands (18 个)
-│   └── skills/            # Agent Skills (39 个)
+│   ├── skills/            # Agent Skills (39 个)
+│   └── .cache/            # 增量缓存
+│       ├── resource-digest.json   # 资源文件摘要
+│       └── write-context.json     # 写作上下文缓存
 │
-├── .specify/              # Spec Kit 配置
+├── resources/             # 所有资源文件（v4 扁平化）
 │   ├── memory/
 │   │   └── constitution.md
-│   ├── scripts/           # 命令行脚本工具
-│   │   ├── bash/
-│   │   └── powershell/
-│   └── templates/
-│       ├── commands/
-│       ├── knowledge-base/
-│       │   ├── craft/          # 写作工艺 (hook-design, power-system, story-structures...)
-│       │   ├── genres/         # 类型知识 (xuanhuan, urban, game-lit, rebirth...)
-│       │   ├── requirements/   # 写作规范 (anti-ai-v4, concretization...)
-│       │   └── styles/         # 写作风格
-│       ├── skills/
-│       │   ├── analysis/             # 10 种专项分析 Skills
-│       │   ├── auto-tracking/        # 自动 Tracking 更新
-│       │   ├── planning/             # 规划 Skills (volume-detail)
-│       │   ├── writing-techniques/   # 写作技巧 Skills
-│       │   ├── quality-assurance/    # 质量检查 Skills
-│       │   └── genre-knowledge/      # 类型知识 Skills
-│       └── config/
-│           └── keyword-mappings.json  # 关键词触发映射表
+│   ├── craft/             # 写作工艺 (hook-design, power-system, story-structures...)
+│   ├── genres/            # 类型知识 (xuanhuan, urban, game-lit, rebirth...)
+│   ├── styles/            # 写作风格
+│   ├── requirements/      # 写作规范 (anti-ai-v5, concretization...)
+│   ├── emotional-beats/   # 情感节拍
+│   ├── character-archetypes/  # 角色原型
+│   ├── references/        # 参考资料
+│   ├── config/
+│   │   └── keyword-mappings.json  # 关键词触发映射表
+│   └── scripts/           # 命令行脚本工具
+│       ├── bash/
+│       └── powershell/
+│
+├── tracking/              # 追踪数据（v4 提升至顶级）
+│   ├── plot-tracker.json
+│   ├── timeline.json
+│   ├── character-state.json
+│   ├── relationships.json
+│   ├── write-checkpoint.json    # 断点续写
+│   └── tracking-log.md          # 更新日志
 │
 ├── stories/
 │   └── 001-my-story/
@@ -434,19 +441,10 @@ my-novel/
 │           ├── chapter-01.md
 │           └── ...
 │
-├── spec/
-│   ├── tracking/       # 追踪数据
-│   │   ├── plot-tracker.json
-│   │   ├── timeline.json
-│   │   ├── character-state.json
-│   │   ├── relationships.json
-│   │   ├── write-checkpoint.json    # 断点续写
-│   │   └── tracking-log.md          # 更新日志
-│   │
-│   └── knowledge/      # 知识库
-│       ├── characters/
-│       ├── worldbuilding/
-│       └── references/
+├── knowledge/             # 知识库
+│   ├── characters/
+│   ├── worldbuilding/
+│   └── references/
 │
 └── README.md
 ```
@@ -510,10 +508,10 @@ novelws plugin:remove <plugin-name>
 
 ### 脚本位置
 
-初始化项目后，脚本位于：`.specify/scripts/`
+初始化项目后，脚本位于：`resources/scripts/`
 
 ```text
-.specify/scripts/
+resources/scripts/
 ├── bash/          # macOS/Linux 脚本
 └── powershell/    # Windows 脚本
 ```
@@ -531,26 +529,26 @@ novelws plugin:remove <plugin-name>
 
 ```bash
 # 创建宪法
-bash .specify/scripts/bash/constitution.sh
+bash resources/scripts/bash/constitution.sh
 
 # 定义规格
-bash .specify/scripts/bash/specify-story.sh
+bash resources/scripts/bash/specify-story.sh
 
 # 追踪进度
-bash .specify/scripts/bash/track-progress.sh
+bash resources/scripts/bash/track-progress.sh
 ```
 
 **Windows:**
 
 ```powershell
 # 创建宪法
-.\.specify\scripts\powershell\constitution.ps1
+.\resources\scripts\powershell\constitution.ps1
 
 # 定义规格
-.\.specify\scripts\powershell\specify-story.ps1
+.\resources\scripts\powershell\specify-story.ps1
 
 # 追踪进度
-.\.specify\scripts\powershell\track-progress.ps1
+.\resources\scripts\powershell\track-progress.ps1
 ```
 
 ### 何时使用脚本 vs Slash Commands
@@ -562,7 +560,7 @@ bash .specify/scripts/bash/track-progress.sh
 | CI/CD 集成 | 命令行脚本 |
 | 快速检查验证 | 命令行脚本 |
 
-[脚本详细文档](templates/scripts/README.md)
+[脚本详细文档](templates/resources/scripts/README.md)
 
 ## 超长篇小说支持（NEW in v3.0）
 
@@ -612,7 +610,7 @@ novelws init my-novel --with-mcp
 #### 1. 分片 JSON 系统
 
 ```
-spec/tracking/
+tracking/
 ├── summary/          # 全局摘要（跨卷查询入口）
 │   ├── characters-summary.json
 │   ├── plot-summary.json
@@ -671,7 +669,7 @@ spec/tracking/
 - [命令详解](docs/guides/commands.md) - 所有命令的完整说明
 - [Skills 指南](docs/guides/skills-guide.md) - Agent Skills 工作原理
 - [资源加载指南](docs/guides/resource-loading-guide.md) - 三层资源加载配置
-- [脚本工具集](templates/scripts/README.md) - 命令行脚本使用指南
+- [脚本工具集](templates/resources/scripts/README.md) - 命令行脚本使用指南
 - [插件开发](docs/plugin-development.md) - 如何开发自己的插件
 
 ## 贡献

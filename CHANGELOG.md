@@ -5,6 +5,80 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2026-02-17
+
+### Breaking Changes
+
+- **目录结构全面重组** — 从 6+ 层嵌套扁平化为 2-3 层顶级目录
+  - `.specify/` → `resources/`（资源文件）
+  - `spec/tracking/` → `tracking/`（追踪数据，提升至顶级）
+  - `.specify/templates/knowledge-base/` → `resources/` 下对应子目录
+  - `.specify/scripts/` → `resources/scripts/`
+  - `.specify/templates/config/` → `resources/config/`
+  - 旧项目需执行 `novelws upgrade` 迁移
+
+### Added
+
+#### 目录结构重组（9 阶段实施）
+
+- **扁平化项目结构** — 生成项目从 4-5 层嵌套简化为清晰的 3 目录布局
+  ```
+  my-novel/
+  ├── .claude/          # Claude Code 配置
+  │   ├── CLAUDE.md
+  │   ├── commands/
+  │   ├── skills/
+  │   └── .cache/       # 增量缓存（NEW）
+  ├── resources/        # 所有资源文件（NEW，替代 .specify/）
+  │   ├── memory/
+  │   ├── craft/
+  │   ├── genres/
+  │   ├── styles/
+  │   ├── requirements/
+  │   ├── emotional-beats/
+  │   ├── character-archetypes/
+  │   ├── references/
+  │   ├── config/
+  │   └── scripts/
+  ├── tracking/         # 追踪数据（NEW，提升至顶级）
+  ├── stories/
+  └── knowledge/
+  ```
+
+- **增量缓存加载机制** — `/write` 命令新增 L0/L1/L2 资源分层加载
+  - L0（必读）：constitution、specification、前文内容
+  - L1（摘要缓存）：craft 知识库、genre 知识库，首次读取后缓存摘要
+  - L2（按需）：references、emotional-beats 等，仅关键词触发时加载
+  - 缓存文件：`.claude/.cache/resource-digest.json`、`.claude/.cache/write-context.json`
+  - 通过文件摘要检测变更，未变更资源直接使用缓存，大幅减少 token 消耗
+
+- **MCP 配置修复** — `novelws init --with-mcp` 现在正确生成 `.claude/mcp-servers.json`
+  - 修复此前缺失 MCP 配置文件导致 MCP 模式无法启用的问题
+  - 诊断系统正确检测 `tracking/novel-tracking.db` 判断 MCP 模式
+
+- **v3→v4 自动迁移** — `novelws upgrade` 自动检测旧 `.specify/` 结构并迁移
+  - 13 项文件/目录迁移映射
+  - 迁移 config.json 到新路径
+  - 清理旧目录结构
+  - 清除缓存确保一致性
+
+### Changed
+
+- **config.ts** — 新增 `RESOURCES`、`CACHE` 目录常量，新增 `MCP_SERVERS`、`RESOURCE_DIGEST`、`WRITE_CONTEXT` 文件常量
+- **init.ts** — 重写初始化逻辑，创建 `resources/`、`tracking/`、`.claude/` 扁平结构
+- **diagnostics.ts** — 更新项目结构检测、MCP 状态检测、项目模式检测为 v4 路径
+- **upgrade.ts** — 新增 v3→v4 迁移逻辑（检测旧结构、执行迁移、清理）
+- **54 个模板文件路径更新** — 21 个命令模板 + 27 个脚本文件 + keyword-mappings + CLAUDE.md + MCP 路径全部迁移至 v4 路径
+- **templates/ 源目录重组** — 168 个文件从旧嵌套结构移至 `templates/resources/` 扁平结构
+
+### Technical
+
+- **测试** — 21 suites，314 个测试全部通过，9 个测试套件更新路径断言
+- **构建** — 编译通过，零错误
+- **兼容性** — 破坏性升级（v4.0.0），通过 `novelws upgrade` 提供迁移路径
+
+---
+
 ## [3.1.0] - 2026-02-15
 
 ### Added
