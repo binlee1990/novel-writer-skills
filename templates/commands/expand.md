@@ -74,6 +74,8 @@ allowed-tools: Read(//stories/**), Write(//stories/**/content/**), Read(//tracki
 基于概要，扩写为 3000-5000 字正文。遵循以下原则：
 
 - **忠实于概要**：核心事件、出场角色、情感走向必须与概要一致
+- **全局一致性**：正文必须与 specification.md 的类型定位和 creative-plan.md 的卷级设计保持一致
+- **角色关系驱动**：对话和互动必须体现 relationships.json 中的关系动态
 - **文学表达**：专注于场景描写、对话、心理活动、动作细节
 - **风格一致**：遵循 style-reference.md 的风格设定
 - **反AI规范**：遵循 anti-ai.md 的写作规范
@@ -91,6 +93,8 @@ allowed-tools: Read(//stories/**), Write(//stories/**/content/**), Read(//tracki
 ### 5. 批量模式
 
 如果指定了 `--batch N`，重复步骤 2-4 共 N 次。每章完成后输出进度和字数。
+
+**批量模式资源隔离**：每章都必须重新从文件系统加载所有资源（前一章扩写可能更新了 tracking）。批量模式中每章视为独立的扩写任务，不复用前一章扩写过程中的中间状态。
 
 ### 6. 后续建议
 
