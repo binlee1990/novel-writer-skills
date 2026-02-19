@@ -2,7 +2,7 @@
 description: 将章节概要扩写为 3000-5000 字正文
 argument-hint: [章节号] [--batch N]
 recommended-model: claude-opus-4-6
-allowed-tools: Read(//stories/**), Write(//stories/**/content/**), Read(//tracking/**), Write(//tracking/**), Read(//resources/style-reference.md), Read(//resources/anti-ai.md), Bash(ls:*)
+allowed-tools: Read(//stories/**), Write(//stories/**/content/**), Read(//tracking/**), Write(//tracking/**), Read(//resources/style-reference.md), Read(//resources/anti-ai.md), Read(//resources/constitution.md), Bash(ls:*)
 ---
 
 用户输入：$ARGUMENTS
