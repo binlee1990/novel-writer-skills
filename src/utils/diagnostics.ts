@@ -2,7 +2,7 @@
  * 项目诊断系统
  *
  * 命令失败时自动诊断并给出修复步骤。
- * 5 项检查：项目结构、JSON 格式、项目模式、依赖状态、修复建议。
+ * 3 项检查：项目结构、tracking 文件、JSON 完整性。
  */
 
 import fs from 'fs-extra';
@@ -32,9 +32,6 @@ export interface CommandContext {
   args?: string[];
 }
 
-/** 项目模式 */
-export type ProjectMode = 'single-file' | 'sharded' | 'mcp' | 'unknown';
-
 export class ProjectDiagnostics {
   /**
    * 对错误进行诊断，返回诊断报告
@@ -43,8 +40,6 @@ export class ProjectDiagnostics {
     const checks = await Promise.all([
       this.checkProjectStructure(context.projectRoot),
       this.checkTrackingFiles(context.projectRoot),
-      this.checkProjectMode(context.projectRoot),
-      this.checkMCPStatus(context.projectRoot),
       this.checkFileIntegrity(context.projectRoot),
     ]);
 
@@ -101,7 +96,7 @@ export class ProjectDiagnostics {
         name: 'Tracking 文件',
         passed: false,
         message: 'tracking 目录不存在',
-        fix: '/track --sync',
+        fix: 'novelws init',
       };
     }
 
@@ -127,65 +122,12 @@ export class ProjectDiagnostics {
       name: 'Tracking 文件',
       passed: false,
       message: `缺少 tracking 文件: ${missing.join(', ')}`,
-      fix: '/track --sync',
+      fix: 'novelws init',
     };
   }
 
   /**
-   * 检查 3: 项目模式是否匹配
-   */
-  async checkProjectMode(projectRoot: string): Promise<CheckResult> {
-    const mode = await this.detectProjectMode(projectRoot);
-
-    if (mode === 'unknown') {
-      return {
-        name: '项目模式',
-        passed: false,
-        message: '无法检测项目模式',
-        fix: '/track --sync',
-      };
-    }
-
-    return {
-      name: '项目模式',
-      passed: true,
-      message: `当前模式: ${mode}`,
-    };
-  }
-
-  /**
-   * 检查 4: MCP 服务器状态
-   */
-  async checkMCPStatus(projectRoot: string): Promise<CheckResult> {
-    const paths = getProjectPaths(projectRoot);
-    const dbPath = paths.trackingDb;
-    const mcpConfigPath = paths.mcpServers;
-
-    const hasDb = await fs.pathExists(dbPath);
-    const hasMcpConfig = await fs.pathExists(mcpConfigPath);
-
-    if (!hasMcpConfig) {
-      return {
-        name: 'MCP 状态',
-        passed: true,
-        message: '未配置 MCP（使用 JSON 模式）',
-      };
-    }
-
-    if (hasMcpConfig && !hasDb) {
-      return {
-        name: 'MCP 状态',
-        passed: false,
-        message: 'MCP 已配置但数据库不存在',
-        fix: '/track --migrate --target mcp',
-      };
-    }
-
-    return { name: 'MCP 状态', passed: true, message: 'MCP 服务正常' };
-  }
-
-  /**
-   * 检查 5: JSON 文件完整性
+   * 检查 3: JSON 文件完整性
    */
   async checkFileIntegrity(projectRoot: string): Promise<CheckResult> {
     const trackingDir = getProjectPaths(projectRoot).tracking;
@@ -222,33 +164,8 @@ export class ProjectDiagnostics {
       name: '文件完整性',
       passed: false,
       message: `JSON 格式损坏: ${corrupted.join(', ')}`,
-      fix: '/track --fix',
+      fix: '手动修复损坏的 JSON 文件',
     };
-  }
-
-  /**
-   * 检测项目模式
-   */
-  async detectProjectMode(projectRoot: string): Promise<ProjectMode> {
-    const paths = getProjectPaths(projectRoot);
-    const dbPath = paths.trackingDb;
-
-    if (await fs.pathExists(dbPath)) {
-      return 'mcp';
-    }
-
-    if (await fs.pathExists(paths.trackingVolumes)) {
-      const entries = await fs.readdir(paths.trackingVolumes).catch(() => []);
-      if (entries.length > 0) {
-        return 'sharded';
-      }
-    }
-
-    if (await fs.pathExists(paths.tracking)) {
-      return 'single-file';
-    }
-
-    return 'unknown';
   }
 
   /**

@@ -5,6 +5,65 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.0] - 2026-02-20
+
+### Breaking Changes
+
+- **架构全面重设计** — 从七步方法论（21 命令、55+ Skills、100+ 资源文件）重构为五命令流水线
+- **概要先行架构** — 新增 `/write`（概要生成）+ `/expand`（正文扩写）两阶段写作流程
+- **零 Skills 架构** — 移除全部 Agent Skills，所有逻辑内嵌于 5 个命令模板
+- **移除插件系统** — 删除 `plugins/`、`packages/novelws-mcp/`、插件命令及相关源码
+- **移除脚本系统** — 删除 `scripts/` 目录及所有 bash/powershell 脚本
+- **资源文件精简** — 从 100+ 文件（craft/genres/styles/requirements/...）精简为 3 个核心文件
+- **Tracking 精简** — 从 6+ 文件精简为 4 个核心 JSON 文件
+- **旧项目不兼容** — v4 项目需重新 `novelws init`，无自动迁移路径
+
+### Added
+
+- **`/expand` 命令** — 将 200-500 字概要扩写为 3000-5000 字正文
+  - 精准最小上下文加载（当前概要 + 前章末尾 + 出场角色 + 活跃伏笔 + 风格 + 反AI）
+  - 总上下文控制在 2000-3000 字
+  - 支持 `--batch N` 批量扩写
+
+### Changed
+
+- **`/specify`** — 重写为交互式故事定义（类型、概要、设定、角色、冲突、规模、风格）
+- **`/plan`** — 重写为卷级大纲生成器（冲突、转折、高潮、钩子、角色变动、伏笔规划）
+- **`/write`** — 重写为概要生成器（200-500 字剧情概要 + tracking 骨架更新）
+  - 极简上下文：specification 摘要 + 当前卷大纲 + 前序标题列表 + 前一章概要
+  - 支持 `--batch N` 批量生成（最大 20 章）
+- **`/analyze`** — 重写为 5 项质量检查（概要符合度、角色一致性、伏笔完整性、连贯性、AI味检测）
+- **CLAUDE.md** — 重写为五命令流水线规范
+- **资源文件** — 精简为 3 个：`constitution.md`（创作宪法）、`style-reference.md`（风格参考）、`anti-ai.md`（反AI规范）
+- **Tracking** — 精简为 4 个：`character-state.json`、`relationships.json`、`plot-tracker.json`、`timeline.json`
+- **`config.ts`** — 移除 SPECIFY/SPEC/KNOWLEDGE_BASE/PLUGINS/MEMORY 等废弃常量
+- **`init.ts`** — 移除 --plugins/--scale/--with-mcp 选项，简化为五命令结构
+- **`upgrade.ts`** — 移除 skills/scripts/legacy 路径处理
+- **`diagnostics.ts`** — 简化为 3 项检查（项目结构、tracking 文件、JSON 完整性）
+- **`errors.ts`** — 移除 PluginNotFoundError 等 4 个插件相关错误类
+- **`package.json`** — 移除 `files` 中的 `plugins` 条目，更新描述
+
+### Removed
+
+- **21 个命令模板** — constitution、clarify、tasks、track-init、track、recap、timeline、relations、revise、checklist、expert、facts、guide、help-me、character、search、volume-summary 等
+- **55+ Agent Skills** — 全部 skills/ 目录（genre knowledge、writing techniques、quality assurance、analysis 等）
+- **插件系统** — `src/plugins/`（manager、identifier、registry、validator、installers）、`src/commands/plugin.ts`、`plugins/` 目录
+- **MCP 包** — `packages/novelws-mcp/` 整个目录
+- **脚本系统** — `scripts/` 目录、`templates/resources/scripts/`
+- **知识库** — `templates/knowledge/`、`templates/resources/craft/`、`genres/`、`styles/`、`requirements/` 等
+- **资源子目录** — memory/、config/、emotional-beats/、character-archetypes/、references/、presets/
+- **Tracking 文件** — story-facts.json、validation-rules.json、tracking-log.md、summary/ 目录
+- **源码** — `src/utils/logger.ts`（未使用）
+- **旧配置** — `.specify/` 目录
+
+### Technical
+
+- **测试** — 8 suites，67 个测试全部通过
+- **构建** — TypeScript 编译零错误
+- **项目结构** — templates/（commands + dot-claude + resources + tracking）、src/（cli + 3 commands + 4 core + 2 utils）
+
+---
+
 ## [4.0.0] - 2026-02-17
 
 ### Breaking Changes
@@ -19,63 +78,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-#### 目录结构重组（9 阶段实施）
-
 - **扁平化项目结构** — 生成项目从 4-5 层嵌套简化为清晰的 3 目录布局
-  ```
-  my-novel/
-  ├── .claude/          # Claude Code 配置
-  │   ├── CLAUDE.md
-  │   ├── commands/
-  │   ├── skills/
-  │   └── .cache/       # 增量缓存（NEW）
-  ├── resources/        # 所有资源文件（NEW，替代 .specify/）
-  │   ├── memory/
-  │   ├── craft/
-  │   ├── genres/
-  │   ├── styles/
-  │   ├── requirements/
-  │   ├── emotional-beats/
-  │   ├── character-archetypes/
-  │   ├── references/
-  │   ├── config/
-  │   └── scripts/
-  ├── tracking/         # 追踪数据（NEW，提升至顶级）
-  ├── stories/
-  └── knowledge/
-  ```
-
 - **增量缓存加载机制** — `/write` 命令新增 L0/L1/L2 资源分层加载
-  - L0（必读）：constitution、specification、前文内容
-  - L1（摘要缓存）：craft 知识库、genre 知识库，首次读取后缓存摘要
-  - L2（按需）：references、emotional-beats 等，仅关键词触发时加载
-  - 缓存文件：`.claude/.cache/resource-digest.json`、`.claude/.cache/write-context.json`
-  - 通过文件摘要检测变更，未变更资源直接使用缓存，大幅减少 token 消耗
-
-- **MCP 配置修复** — `novelws init --with-mcp` 现在正确生成 `.claude/mcp-servers.json`
-  - 修复此前缺失 MCP 配置文件导致 MCP 模式无法启用的问题
-  - 诊断系统正确检测 `tracking/novel-tracking.db` 判断 MCP 模式
-
+- **MCP 配置修复** — `novelws init --with-mcp` 正确生成 `.claude/mcp-servers.json`
 - **v3→v4 自动迁移** — `novelws upgrade` 自动检测旧 `.specify/` 结构并迁移
-  - 13 项文件/目录迁移映射
-  - 迁移 config.json 到新路径
-  - 清理旧目录结构
-  - 清除缓存确保一致性
 
 ### Changed
 
-- **config.ts** — 新增 `RESOURCES`、`CACHE` 目录常量，新增 `MCP_SERVERS`、`RESOURCE_DIGEST`、`WRITE_CONTEXT` 文件常量
-- **init.ts** — 重写初始化逻辑，创建 `resources/`、`tracking/`、`.claude/` 扁平结构
-- **diagnostics.ts** — 更新项目结构检测、MCP 状态检测、项目模式检测为 v4 路径
-- **upgrade.ts** — 新增 v3→v4 迁移逻辑（检测旧结构、执行迁移、清理）
-- **54 个模板文件路径更新** — 21 个命令模板 + 27 个脚本文件 + keyword-mappings + CLAUDE.md + MCP 路径全部迁移至 v4 路径
-- **templates/ 源目录重组** — 168 个文件从旧嵌套结构移至 `templates/resources/` 扁平结构
+- **config.ts** — 新增 `RESOURCES`、`CACHE` 目录常量
+- **init.ts** — 重写初始化逻辑
+- **diagnostics.ts** — 更新项目结构检测为 v4 路径
+- **upgrade.ts** — 新增 v3→v4 迁移逻辑
+- **54 个模板文件路径更新**
 
 ### Technical
 
-- **测试** — 21 suites，314 个测试全部通过，9 个测试套件更新路径断言
-- **构建** — 编译通过，零错误
-- **兼容性** — 破坏性升级（v4.0.0），通过 `novelws upgrade` 提供迁移路径
+- 21 suites，314 个测试全部通过
 
 ---
 
@@ -83,56 +101,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-#### Phase 1: 创作质量核心 - AI 去味智能化
-
-- **writing-balance Skill** - 6 维度写作平衡评分系统
-  - 句长分布、词汇丰富度、描写层次、成语使用、句式变化、自然度
-  - 从"禁止列表"转向"智能平衡"，保留创作自由度
-  - 量化评分 + 改进建议，替代一刀切禁用
-- **writing-techniques Skill** - 8 模块写作技巧教学
-  - 标点艺术、句式变化、描写手法、对话真实化、节奏控制、留白艺术、词汇丰富化、AI 模式规避
-- **anti-ai-v5-balanced 规则** - 平衡版去 AI 规范，替代旧版 anti-ai-v4
-- **`/write` 命令集成** - 写作时自动调用 writing-balance 评分
-
-#### Phase 2: 用户体验提升
-
-- **`/help-me` 命令** - 自然语言命令发现
-  - 50+ 场景映射，用自然语言描述需求即可找到最佳命令
-  - 支持模糊匹配和多关键词组合
-- **`/guide` 命令增强** - 上下文感知推荐引擎
-  - 基于项目当前状态智能推荐，提升推荐精准度
-- **统一错误处理框架** - 4 个新错误类
-  - `CommandNotFoundError`、`InvalidArgumentError`、`ProjectStateError`、`TrackingDataError`
-  - 每个错误附带修复建议和相关命令提示
-- **诊断系统** - `ProjectDiagnostics` 类
-  - 5 项自动检查：项目结构、tracking 文件、项目模式、MCP 状态、文件完整性
-  - 自动生成修复命令建议
-
-#### Phase 3: 功能扩展与优化
-
-- **5 个新 genre 知识库**
-  - `horror.md` - 恐怖（氛围营造、恐惧递进、心理恐怖）
-  - `youth.md` - 青春（校园、成长、青涩情感）
-  - `military.md` - 军事（战争、军旅、战术谋略）
-  - `sports.md` - 竞技（体育、比赛、热血成长）
-  - `workplace.md` - 职场（商战、职场博弈、行业深耕）
-- **AI 模型智能选择** - 8 个命令模板添加 `recommended-model` 字段
-  - opus：深度分析任务（analyze --type=framework、plan、revise）
-  - sonnet：平衡任务（write、track --check、character）
-  - haiku：速度优先（track --sync、search、help-me）
-
-### Changed
-
-- **anti-ai 规则升级** - v4 禁止列表 → v5 智能平衡评分
-- **`/track` 命令 Token 优化** - 1,080 行 → 704 行（精简 35%），保留所有核心功能
+- **writing-balance Skill** — 6 维度写作平衡评分系统
+- **writing-techniques Skill** — 8 模块写作技巧教学
+- **anti-ai-v5-balanced 规则** — 平衡版去 AI 规范
+- **`/help-me` 命令** — 自然语言命令发现（50+ 场景映射）
+- **`/guide` 命令增强** — 上下文感知推荐引擎
+- **统一错误处理框架** — 4 个新错误类 + 诊断系统
+- **5 个新 genre 知识库** — horror、youth、military、sports、workplace
+- **AI 模型智能选择** — 8 个命令模板添加推荐模型字段
 
 ### Technical
 
-- **测试增长** - 275 → 312 个测试（+37 个）
-- **测试结果** - 312 个测试全部通过，21 个 test suites，零回归
-- **新增 Skills** - writing-balance、writing-techniques（共 2 个）
-- **新增命令** - `/help-me`（共 1 个）
-- **新增 genre** - horror、youth、military、sports、workplace（共 5 个）
+- 312 个测试全部通过
 
 ---
 
@@ -140,106 +120,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-#### 超长篇小说支持（Plan B+）— 完整六阶段实现
-
-**v3.0.0 标志着项目对超长篇小说（300+ 章）的全面支持能力**，通过三层数据架构（MCP → 分片 JSON → 单文件）实现 100x-600x 性能提升。
-
-##### Phase 1: MCP 服务器基础设施
-- **novelws-mcp 包** - 独立的 Model Context Protocol 服务器实现
-  - 4 个核心查询工具：query_chapter_entities / query_plot / query_facts / search_content
-  - SQLite 数据库 + FTS5 全文搜索引擎
-  - 查询速度提升 100x+（100 章项目：200ms → 3ms）
-- **安装支持** - `novelws init --with-mcp` 自动配置 MCP 服务器
-- **23 个 MCP 集成测试** - 覆盖查询、搜索、迁移等全场景
-
-##### Phase 2: 核心迁移系统
-- **`/track --migrate` 命令** - 单命令迁移数据到分片模式/MCP
-  - 从单文件 JSON 自动生成分片 JSON + SQLite 数据库
-  - 支持 `--target sharded` / `--target mcp` 指定迁移目标
-  - 内置安全检查（备份验证、数据完整性检查）
-- **migrate-tracking.ps1 脚本** - PowerShell 独立迁移工具
-- **智能迁移决策** - 基于章节数自动推荐迁移策略
-
-##### Phase 3: 分片 JSON 文件系统
-- **分片目录结构** - `spec/tracking/summary/` + `volumes/`
-  - summary/ 全局摘要：characters-summary.json, plot-summary.json, timeline-summary.json, volume-summaries. json
-  - volumes/vol-XX/ 分卷数据：character-state.json, plot-tracker.json, timeline.json, relationships.json
-- **按需加载机制** - 只加载当前卷数据，加载速度提升 40x+
-- **向下兼容** - 小型项目仍使用单文件模式（spec/tracking/*.json）
-- **`--scale large` 标志** - `novelws init --scale large` 启用分片模式
-
-##### Phase 4: 重命令改造（4 个核心命令）
-对大文件读取命令实施三层 Fallback 改造：
-
-- **`/write` 命令** - 写作时加载上下文
-  - Layer 3: MCP 查询（毫秒级，推荐 >300 章）
-  - Layer 2: 分片 JSON（按卷加载，100-300 章）
-  - Layer 1: 单文件 JSON（兜底，<100 章）
-- **`/analyze` 命令** - 分析章节时读取追踪数据
-- **`/character` 命令** - 角色查询、时间线、关系图谱
-- **`/facts` 命令** - 新增命令，世界观知识库查询
-- **33 个集成测试** - 验证三层 Fallback 在所有场景下正常工作
-
-##### Phase 5: 轻命令改造与新命令（8 个命令 + 2 个新命令）
-扩展三层 Fallback 至剩余命令并新增卷级/搜索功能：
-
-- **改造命令** - `/plan`, `/tasks`, `/recap`, `/track`, `/timeline`, `/relations`, `/revise`, `/checklist`
-- **新增 `/volume-summary` 命令** - 卷级摘要生成
-  - 支持 `--volume vol-XX` 指定卷
-  - 生成角色出场统计、情节线进度、伏笔状态、节奏分析
-- **新增 `/search` 命令** - 全文搜索（需 MCP）
-  - FTS5 全文索引，搜索速度提升 500x+（1000 ms → 2 ms）
-  - 支持 `--type chapter|character|plot|fact` 搜索指定类型
-  - 关键词高亮显示
-- **`--volume vol-XX` 参数** - `/track`, `/analyze` 等支持卷级操作
-- **30 个集成测试** - 覆盖所有轻命令和新命令
-
-##### Phase 6: Skill 集成与文档完善
-- **long-series-continuity Skill** (570 行)
-  - 自动激活：章节数 > 100 时自动启用
-  - 四大监控维度：
-    1. 角色出场间隔提醒（50/100 章阈值）
-    2. 伏笔到期提醒（200/500 章阈值）
-    3. 设定一致性检测（跨卷验证）
-    4. 角色称呼一致性监控
-  - 三层 Fallback 数据加载（MCP → 分片 JSON → 单文件 JSON）
-  - 可配置阈值（在 specification.md 中自定义）
-- **CLAUDE.md 模板更新** (+168 行)
-  - 完整分片模式文档（目录结构、三层 Fallback、迁移命令）
-  - 性能对比表（40x-600x 提升数据）
-  - 最佳实践（按项目规模选择模式）
-- **10 个端到端集成测试** - 验证完整工作流
-
-### Changed
-
-- **项目规模分层** - 根据章节数自动选择最佳模式
-  - < 100 章：单文件 JSON（默认）
-  - 100-300 章：分片 JSON（建议）
-  - \> 300 章：MCP + 分片 JSON（推荐）
-- **Command 增强** - 所有 17 个核心命令支持三层 Fallback
-- **Init 流程升级** - `novelws init` 支持 `--scale large` 和 `--with-mcp` 标志
-
-### Performance
-
-| 操作 | 单文件模式 | 分片模式 | MCP 模式 |
-|-----|---------|---------|---------|
-| 加载 character-state | ~800 ms | ~20 ms (**40倍**) | ~3 ms (**266倍**) |
-| 查询单个角色 | ~1000 ms | ~50 ms (**20倍**) | ~2 ms (**500倍**) |
-| 搜索历史内容 | ~1200 ms | ~60 ms (**20倍**) | ~2 ms (**600倍**) |
+- **超长篇小说支持** — 三层数据架构（MCP → 分片 JSON → 单文件），100x-600x 性能提升
+- **novelws-mcp 包** — 独立 MCP 服务器，SQLite + FTS5 全文搜索
+- **`/track --migrate` 命令** — 单命令迁移数据到分片/MCP 模式
+- **分片 JSON 系统** — 按卷分片，按需加载
+- **12 个核心命令三层 Fallback 改造**
+- **`/volume-summary` 命令** — 卷级摘要生成
+- **`/search` 命令** — FTS5 全文搜索
+- **long-series-continuity Skill** — 超长篇连贯性守护
 
 ### Technical
 
-- **新增包** - `packages/novelws-mcp` (MCP 服务器)
-- **测试增长** - 263 → 275 个测试（+12 个）
-- **测试结果** - ✅ 275 个测试全部通过，零回归
-- **提交数** - Phase 1-6 共 20+ 次提交
-- **版本标签** - v3.0.0（从 v3.0.0-beta.1 正式发布）
-
-### Documentation
-
-- **Phase 完成报告** - `docs/plans/completed/V2/phase-X-completion-report.md`（Phase 1-6）
-- **用户文档** - README.md 更新超长篇支持说明
-- **Skill 文档** - long-series-continuity SKILL.md 完整使用指南
+- 275 个测试全部通过
 
 ---
 
@@ -247,120 +139,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **`/guide` 命令完全重写** — 从 8 阶段列举式推荐改为三层优先级智能推荐引擎
-  - 原版本：每个阶段列出 3-4 个操作选项，用户需要自己判断
-  - 新版本：基于项目状态自动计算**唯一最佳下一步** + 最多 2 个备选操作
-  - 文件大小：298 行 → 678 行（+380 行详细逻辑）
+- **`/guide` 命令完全重写** — 三层优先级智能推荐引擎（P0/P1/P2）
 
-### Added
-
-- **三层优先级推荐系统**
-  - **P0（阻塞级）**：写作断点、tracking 严重落后、时间线冲突、伏笔超紧急、facts 冲突 — 自动成为主推荐
-  - **P1（流程级）**：按创作流程推荐（空白项目 → 规格 → 计划 → 任务 → 写作 → 分析 → 完成）
-  - **P2（优化级）**：角色缺席、伏笔中等紧急、tracking 轻微落后、风格偏移、爽点间隔 — 折叠显示为健康提示
-
-- **长篇小说差异化建议**
-  - **长篇（50-300 章）**：tracking 落后 > 3 章触发 P0，每 5 章质量检查，角色缺席 > 5 章警告
-  - **超长篇（> 300 章）**：tracking 落后 > 2 章触发 P0，每 3 章质量检查，角色缺席 > 8 章警告，新卷开始强制 `/recap --full`
-
-- **4 种场景输出模板**
-  - 空白项目：欢迎信息 + 流程指引
-  - 卷末：本卷统计 + 质量分析推荐
-  - 超长篇新卷开始：强制上下文重建
-  - P0 紧急情况：优先处理异常
-
-- **动态备选操作选择**
-  - 离开 > 1 天自动推荐 `/recap --brief`
-  - 检测到 P2 问题时智能添加对应检查命令
-  - 最多 2 个备选，避免选择困难
-
-### Fixed
-
-- **测试更新** — `template-validation.test.ts` 中 guide.md 相关测试更新为验证新的优先级系统，移除旧的反馈处理测试
+---
 
 ## [2.1.1] - 2026-02-12
 
 ### Fixed
 
-- **脚本目录路径修复** — `novelws init` 现在正确将脚本复制到 `.specify/scripts/` 而非 `.specify/templates/scripts/`，同时从整体模板复制中排除 scripts 目录避免重复
-- **PowerShell 脚本错误修复**
-  - `text-audit.ps1`: 修复使用 bash heredoc 语法（`<< PY`）导致 PowerShell 报错，改为 here-string + 管道
-  - `generate-tasks.ps1`: 修复未引入 `common.ps1` 且硬编码相对路径导致的运行失败
-  - `check-writing-state.ps1`: 修复引用 `templates/` 路径应为 `.specify/templates/`
-  - `track-progress.ps1`: 修复硬编码 `stories/current/progress.json` 路径
-  - `specify-story.ps1`、`plan-story.ps1`、`constitution.ps1`、`analyze-story.ps1`: 添加缺失的 `Set-StrictMode` / `$ErrorActionPreference`
-- **Bash 脚本路径修复** — `check-writing-state.sh` 中 knowledge-base 和 skills 路径同步修正为 `.specify/templates/` 前缀
-- **`upgrade` 命令支持脚本更新** — 新增 `--scripts` 选项，升级时可更新 `.specify/scripts/`
-
-### Changed
-
-- **模型配置不再硬编码** — 移除所有 15 个命令模板中的 `model: claude-sonnet-4-5-20250929`，默认不指定模型（使用 Claude Code 默认模型）
-- **新增 `--model` 参数** — `novelws init --model <name>` 和 `novelws upgrade --model <name>` 支持指定命令使用的 AI 模型
+- **脚本目录路径修复**、PowerShell/Bash 脚本错误修复
+- **模型配置不再硬编码**，新增 `--model` 参数
 
 ## [2.1.0] - 2026-02-12
 
 ### Changed
 
-- **Token 优化：三大核心命令精简 76.9%**
-  - `write.md`: 1,617 → 438 行（72.8% 精简）
-  - `analyze.md`: 2,071 → 329 行（84.1% 精简）
-  - `plan.md`: 1,286 → 380 行（70.5% 精简）
-  - 合计：4,974 → 1,147 行，典型会话 token 消耗从 ~110,000 降至 ~26,000
-
-- **精简策略**
-  - 重复的反 AI 规范、具象化检查清单、后置 Tracking 处理细节提取到独立文件
-  - 三层资源加载中的 JavaScript 伪代码删除，保留执行指令
-  - 会话级资源复用说明统一到 CLAUDE.md，各命令引用
-  - 10 种专项分析从 analyze.md 提取为独立 Skill 文件（按需加载）
-  - 4 种网文结构模板和卷级详细规划从 plan.md 提取到知识库/Skill 文件
+- **Token 优化** — 三大核心命令精简 76.9%（write 72.8%、analyze 84.1%、plan 70.5%）
 
 ### Added
 
-- **`CLAUDE.md` 模板**（`templates/dot-claude/CLAUDE.md`）
-  - 跨命令共享的核心写作规范（~55 行）
-  - `novelws init` 自动生成到 `.claude/CLAUDE.md`
-  - 利用 system prompt 缓存机制（90% 折扣），后续命令几乎零额外 token
-  - 包含：反 AI 写作核心、段落格式规范、后置 Tracking 处理、会话级资源复用、前文内容加载策略、/compact 使用建议
-
-- **具象化检查文件**（`templates/knowledge-base/requirements/concretization.md`）
-  - 从 write.md 提取的完整具象化检查清单和示例
-  - 时间/人物/数量/场景四维具象化对照表
-  - 首次写作时按需加载
-
-- **Auto-Tracking Skill**（`templates/skills/auto-tracking/SKILL.md`）
-  - 从 write.md 提取的完整 Tracking 更新格式和流程
-  - 4 个 JSON 文件（character-state, relationships, plot-tracker, timeline）的更新示例
-  - tracking-log.md 日志格式模板
-  - 错误处理策略
-
-- **10 个分析 Skill 文件**（`templates/skills/analysis/*/SKILL.md`）
-  - opening-analysis: 开篇分析（黄金开篇法则、钩子评估）
-  - pacing-analysis: 节奏分析（冲突分布、爽点间隔、高潮放置）
-  - character-analysis: 人物分析（角色弧追踪、一致性检查、关系网络）
-  - foreshadow-analysis: 伏笔分析（埋设/回收追踪、密度评估）
-  - logic-analysis: 逻辑分析（时间线、因果、能力一致性、世界观）
-  - style-analysis: 风格分析（词汇、句式、叙事风格）
-  - reader-analysis: 读者体验（爽点密度、钩子强度、信息投喂）
-  - hook-analysis: 钩子分析（逐章钩子扫描、类型分布、回收率）
-  - power-analysis: 力量体系（等级一致性、战力平衡、升级节奏）
-  - voice-analysis: 对话一致性（语言指纹分析）
-
-- **网文结构模板文件**（`templates/knowledge-base/craft/story-structures.md`）
-  - 从 plan.md 提取的 4 种网文结构模板
-  - 升级流/副本流/任务流/日常流的卷模板和爽点分布
-
-- **卷级规划 Skill**（`templates/skills/planning/volume-detail/SKILL.md`）
-  - 从 plan.md 提取的卷级详细规划流程（Step 1-6）
-  - 多卷批量规划工作流
-  - 灵感分配工作流
-
-- **`src/core/config.ts`** — 新增 `dotClaude` 和 `claudeMd` 路径
-- **`src/commands/init.ts`** — 新增 CLAUDE.md 复制逻辑
-
-### Technical
-
-- 162 个测试全部通过（从 161 增长到 162，新增 CLAUDE.md 生成测试）
-- Agent Skills 从 24 个增长到 37 个（+10 分析 + 1 auto-tracking + 1 volume-detail + 1 planning 目录）
+- **CLAUDE.md 模板**、具象化检查文件、Auto-Tracking Skill、10 个分析 Skill、网文结构模板、卷级规划 Skill
 
 ---
 
@@ -368,16 +166,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **清理遗留引用** — 全面排查并修复命令模板和脚本中引用不存在的文件/命令的问题
-  - `outline.md` → `creative-plan.md`（7 个文件）：`/outline` 命令已合并到 `/plan`，但引用未同步更新
-  - `/story` → `/specify`（6 个文件）：`/story` 命令已重命名为 `/specify`，脚本和模板中残留旧名称
-  - `/plot-check` → `/checklist`（3 个文件）：`/plot-check` 已被统一的 `/checklist` 命令替代
-  - `story.md` → `specification.md`（1 个文件）：`clarify.md` 的 `allowed-tools` 声明引用了旧文件名
-- **文档同步更新** — `commands.md`、`getting-started.md` 中的废弃命令引用已修正
-
-### Changed
-
-- `src/commands/init.ts` 初始化提示：`/plot-check` 替换为 `/checklist`
+- **清理遗留引用** — 修复命令模板和脚本中引用不存在的文件/命令
 
 ---
 
@@ -385,61 +174,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-#### Phase 3: 高级创作引擎（13 个任务，全部完成）
-
-- **多线叙事管理（Task 29）**
-  - Multi-Thread Narrative Skill 扩展：视角切换规划、信息差追踪、叙事线交汇设计
-  - `narrative-threads.json` 数据结构支持
-  - `/track` 命令集成叙事线同步
-
-- **角色声纹指纹系统（Task 30）**
-  - 新增 Voice Consistency Checker Skill（对话一致性检查）
-  - 语言指纹六维分析（词汇、句式、语气、口头禅、修辞、节奏）
-  - `/analyze --focus=voice` 对话一致性专项分析
-
-- **伏笔管理增强（Task 31）**
-  - `/track` 伏笔健康度检测（伏笔热度、伏笔回收、伏笔链）
-  - 紧急度量化评分和回收建议
-
-- **风格一致性引擎增强（Task 32）**
-  - Style Detector Skill 扩展：风格基线建立、风格偏移检测、跨章节风格一致性评分
-
-- **智能"下一步"推荐系统（Task 33）**
-  - `/guide` 智能推荐引擎（6 数据源、P0-P3 优先级）
-  - `/write` 后置智能推荐（写完自动推荐下一步）
-
-- **创作数据统计（Task 34）**
-  - `/track --stats` 创作数据统计面板
-  - 字数详情、角色出场频率、内容构成、伏笔状态、情节线进度
-
-- **反馈循环增强（Task 35）**
-  - `/analyze` 反馈建议模块（反馈分类、规格书/计划/任务反馈）
-  - `/specify --feedback` 反馈接收模式
-  - `/plan --feedback` 反馈接收模式
-  - `/guide` 未处理反馈提醒
-
-- **命令内容增强（Tasks 36-40）**
-  - `/timeline` 时间线可视化、多线程时间对齐、时间冲突检测
-  - `/relations` 关系图谱可视化、关系变化追踪、关系冲突检测
-  - `/expert` 五大领域专家定义（角色塑造/情节设计/世界观构建/文笔提升/类型写作）+ 咨询流程
-  - `/tasks` 任务优先级、任务依赖关系、从计划自动生成任务、任务完成度统计
-  - `/checklist` 阶段性检查模板（写前/写后/卷末）、自定义检查项、自动修复建议
-
-- **灵感扫描机制（Task 41）**
-  - `/write` 灵感扫描（前置）+ 灵感状态更新 + 灵感快速捕捉
-  - `/plan` 灵感分配建议
-  - `ideas.json` 数据结构支持
-
-### Changed
-
-- **CLAUDE.md 新增开发规则**
-  - Bash 最小化原则：禁止用 Bash 执行文件读写操作
-  - 并行任务与共享文件的执行策略：subagent 并行改独立文件，主线程统一改共享文件
-
-### Technical
-
-- 161 个测试全部通过（从 150 增长到 161）
-- 新增 11 个集成测试覆盖 Phase 3 全部功能
+- **Phase 3: 高级创作引擎** — 多线叙事、声纹指纹、伏笔管理、风格一致性、智能推荐、创作统计、反馈循环、灵感管理
 
 ---
 
@@ -447,24 +182,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **命令模板路径修复** — 修复全部 17 个 Slash Command 模板中与生成项目实际目录结构不匹配的路径引用
-  - `memory/` → `.specify/memory/`（constitution.md、style-reference.md 等）
-  - `templates/knowledge-base/` → `.specify/templates/knowledge-base/`
-  - `templates/skills/` → `.specify/templates/skills/`
-  - `templates/config/` → `.specify/templates/config/`
-  - `.claude/knowledge-base/` → `.specify/templates/knowledge-base/`
-  - `scripts/bash/` → `.specify/scripts/bash/`
-  - `stories/*/spec/tracking/` → `spec/tracking/`
-  - 涉及文件：write.md、analyze.md、plan.md、track.md、specify.md、constitution.md、revise.md、checklist.md、character.md 等
-
-- **`config.ts` knowledgeBase 路径修复** — `getProjectPaths()` 中 `knowledgeBase` 路径从 `.claude/knowledge-base` 修正为 `.specify/templates/knowledge-base`
-
-### Changed
-
-- **CLAUDE.md 新增开发规则**
-  - 并发编辑规则：禁止多个 agent 同时编辑同一文件
-  - 测试框架说明：明确使用 Jest（非 vitest），包含正确运行命令
-  - 生成项目目录结构参考：完整目录树 + 关键路径映射表
+- **命令模板路径修复** — 修复全部 17 个模板中的路径引用
 
 ---
 
@@ -472,25 +190,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-#### Phase 2 Batch 2: 批量操作与智能链接
-
-- **批量操作支持**
-  - `/plan --detail vol-XX-YY` 多卷规划
-  - `/analyze --range ch-XX-YY` / `--range vol-XX` / `--range vol-XX-YY` 批量章节/卷分析
-  - `/track --sync` 批量同步追踪数据
-
-- **命令链式提示**
-  - 全部 17 个命令模板新增"下一步建议"区块
-  - 根据当前命令上下文智能推荐 2-3 个后续操作
-  - 形成完整的创作工作流图
-
-- **Reader Expectation Skill 增强**
-  - 期待自动识别引擎（5 种类型：情节承诺、悬念、角色成长、关系、世界谜团）
-  - 满足/颠覆节奏规划器（按类型推荐时间线）
-  - 情绪预测曲线（逐章读者情绪预测）
-
-- **keyword-mappings.json v1.2.0**
-  - 新增 4 个关键词映射：tension-management、urban、game-lit、rebirth
+- **批量操作支持**、命令链式提示、Reader Expectation Skill 增强
 
 ---
 
@@ -498,42 +198,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-#### Phase 2 Batch 1: 网文深度优化
-
-- **`/guide` 智能引导命令**
-  - 自动检测创作阶段（规划期/写作期/修改期/完结期）
-  - 根据项目状态推荐下一步操作
-  - 新手友好的交互式引导
-
-- **`/analyze --focus=power` 力量体系分析**
-  - 等级一致性检查
-  - 战力平衡分析
-  - 升级节奏评估
-  - 能力追踪与规则合规性
-
-- **网文结构模板**
-  - `/plan` 内置 4 种网文结构模板
-  - 升级流（修仙/玄幻/都市异能）
-  - 副本流（游戏文/无限流）
-  - 任务流（冒险/佣兵/赏金猎人）
-  - 日常流（经营/种田/慢节奏）
-
-- **`/track --check` 节奏健康检测**
-  - 节奏多样性评分
-  - 满足间隔追踪
-  - 钩子连续性检查
-  - 情绪曲线分析
-
-- **新增知识库**
-  - `tension-management.md` - 紧张感管理（信息差、时间压力、两难抉择）
-  - `urban.md` - 都市现代类型知识库
-  - `game-lit.md` - 游戏/系统文类型知识库
-  - `rebirth.md` - 重生/穿越类型知识库
-
-- **Pacing Control Skill 增强**
-  - 章内节奏检测（开场/发展/高潮/收尾）
-  - 多章单调预警（连续章节节奏模式重复检测）
-  - 满足间隔追踪（读者期待满足频率监控）
+- **`/guide` 智能引导命令**、力量体系分析、网文结构模板、节奏健康检测、新增知识库
 
 ---
 
@@ -541,36 +206,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-#### Phase 1b: 角色管理与写作增强
-
-- **`/character` 统一角色管理命令**
-  - 7 个子命令：create / list / show / update / relate / voice / timeline
-  - 替代分散的角色相关操作
-
-- **`/plan --detail vol-XX` 单卷详细规划**
-  - 按卷展开章节级别的详细计划
-  - 支持卷内节奏设计
-
-- **`/specify` 金手指子模式 + `--world` 世界观构建**
-  - 金手指/系统设定专项定义
-  - 世界观构建子模式（地理、势力、规则）
-
-- **`power-system.md` 知识库**
-  - 力量体系设计框架
-  - 战斗标准化模板
-  - 升级节奏指南
-
-- **Hook Checker Skill**
-  - 5 维钩子评分系统
-  - 悬念强度、情感牵引、信息差、行动暗示、节奏适配
-
-- **`/analyze --focus=hook` 钩子专项分析**
-  - 章末钩子质量评估
-  - 钩子类型分布统计
-
-- **`/write` 断点续写机制**
-  - 基于 `write-checkpoint.json` 的断点记录
-  - 中断后自动恢复写作上下文
+- **`/character` 统一角色管理**、单卷详细规划、金手指子模式、Hook Checker Skill、断点续写
 
 ---
 
@@ -578,83 +214,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-#### Phase 1a: 网文核心功能
-
-- **`/write --fast` 快写模式**
-  - 简化输出，专注内容生成
-  - 跳过详细分析步骤
-
-- **Anti-AI 禁用词外置化**
-  - 200+ 禁用词从模板中提取为独立配置
-  - 基于腾讯朱雀标准实测
-
-- **`/recap` 预测性提示**
-  - 上下文重建时自动提示可能的后续操作
-  - `--brief` 快速模式
-
-- **`hook-design.md` 知识库**
-  - 6 种钩子类型定义
-  - 钩子链设计方法
-  - 章末钩子模板
-
-- **`xuanhuan.md` 知识库**
-  - 玄幻修仙类型创作惯例
-  - 力量体系、宗门、境界设定指南
-
-- **`/analyze --focus=reader` 读者体验分析**
-  - 爽点密度统计
-  - 钩子强度评估
-  - 信息投喂节奏分析
-
-- **keyword-mappings.json 扩展**
-  - 从 8 个映射扩展到 15 个
-  - 新增 hook-design、xuanhuan、power-system 等映射
-
-### Changed
-
-- 核心架构重构（详见 1.2.0 原始条目）
-
-#### 核心架构重构
-- 新增 `src/core/` 核心层
-  - `config.ts` - 统一配置管理，集中路径常量和默认值
-  - `errors.ts` - 自定义错误类型层级（NovelWriterError 及子类）
-  - `platform.ts` - 跨平台工具（tar 解压、临时目录）
-
-#### 插件系统重构
-- 新增抽象安装器架构
-  - `installers/base.ts` - 安装器基类
-  - `installers/npm.ts` - npm/scoped npm 包安装器
-  - `installers/github.ts` - GitHub 仓库安装器
-  - `installers/local.ts` - 本地 tarball 安装器
-- 新增 `plugins/registry.ts` - 独立的插件注册表管理
-- 新增 `plugins/identifier.ts` - 插件标识符解析器
-
-#### CLI 命令模块化
-- CLI 拆分为独立命令模块
-  - `commands/init.ts` - 项目初始化命令
-  - `commands/check.ts` - 环境检查命令
-  - `commands/upgrade.ts` - 项目升级命令
-  - `commands/plugin.ts` - 插件管理命令组
-
-#### 工具层增强
-- `logger.ts` - 新增日志级别过滤（debug/info/warn/error/silent）
-- `version.ts` - 版本号缓存，移除 `import.meta.url` 依赖
-- `project.ts` - 使用配置常量替代硬编码路径，抛出类型化错误
-
-### Changed
-
-- `cli.ts` 从 ~520 行精简为 ~58 行入口文件
-- 插件系统从单文件重构为多模块架构
-- 所有硬编码路径替换为 `core/config.ts` 常量
-- `ensureProjectRoot()` 抛出 `ProjectNotFoundError` 替代通用 Error
-- `postbuild` 脚本改为跨平台兼容
-- `package.json` files 字段清理，移除不必要的源码和文档
-
-### Technical
-
-- 92 个测试全部通过（新增 6 个日志级别测试）
-- ESM（生产）+ CJS（Jest）双模式兼容
-- 消除所有 `import.meta.url` 在 CJS 环境下的兼容问题
+- **快写模式**、Anti-AI 禁用词外置化、预测性提示、知识库扩展、核心架构重构、插件系统重构
 
 ---
 
@@ -663,8 +223,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - 新增科幻和惊悚类型知识库及 Skills
-- 新增 POV Validator、Continuity Tracker、Pacing Monitor Skills
-- 扩展参考资料库（唐朝、现代职场、修仙世界）
 
 ---
 
@@ -672,88 +230,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-#### 核心功能
-- 完整的七步方法论 Slash Commands
-  - `/constitution` - 创建创作宪法
-  - `/specify` - 定义故事规格
-  - `/clarify` - 澄清关键决策
-  - `/plan` - 制定创作计划
-  - `/tasks` - 分解任务清单
-  - `/write` - AI 辅助写作
-  - `/analyze` - 质量验证分析
-
-- 追踪与验证命令
-  - `/track-init` - 初始化追踪系统
-  - `/track` - 综合追踪更新
-  - `/plot-check` - 情节一致性检查
-  - `/timeline` - 时间线管理
-  - `/relations` - 角色关系追踪
-  - `/world-check` - 世界观验证
-
-#### Agent Skills 系统
-- Genre Knowledge Skills
-  - Romance - 言情小说惯例和情感节奏
-  - Mystery - 推理悬疑技巧和线索管理
-  - Fantasy - 奇幻设定规范和世界构建
-
-- Writing Techniques Skills
-  - Dialogue Techniques - 对话自然度和角色声音
-  - Scene Structure - 场景构建和节奏控制
-  - Character Arc - 角色弧线和成长逻辑
-
-- Quality Assurance Skills
-  - Consistency Checker - 一致性自动监控
-  - Workflow Guide - 七步方法论引导
-
-#### CLI 工具
-- 项目管理
-  - `novelws init` - 初始化项目
-  - `novelws check` - 检查环境
-  - `novelws upgrade` - 升级项目
-
-- 插件系统
-  - `novelws plugin:list` - 列出已安装插件
-  - `novelws plugin:add` - 安装插件
-  - `novelws plugin:remove` - 移除插件
-
-#### 文档
+- 完整的七步方法论 Slash Commands（7 个核心命令 + 6 个追踪命令）
+- Agent Skills 系统（Genre Knowledge + Writing Techniques + Quality Assurance）
+- CLI 工具（init、check、upgrade、plugin）
 - 完整文档体系
-  - README.md - 项目概览
-  - Getting Started - 入门指南
-  - Commands Guide - 命令详解
-  - Skills Guide - Skills 指南
-  - Plugin Development - 插件开发
-
-### Features
-
-- Claude Code 深度集成
-- Agent Skills 自动激活机制
-- 智能质量检查系统
-- 可扩展插件架构
-- 完整的项目模板
-
-### Technical
-
-- TypeScript 实现
-- ES Module 支持
-- Node.js >= 18.0.0
-- 基于 Commander.js 的 CLI
-- 完整的类型定义
-
----
-
-## [Unreleased]
-
-_暂无计划中的功能_
-
----
-
-**注释**：
-- 核心功能
-- Agent Skills
-- CLI 工具
-- 文档
-- 新特性
-- 技术改进
-- Bug 修复
-- 安全更新

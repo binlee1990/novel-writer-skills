@@ -6,7 +6,6 @@ import { getVersion, getVersionInfo } from './version.js';
 import { registerInitCommand } from './commands/init.js';
 import { registerCheckCommand } from './commands/check.js';
 import { registerUpgradeCommand } from './commands/upgrade.js';
-import { registerPluginCommands } from './commands/plugin.js';
 
 // 显示欢迎横幅
 function displayBanner(): void {
@@ -34,7 +33,6 @@ program
 registerInitCommand(program);
 registerCheckCommand(program);
 registerUpgradeCommand(program);
-registerPluginCommands(program);
 
 // 自定义帮助信息
 program.on('--help', () => {
@@ -44,7 +42,7 @@ program.on('--help', () => {
   console.log('  $ novelws init my-story      # 创建新项目');
   console.log('  $ novelws init --here        # 在当前目录初始化');
   console.log('  $ novelws check              # 检查环境');
-  console.log('  $ novelws plugin:list        # 列出插件');
+  console.log('  $ novelws upgrade            # 升级项目');
   console.log('');
   console.log(chalk.gray('更多信息: https://github.com/binlee1990/novel-writer-skills'));
 });

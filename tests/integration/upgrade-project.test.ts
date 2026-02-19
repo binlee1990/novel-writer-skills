@@ -27,28 +27,23 @@ describe('novelws upgrade', () => {
     }
   });
 
-  it('should detect large tracking files and output migration hint', () => {
-    // 创建一个超过 50KB 的 character-state.json
-    const trackingPath = path.join(projectPath, 'tracking', 'character-state.json');
-    const largeData = { characters: 'x'.repeat(60 * 1024) };
-    fs.writeJsonSync(trackingPath, largeData);
-
+  it('should upgrade project successfully', () => {
     const output = execSync(`node "${CLI_PATH}" upgrade -y`, {
       cwd: projectPath,
       stdio: 'pipe',
       encoding: 'utf-8',
     });
 
-    expect(output).toContain('tracking');
+    expect(output).toContain('升级内容');
   });
 
-  it('should not show migration hint for small tracking files', () => {
-    const output = execSync(`node "${CLI_PATH}" upgrade -y`, {
+  it('should update version in config', () => {
+    execSync(`node "${CLI_PATH}" upgrade -y`, {
       cwd: projectPath,
       stdio: 'pipe',
-      encoding: 'utf-8',
     });
 
-    expect(output).not.toContain('迁移');
+    const config = fs.readJsonSync(path.join(projectPath, 'resources', 'config.json'));
+    expect(config.version).toBeDefined();
   });
 });

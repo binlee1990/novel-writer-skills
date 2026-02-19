@@ -15,22 +15,22 @@ describe('utils/project.ts', () => {
   });
 
   describe('isProjectRoot()', () => {
-    it('should return true when .specify/config.json exists', async () => {
+    it('should return true when resources/config.json exists', async () => {
       const projectPath = await createMockProject(tempDir);
       const result = await isProjectRoot(projectPath);
       expect(result).toBe(true);
     });
 
-    it('should return false when .specify/config.json does not exist', async () => {
+    it('should return false when resources/config.json does not exist', async () => {
       const emptyDir = path.join(tempDir, 'empty');
       await fs.ensureDir(emptyDir);
       const result = await isProjectRoot(emptyDir);
       expect(result).toBe(false);
     });
 
-    it('should return false for directory with only .specify but no config.json', async () => {
+    it('should return false for directory with only resources but no config.json', async () => {
       const dir = path.join(tempDir, 'partial');
-      await fs.ensureDir(path.join(dir, '.specify'));
+      await fs.ensureDir(path.join(dir, 'resources'));
       const result = await isProjectRoot(dir);
       expect(result).toBe(false);
     });
@@ -69,7 +69,7 @@ describe('utils/project.ts', () => {
       expect(info).not.toBeNull();
       expect(info!.name).toBe('my-novel');
       expect(info!.version).toBe('1.0.0');
-      expect(info!.hasSpecifyDir).toBe(true);
+      expect(info!.hasResourcesDir).toBe(true);
     });
 
     it('should return null if config not found', async () => {
@@ -86,14 +86,14 @@ describe('utils/project.ts', () => {
 
       expect(info).not.toBeNull();
       expect(info!.hasClaudeDir).toBe(true);
-      expect(info!.hasSpecifyDir).toBe(true);
+      expect(info!.hasResourcesDir).toBe(true);
       expect(info!.hasStoriesDir).toBe(true);
     });
 
     it('should handle missing optional directories', async () => {
       const projectPath = path.join(tempDir, 'minimal');
-      await fs.ensureDir(path.join(projectPath, '.specify'));
-      await fs.writeJson(path.join(projectPath, '.specify', 'config.json'), {
+      await fs.ensureDir(path.join(projectPath, 'resources'));
+      await fs.writeJson(path.join(projectPath, 'resources', 'config.json'), {
         name: 'minimal',
         version: '0.1.0',
       });

@@ -34,38 +34,6 @@ export class ProjectExistsError extends NovelWriterError {
   }
 }
 
-/** 插件不存在 */
-export class PluginNotFoundError extends NovelWriterError {
-  constructor(name: string) {
-    super(`插件 "${name}" 未找到`, 'PLUGIN_NOT_FOUND');
-  }
-}
-
-/** 插件校验失败 */
-export class PluginValidationError extends NovelWriterError {
-  readonly errors: string[];
-  readonly warnings: string[];
-
-  constructor(name: string, errors: string[], warnings: string[] = []) {
-    super(`插件 "${name}" 验证失败: ${errors.join(', ')}`, 'PLUGIN_VALIDATION_FAILED');
-    this.errors = errors;
-    this.warnings = warnings;
-  }
-}
-
-/** 插件安装失败 */
-export class PluginInstallError extends NovelWriterError {
-  readonly source: string;
-
-  constructor(name: string, source: string, reason?: string) {
-    const msg = reason
-      ? `插件 "${name}" 安装失败 (来源: ${source}): ${reason}`
-      : `插件 "${name}" 安装失败 (来源: ${source})`;
-    super(msg, 'PLUGIN_INSTALL_FAILED');
-    this.source = source;
-  }
-}
-
 /** 网络请求失败 */
 export class NetworkError extends NovelWriterError {
   readonly url: string;
@@ -103,51 +71,12 @@ export class ConfigError extends NovelWriterError {
   }
 }
 
-/** 插件已安装 */
-export class PluginAlreadyInstalledError extends NovelWriterError {
-  constructor(name: string) {
-    super(`插件 "${name}" 已安装。如需更新请使用 plugin:update`, 'PLUGIN_ALREADY_INSTALLED');
-  }
-}
-
 /** 文件缺失错误（带修复建议） */
 export class MissingFileError extends NovelWriterError {
   constructor(filePath: string, suggestion: string) {
     super(
       `文件不存在: ${filePath}\n\n💡 修复建议: ${suggestion}`,
       'MISSING_FILE'
-    );
-  }
-}
-
-/** 模式不匹配错误 */
-export class ModeMismatchError extends NovelWriterError {
-  constructor(expectedMode: string, actualMode: string, action: string) {
-    super(
-      `模式不匹配: 当前项目使用 ${actualMode} 模式，但 ${action} 需要 ${expectedMode} 模式\n\n` +
-      `💡 修复建议: 运行 /track --migrate --target ${expectedMode}`,
-      'MODE_MISMATCH'
-    );
-  }
-}
-
-/** 数据完整性错误 */
-export class DataIntegrityError extends NovelWriterError {
-  constructor(issue: string, autoFixed: boolean) {
-    super(
-      `数据完整性问题: ${issue}\n\n` +
-      (autoFixed ? '✅ 已自动修复' : '⚠️ 需要手动检查'),
-      'DATA_INTEGRITY'
-    );
-  }
-}
-
-/** 依赖缺失错误 */
-export class DependencyMissingError extends NovelWriterError {
-  constructor(dependency: string, installCmd: string) {
-    super(
-      `缺少依赖: ${dependency}\n\n💡 安装方法: ${installCmd}`,
-      'DEPENDENCY_MISSING'
     );
   }
 }
@@ -159,11 +88,6 @@ export class DependencyMissingError extends NovelWriterError {
 export function handleError(error: unknown): never {
   if (error instanceof NovelWriterError) {
     console.error(`\n❌ ${error.message}`);
-    if (error instanceof PluginValidationError && error.errors.length > 0) {
-      for (const err of error.errors) {
-        console.error(`   - ${err}`);
-      }
-    }
     process.exit(error.exitCode);
   }
 

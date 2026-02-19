@@ -51,33 +51,17 @@ const _packageRoot = findPackageRoot(getCurrentDir());
 /** 目录名常量 */
 export const DIRS = {
   CLAUDE: '.claude',
-  SPECIFY: '.specify',
   STORIES: 'stories',
-  SPEC: 'spec',
   COMMANDS: 'commands',
-  SKILLS: 'skills',
-  KNOWLEDGE_BASE: 'knowledge-base',
-  PLUGINS: 'plugins',
-  MEMORY: 'memory',
   TEMPLATES: 'templates',
   TRACKING: 'tracking',
-  KNOWLEDGE: 'knowledge',
-  SCRIPTS: 'scripts',
-  SUMMARY: 'summary',
-  VOLUMES: 'volumes',
   RESOURCES: 'resources',
-  CACHE: '.cache',
 } as const;
 
 /** 文件名常量 */
 export const FILES = {
   CONFIG: 'config.json',
-  PLUGIN_REGISTRY: 'plugins.json',
-  PLUGIN_CONFIG: 'config.yaml',
   GITIGNORE: '.gitignore',
-  MCP_SERVERS: 'mcp-servers.json',
-  RESOURCE_DIGEST: 'resource-digest.json',
-  WRITE_CONTEXT: 'write-context.json',
 } as const;
 
 /** 默认 .gitignore 内容 */
@@ -110,64 +94,36 @@ export function getTemplatesDir(): string {
   return path.join(getPackageRoot(), DIRS.TEMPLATES);
 }
 
-/** 获取内置插件目录路径 */
-export function getBuiltinPluginsDir(): string {
-  return path.join(getPackageRoot(), DIRS.PLUGINS);
-}
-
 /**
  * 获取项目内各目录的路径
  */
 export function getProjectPaths(projectRoot: string) {
   return {
     root: projectRoot,
-    // .claude/ 区域
+    // .claude/
     claude: path.join(projectRoot, DIRS.CLAUDE),
     claudeMd: path.join(projectRoot, DIRS.CLAUDE, 'CLAUDE.md'),
     commands: path.join(projectRoot, DIRS.CLAUDE, DIRS.COMMANDS),
-    skills: path.join(projectRoot, DIRS.CLAUDE, DIRS.SKILLS),
-    mcpServers: path.join(projectRoot, DIRS.CLAUDE, FILES.MCP_SERVERS),
-    cache: path.join(projectRoot, DIRS.CLAUDE, DIRS.CACHE),
-    resourceDigest: path.join(projectRoot, DIRS.CLAUDE, DIRS.CACHE, FILES.RESOURCE_DIGEST),
-    writeContext: path.join(projectRoot, DIRS.CLAUDE, DIRS.CACHE, FILES.WRITE_CONTEXT),
-
-    // resources/ 区域
+    // resources/
     resources: path.join(projectRoot, DIRS.RESOURCES),
-    resourcesConfig: path.join(projectRoot, DIRS.RESOURCES, 'config', FILES.CONFIG),
-    resourcesMemory: path.join(projectRoot, DIRS.RESOURCES, DIRS.MEMORY),
-    resourcesScripts: path.join(projectRoot, DIRS.RESOURCES, DIRS.SCRIPTS),
-    resourcesKnowledge: path.join(projectRoot, DIRS.RESOURCES, DIRS.KNOWLEDGE),
-    pluginRegistry: path.join(projectRoot, DIRS.RESOURCES, 'config', FILES.PLUGIN_REGISTRY),
-
-    // tracking/ 区域（顶层）
+    resourcesConfig: path.join(projectRoot, DIRS.RESOURCES, FILES.CONFIG),
+    // tracking/
     tracking: path.join(projectRoot, DIRS.TRACKING),
-    trackingSummary: path.join(projectRoot, DIRS.TRACKING, DIRS.SUMMARY),
-    trackingVolumes: path.join(projectRoot, DIRS.TRACKING, DIRS.VOLUMES),
-    trackingDb: path.join(projectRoot, DIRS.TRACKING, 'novel-tracking.db'),
-
-    // 不变
+    // stories/
     stories: path.join(projectRoot, DIRS.STORIES),
-    plugins: path.join(projectRoot, DIRS.PLUGINS),
-
-    // 旧路径（保留用于 upgrade 迁移检测）
-    _legacy_specify: path.join(projectRoot, '.specify'),
-    _legacy_spec: path.join(projectRoot, 'spec'),
   };
 }
 
 /**
- * 获取模板源路径映射（用于 init 和 upgrade）
+ * 获取模板源路径映射（用于 init）
  */
 export function getTemplateSourcePaths() {
   const templatesDir = getTemplatesDir();
   return {
     commands: path.join(templatesDir, DIRS.COMMANDS),
-    skills: path.join(templatesDir, DIRS.SKILLS),
     dotClaude: path.join(templatesDir, 'dot-claude'),
     resources: path.join(templatesDir, DIRS.RESOURCES),
     tracking: path.join(templatesDir, DIRS.TRACKING),
-    knowledge: path.join(templatesDir, DIRS.KNOWLEDGE),
-    trackingSummary: path.join(templatesDir, DIRS.TRACKING, DIRS.SUMMARY),
     all: templatesDir,
   };
 }

@@ -7,7 +7,7 @@ export interface ProjectInfo {
   name: string;
   version: string;
   hasClaudeDir: boolean;
-  hasSpecifyDir: boolean;
+  hasResourcesDir: boolean;
   hasStoriesDir: boolean;
 }
 
@@ -15,7 +15,7 @@ export interface ProjectInfo {
  * 检测当前目录是否是 novel-writer-skills 项目
  */
 export async function isProjectRoot(dir: string): Promise<boolean> {
-  const configPath = path.join(dir, DIRS.SPECIFY, FILES.CONFIG);
+  const configPath = path.join(dir, DIRS.RESOURCES, FILES.CONFIG);
   return await fs.pathExists(configPath);
 }
 
@@ -71,9 +71,10 @@ export async function injectModelToCommands(commandsDir: string, model: string):
     await fs.writeFile(filePath, content, 'utf-8');
   }
 }
+
 export async function getProjectInfo(projectPath: string): Promise<ProjectInfo | null> {
   try {
-    const configPath = path.join(projectPath, DIRS.SPECIFY, FILES.CONFIG);
+    const configPath = path.join(projectPath, DIRS.RESOURCES, FILES.CONFIG);
 
     if (!await fs.pathExists(configPath)) {
       return null;
@@ -85,7 +86,7 @@ export async function getProjectInfo(projectPath: string): Promise<ProjectInfo |
       name: config.name || path.basename(projectPath),
       version: config.version || 'unknown',
       hasClaudeDir: await fs.pathExists(path.join(projectPath, DIRS.CLAUDE)),
-      hasSpecifyDir: await fs.pathExists(path.join(projectPath, DIRS.SPECIFY)),
+      hasResourcesDir: await fs.pathExists(path.join(projectPath, DIRS.RESOURCES)),
       hasStoriesDir: await fs.pathExists(path.join(projectPath, DIRS.STORIES)),
     };
   } catch {

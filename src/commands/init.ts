@@ -9,12 +9,11 @@ import fs from 'fs-extra';
 import ora from 'ora';
 import { execSync } from 'child_process';
 import { getVersion } from '../version.js';
-import { PluginManager } from '../plugins/manager.js';
 import {
-  getPackageRoot,
   getTemplateSourcePaths,
   getProjectPaths,
   DEFAULT_GITIGNORE,
+  FILES,
 } from '../core/config.js';
 import { injectModelToCommands } from '../utils/project.js';
 
@@ -24,20 +23,12 @@ export function registerInitCommand(program: Command): void {
     .argument('[name]', '小说项目名称')
     .option('--here', '在当前目录初始化')
     .option('--model <name>', '指定命令使用的 AI 模型')
-    .option('--plugins <names>', '预装插件，逗号分隔')
-    .option('--scale <size>', '项目规模预设 (large: 启用分片存储)')
-    .option('--with-mcp', '启用 MCP + SQLite 数据中枢（隐含 --scale large）')
     .option('--no-git', '跳过 Git 初始化')
     .description('初始化一个新的小说项目')
     .action(async (name, options) => {
       const spinner = ora('正在初始化小说项目...').start();
 
       try {
-        // --with-mcp 隐含 --scale large
-        if (options.withMcp && !options.scale) {
-          options.scale = 'large';
-        }
-
         // 确定项目路径
         let projectPath: string;
         if (options.here) {
@@ -61,12 +52,7 @@ export function registerInitCommand(program: Command): void {
         const baseDirs = [
           paths.claude,
           paths.commands,
-          paths.skills,
-          paths.cache,
           paths.resources,
-          path.join(paths.resources, 'config'),
-          paths.resourcesMemory,
-          paths.resourcesScripts,
           paths.tracking,
           paths.stories,
         ];
@@ -79,11 +65,8 @@ export function registerInitCommand(program: Command): void {
         const config = {
           name,
           type: 'novel',
-          ai: 'claude',
-          created: new Date().toISOString(),
           version: getVersion(),
-          ...(options.scale && { scale: options.scale }),
-          ...(options.withMcp && { mcp: true }),
+          created: new Date().toISOString(),
         };
 
         await fs.writeJson(paths.resourcesConfig, config, { spaces: 2 });
@@ -94,17 +77,10 @@ export function registerInitCommand(program: Command): void {
         // 复制命令文件
         if (await fs.pathExists(templates.commands)) {
           await fs.copy(templates.commands, paths.commands);
-          // 如果指定了 --model，注入到命令文件 frontmatter
           if (options.model) {
             await injectModelToCommands(paths.commands, options.model);
           }
           spinner.text = '已安装 Slash Commands...';
-        }
-
-        // 复制 Skills 文件
-        if (await fs.pathExists(templates.skills)) {
-          await fs.copy(templates.skills, paths.skills);
-          spinner.text = '已安装 Agent Skills...';
         }
 
         // 复制 CLAUDE.md 到 .claude/
@@ -116,78 +92,15 @@ export function registerInitCommand(program: Command): void {
           }
         }
 
-        // 复制 resources/ 模板（一次性：memory, config, scripts, craft, genres, styles 等）
+        // 复制 resources/ 模板（constitution.md, style-reference.md, anti-ai.md）
         if (await fs.pathExists(templates.resources)) {
           await fs.copy(templates.resources, paths.resources);
           spinner.text = '已安装资源文件...';
         }
 
-        // 复制追踪文件模板（非 large 模式排除 summary 子目录）
+        // 复制 tracking/ 模板（4 个 JSON 文件）
         if (await fs.pathExists(templates.tracking)) {
-          const summaryDir = path.normalize(templates.trackingSummary);
-          if (options.scale === 'large') {
-            await fs.copy(templates.tracking, paths.tracking);
-          } else {
-            await fs.copy(templates.tracking, paths.tracking, {
-              filter: (src: string) => !path.normalize(src).startsWith(summaryDir),
-            });
-          }
-        }
-
-        // 大型项目：创建分片目录结构
-        if (options.scale === 'large') {
-          await fs.ensureDir(paths.trackingSummary);
-          await fs.ensureDir(path.join(paths.trackingVolumes, 'vol-01'));
-
-          // 复制 tracking 模板到 vol-01 作为初始卷
-          const trackingFiles = ['character-state.json', 'plot-tracker.json', 'timeline.json', 'relationships.json'];
-          for (const file of trackingFiles) {
-            const src = path.join(templates.tracking, file);
-            const dest = path.join(paths.trackingVolumes, 'vol-01', file);
-            if (await fs.pathExists(src)) {
-              await fs.copy(src, dest);
-            }
-          }
-
-          spinner.text = '已创建大型项目分片结构...';
-        }
-
-        // 复制知识库模板（项目特定）→ resources/knowledge/
-        if (await fs.pathExists(templates.knowledge)) {
-          await fs.copy(templates.knowledge, paths.resourcesKnowledge);
-        }
-
-        // MCP 配置生成
-        if (options.withMcp) {
-          const mcpConfig = {
-            mcpServers: {
-              novelws: {
-                command: 'npx',
-                args: ['novelws-mcp', '.'],
-                env: {},
-              },
-            },
-          };
-          await fs.writeJson(paths.mcpServers, mcpConfig, { spaces: 2 });
-          spinner.text = '已生成 MCP 服务器配置...';
-        }
-
-
-        // 如果指定了 --plugins，安装插件
-        if (options.plugins) {
-          spinner.text = '安装插件...';
-          const pluginNames = options.plugins.split(',').map((p: string) => p.trim());
-          const pluginManager = new PluginManager(projectPath);
-          const packageRoot = getPackageRoot();
-
-          for (const pluginName of pluginNames) {
-            const builtinPluginPath = path.join(packageRoot, 'plugins', pluginName);
-            if (await fs.pathExists(builtinPluginPath)) {
-              await pluginManager.installPlugin(pluginName, builtinPluginPath);
-            } else {
-              console.log(chalk.yellow(`\n警告: 插件 "${pluginName}" 未找到`));
-            }
-          }
+          await fs.copy(templates.tracking, paths.tracking);
         }
 
         // Git 初始化
@@ -215,23 +128,14 @@ export function registerInitCommand(program: Command): void {
         console.log(`  2. ${chalk.white('在 Claude Code 中打开项目')}`);
         console.log(`  3. 使用以下斜杠命令开始创作:`);
 
-        console.log('\n' + chalk.yellow('     📝 七步方法论:'));
-        console.log(`     ${chalk.cyan('/constitution')} - 创建创作宪法，定义核心原则`);
-        console.log(`     ${chalk.cyan('/specify')}      - 定义故事规格，明确要创造什么`);
-        console.log(`     ${chalk.cyan('/clarify')}      - 澄清关键决策点，明确模糊之处`);
-        console.log(`     ${chalk.cyan('/plan')}         - 制定技术方案，决定如何创作`);
-        console.log(`     ${chalk.cyan('/tasks')}        - 分解执行任务，生成可执行清单`);
-        console.log(`     ${chalk.cyan('/write')}        - AI 辅助写作章节内容`);
-        console.log(`     ${chalk.cyan('/analyze')}      - 综合验证分析，确保质量一致`);
+        console.log('\n' + chalk.yellow('     📝 五命令流水线:'));
+        console.log(`     ${chalk.cyan('/specify')}  - 定义故事设定、角色、世界观`);
+        console.log(`     ${chalk.cyan('/plan')}     - 生成卷级大纲`);
+        console.log(`     ${chalk.cyan('/write')}    - 逐章生成剧情概要`);
+        console.log(`     ${chalk.cyan('/expand')}   - 将概要扩写为正文`);
+        console.log(`     ${chalk.cyan('/analyze')}  - 质量检查`);
 
-        console.log('\n' + chalk.yellow('     📊 追踪管理命令:'));
-        console.log(`     ${chalk.cyan('/track-init')}  - 初始化追踪系统`);
-        console.log(`     ${chalk.cyan('/track')}       - 综合追踪更新`);
-        console.log(`     ${chalk.cyan('/checklist')}   - 质量检查清单`);
-        console.log(`     ${chalk.cyan('/timeline')}    - 管理故事时间线`);
-
-        console.log('\n' + chalk.gray('Agent Skills 会自动激活，无需手动调用'));
-        console.log(chalk.dim('提示: 斜杠命令在 Claude Code 内部使用，不是在终端中'));
+        console.log('\n' + chalk.dim('提示: 斜杠命令在 Claude Code 内部使用，不是在终端中'));
       } catch (error) {
         spinner.fail(chalk.red('项目初始化失败'));
         console.error(error);
