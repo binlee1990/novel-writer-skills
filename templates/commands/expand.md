@@ -7,6 +7,15 @@ allowed-tools: Read(//stories/**), Write(//stories/**/content/**), Read(//tracki
 
 用户输入：$ARGUMENTS
 
+## 上下文隔离（强制）
+
+本命令的所有创作资源必须从文件系统重新加载，禁止依赖本对话中之前任何 /write 或其他命令的生成过程和中间记忆。
+
+具体规则：
+- 忽略对话历史中所有 /write 生成的概要内容，以文件系统中的 synopsis.md 为唯一真实来源
+- 忽略对话历史中所有 tracking 文件的中间状态，重新从文件读取最新版本
+- 不复用对话中已加载的 style-reference.md 或 anti-ai.md，重新读取
+
 ## 目标
 
 将已生成的章节概要扩写为 3000-5000 字的完整正文。
