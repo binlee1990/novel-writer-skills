@@ -25,18 +25,38 @@ allowed-tools: Read(//stories/**), Write(//stories/**/content/**), Read(//tracki
 - 章节号：从 $ARGUMENTS 提取
 - `--batch N`：批量扩写 N 章（最大 10），从指定章节号开始
 
-## 资源加载（精准最小集）
+## 资源加载（3 层结构，从文件系统重新加载）
 
-1. **当前章概要**：读取 `stories/<story>/content/chapter-XXX-synopsis.md`（200-500字）
-2. **前一章正文末尾**：读取前一章 `chapter-XXX.md` 的最后 500-800 字（衔接用）。如果前一章尚未扩写，读取前一章概要代替
-3. **本章出场角色状态**：从概要中提取出场角色列表，然后从 `tracking/character-state.json` 只提取这些角色的条目
-4. **本章活跃伏笔**：从 `tracking/plot-tracker.json` 提取 status=planted 或 status=hinted 且 keyChapters 包含当前章或相邻章（±3章）的伏笔
-5. **风格参考**：读取 `resources/style-reference.md`
-6. **反AI规范**：读取 `resources/anti-ai.md`
+所有资源必须从文件系统读取，不复用对话中的缓存。总上下文控制在 3500 字以内。
 
-**总上下文控制在 2000-3000 字以内。**
+### 第 1 层 — 全局视角
 
-**不加载**：specification.md、creative-plan.md、constitution.md、其他 tracking 文件
+1. **specification.md 摘要**：读取 `stories/<story>/specification.md`，提取 100 字核心摘要（类型 + 主角 + 核心冲突）
+2. **当前卷大纲**：读取 `stories/<story>/creative-plan.md`，只提取当前章节所属卷的段落
+
+### 第 2 层 — 章节核心
+
+3. **当前章概要**：读取 `stories/<story>/content/chapter-XXX-synopsis.md`（200-500字）
+4. **前一章正文末尾**：读取前一章 `chapter-XXX.md` 的最后 500-800 字（衔接用）。如果前一章尚未扩写，读取前一章概要代替
+
+### 第 3 层 — 细节支撑
+
+5. **本章出场角色状态**：从概要中提取出场角色列表，然后从 `tracking/character-state.json` 只提取这些角色的条目
+6. **本章活跃伏笔**：从 `tracking/plot-tracker.json` 提取 status=planted 或 status=hinted 且 keyChapters 包含当前章或相邻章（±3章）的伏笔
+7. **本章相关角色关系**：从 `tracking/relationships.json` 提取本章出场角色之间的关系条目（最多 5 条，超出则取最近更新的）
+8. **风格参考**：读取 `resources/style-reference.md`
+9. **反AI规范**：读取 `resources/anti-ai.md`
+
+**上下文预算**：
+
+| 层级 | 预估字数 |
+|------|---------|
+| 第 1 层 全局 | 200-400 字 |
+| 第 2 层 章节 | 700-1300 字 |
+| 第 3 层 细节 | 800-1500 字 |
+| **总计** | **1700-3200 字** |
+
+每层加载完后检查上下文预算，超出则截断（如角色关系条目过多时只取最核心的 5 条）。
 
 ## 执行步骤
 
