@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.0] - 2026-02-20
+
+### Added
+
+- **`/expand` 上下文隔离声明** — 强制从文件系统重新加载所有资源，不依赖对话历史中 /write 的中间记忆
+- **`/expand` 3 层资源加载结构** — 从 6 项扩展为 9 项：
+  - 第 1 层（全局）：specification.md 摘要 + 当前卷大纲（新增）
+  - 第 2 层（章节）：当前章概要 + 前一章正文末尾
+  - 第 3 层（细节）：角色状态 + 伏笔 + 角色关系（新增）+ 风格参考 + 反AI规范
+- **`/expand` 全局一致性原则** — 正文必须与 specification.md 类型定位和 creative-plan.md 卷级设计保持一致
+- **`/expand` 角色关系驱动原则** — 对话和互动必须体现 relationships.json 中的关系动态
+- **`/expand` 批量模式资源隔离** — 每章独立从文件系统加载资源，不复用前一章扩写的中间状态
+
+### Changed
+
+- **`/expand` allowed-tools** — 新增 `Read(//resources/constitution.md)` 权限
+- **CLAUDE.md 会话级复用规则** — 从统一复用改为分命令策略：/specify、/plan、/write 可复用；/expand、/analyze 强制从文件重载
+
+---
+
 ## [5.0.0] - 2026-02-20
 
 ### Breaking Changes
