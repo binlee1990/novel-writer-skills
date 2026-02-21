@@ -35,17 +35,30 @@
 | resources/style-reference.md | 风格参考 | /expand |
 | resources/anti-ai.md | 反AI规范 | /expand |
 
-## Tracking 文件
+## 卷级结构
 
-| 文件 | 用途 |
-|------|------|
-| tracking/character-state.json | 角色状态（role, status, location, state, lastAppearance） |
-| tracking/relationships.json | 角色关系（from, to, type, note, lastUpdate） |
-| tracking/plot-tracker.json | 情节线和伏笔（plotlines, foreshadowing） |
-| tracking/timeline.json | 时间线（chapter, time, event） |
+每个故事按卷分片存储：
 
-- /write 完成后自动更新 tracking 骨架
-- /expand 完成后补充 tracking 细节
+```
+stories/<story>/
+├── specification.md
+├── creative-plan.md
+└── volumes/
+    └── vol-XXX/
+        ├── volume-summary.md    # 跨卷状态快照
+        ├── tracking/            # 卷级 tracking
+        │   ├── character-state.json
+        │   ├── plot-tracker.json
+        │   ├── relationships.json
+        │   └── timeline.json
+        └── content/             # 卷级内容
+            ├── chapter-YYY-synopsis.md
+            └── chapter-YYY.md
+```
+
+- volume-summary.md 在卷切换时自动生成，是当前卷的入口条件
+- /write 完成后自动更新卷级 tracking 骨架
+- /expand 完成后补充卷级 tracking 细节
 
 ## 会话级资源复用
 

@@ -48,7 +48,8 @@ allowed-tools: Read(//stories/**/specification.md), Read(//stories/**/creative-p
 - 主线概要：
 
 ## 第一卷：[卷名]
-- 章节范围：第1-XX章
+- 卷目录：vol-001
+- 章节范围：第1-XX章（chapter-001 到 chapter-XXX）
 - 核心主题：
 - 核心冲突：
 - 转折点：
@@ -67,4 +68,4 @@ allowed-tools: Read(//stories/**/specification.md), Read(//stories/**/creative-p
 
 ### 4. 后续建议
 
-输出：「卷级大纲生成完成。下一步请使用 /write 1 开始逐章生成剧情概要。可用 /write --batch 20 批量生成。」
+输出：「卷级大纲生成完成。下一步请使用 /write 1 开始逐章生成剧情概要（系统会自动创建 volumes/vol-001/ 目录结构）。可用 /write --batch 20 批量生成。」

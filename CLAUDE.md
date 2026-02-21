@@ -83,30 +83,29 @@
 my-novel/
 ├── .claude/
 │   ├── commands/       # Slash Commands
-│   └── skills/         # Agent Skills
-├── .specify/
-│   ├── memory/         # constitution.md, style-reference.md 等
-│   ├── scripts/        # bash/, powershell/ 脚本
-│   └── templates/
-│       ├── commands/
-│       ├── knowledge-base/   # craft/, genres/, requirements/, styles/
-│       ├── skills/           # writing-techniques/, quality-assurance/, genre-knowledge/
-│       └── config/           # keyword-mappings.json
+│   └── CLAUDE.md       # 核心规范
+├── resources/          # 资源文件
+│   ├── config.json
+│   ├── constitution.md
+│   ├── style-reference.md
+│   └── anti-ai.md
 ├── stories/
 │   └── <story>/
 │       ├── specification.md
 │       ├── creative-plan.md
-│       ├── tasks.md
-│       └── content/
-├── spec/
-│   ├── tracking/       # plot-tracker.json, timeline.json, character-state.json 等
-│   └── knowledge/      # characters/, worldbuilding/, references/
-└── plugins/
+│       └── volumes/
+│           └── vol-XXX/
+│               ├── volume-summary.md
+│               ├── tracking/
+│               │   ├── character-state.json
+│               │   ├── plot-tracker.json
+│               │   ├── relationships.json
+│               │   └── timeline.json
+│               └── content/
+│                   ├── chapter-YYY-synopsis.md
+│                   └── chapter-YYY.md
 ```
 - **关键路径映射**（常见易错项）：
-  - `memory/` → `.specify/memory/`
-  - `templates/knowledge-base/` → `.specify/templates/knowledge-base/`
-  - `templates/skills/` → `.specify/templates/skills/`
-  - `templates/config/` → `.specify/templates/config/`
-  - `scripts/bash/` → `.specify/scripts/bash/`
-  - tracking 文件在项目根的 `spec/tracking/`，不是 `stories/*/spec/tracking/`
+  - tracking 文件在 `stories/<story>/volumes/vol-XXX/tracking/`，不是项目根
+  - content 文件在 `stories/<story>/volumes/vol-XXX/content/`，不是 `stories/<story>/content/`
+  - resources 在项目根的 `resources/`，不是 `.specify/memory/`

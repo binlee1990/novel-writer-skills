@@ -2,7 +2,7 @@
 description: 质量检查：对比概要与正文，检测一致性和AI味
 argument-hint: [章节号] [--range start-end]
 recommended-model: claude-sonnet-4-5-20250929
-allowed-tools: Read(//stories/**), Read(//tracking/**), Bash(ls:*)
+allowed-tools: Read(//stories/**), Bash(ls:*)
 ---
 
 用户输入：$ARGUMENTS
@@ -16,11 +16,15 @@ allowed-tools: Read(//stories/**), Read(//tracking/**), Bash(ls:*)
 - 章节号：分析单章
 - `--range start-end`：批量分析章节范围（如 `--range 1-20`）
 
+## 卷定位
+
+根据章节号和 `stories/<story>/creative-plan.md` 确定目标章节所属卷（如 `vol-001`）。
+
 ## 资源加载
 
-- 目标章节正文：`stories/<story>/content/chapter-XXX.md`
-- 对应概要：`stories/<story>/content/chapter-XXX-synopsis.md`
-- tracking 数据：`tracking/character-state.json`、`tracking/plot-tracker.json`
+- 目标章节正文：`stories/<story>/volumes/vol-XXX/content/chapter-YYY.md`
+- 对应概要：`stories/<story>/volumes/vol-XXX/content/chapter-YYY-synopsis.md`
+- 卷级 tracking：`stories/<story>/volumes/vol-XXX/tracking/character-state.json`、`stories/<story>/volumes/vol-XXX/tracking/plot-tracker.json`
 
 ## 检查项（5项）
 
