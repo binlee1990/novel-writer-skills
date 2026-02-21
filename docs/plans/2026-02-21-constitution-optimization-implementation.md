@@ -1,0 +1,132 @@
+# constitution.md 优化实施计划
+
+> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+
+**Goal:** 将 `templates/resources/constitution.md` 从通用写作建议重写为 AI 失败模式防护栏 + 写作规范的分层宪法。
+
+**Architecture:** 单文件替换。用设计文档中确定的分层宪法内容完整替换现有 140 行文件。不修改其他文件。
+
+**Tech Stack:** Markdown 模板文件，Jest 测试验证
+
+---
+
+### Task 1: 替换 constitution.md
+
+**Files:**
+- Modify: `templates/resources/constitution.md` (全文替换)
+
+**Step 1: 用 Write 工具写入新内容**
+
+将 `templates/resources/constitution.md` 完整替换为以下内容：
+
+```markdown
+# 创作宪法
+
+## 硬规则 — 违反即为质量事故
+
+### 一、角色区分（反同质化）
+
+**规则**：同一场景中的不同角色，对话风格、反应模式、决策逻辑必须可区分。
+
+**违规信号**（出现任一即需修正）：
+- 遮住角色名后，无法从对话内容判断说话者
+- 两个角色面对同一事件的内心反应用了相似的句式或情绪词
+- 配角的对话仅用于推进主角剧情，没有体现自身立场
+
+**执行方法**：
+- 写对话前先回顾角色档案中的语言习惯标签
+- 每个角色至少有一个标志性的表达方式（口头禅、句式偏好、话题倾向）
+- 配角发言时，从该配角的目标出发思考，不从"剧情需要什么"出发
+
+### 二、情节反套路（反公式化）
+
+**规则**：情节发展必须服从角色逻辑和因果链，禁止套用固定叙事公式。
+
+**违规信号**：
+- "误会 → 解释 → 和好"在同一作品中出现超过一次
+- 每次冲突都在同一章内解决，缺乏跨章悬念
+- 主角遇到危机时总是恰好获得新能力/外援
+- 反派智商随剧情需要波动（该精明时精明，该蠢时蠢）
+- 配角在危机时刻突然"及时赶到"而没有前置铺垫
+
+**执行方法**：
+- 冲突解决必须有成本：主角得到的同时必须失去什么
+- 允许角色犯错和失败，不是每次决策都是最优解
+- 危机解除必须基于前文已建立的资源（角色能力、道具、人脉）
+- 转折前必须有至少 2 处伏笔或暗示
+
+### 三、一致性校验（反矛盾）
+
+**规则**：所有创作内容必须与已建立的设定、tracking 记录保持一致。
+
+**违规信号**：
+- 角色能力/性格与 character-state.json 记录不符
+- 世界观规则前后矛盾（如前文说不能飞，后文突然飞了）
+- 角色关系状态与 relationships.json 不符（如已决裂的两人突然亲密）
+- 时间线冲突（如白天的场景突然变成夜晚）
+- 已消耗的资源/道具再次出现
+
+**执行方法**：
+- 扩写前必须检查本章出场角色的最新状态
+- 涉及世界观规则时回查 specification.md 的设定
+- 新增设定细节后必须更新对应 tracking 文件
+
+### 四、张力维持（反平淡）
+
+**规则**：每个场景必须包含至少一种张力来源。
+
+**张力类型**（任选其一即可）：
+- 信息差：读者知道角色不知道的，或反之
+- 目标冲突：场景中至少两个角色的即时目标相互矛盾
+- 时间压力：角色必须在限制内完成某事
+- 内心矛盾：角色的欲望与责任/道德相冲突
+- 悬念延续：场景结束时留下未解答的问题
+
+**违规信号**：
+- 场景中所有角色目标一致、没有任何对立面
+- 连续 3 段以上纯描写/叙述，没有推动任何冲突
+- 章节结尾一切圆满解决，没有遗留任何钩子
+
+## 软指导 — 写作规范
+
+### 分段格式
+- 禁止使用"一"、"二"、"三"等数字标记分段（破坏沉浸感）
+- 场景转换使用纯空行分段
+
+### 章节结构
+- 开篇 3 段内必须有钩子（悬念、冲突或反常）
+- 结尾必须留下至少一个未解决的问题或新的信息
+- 每章是一个相对完整的叙事单元，有清晰的场景目标
+
+### Show not Tell
+- 情感通过行为、对话、生理反应表现，不直接命名情绪
+  - ❌ 他很愤怒
+  - ✅ 他攥紧的拳头微微发抖，指甲掐进掌心
+- 角色性格通过决策和行动展现，不通过旁白描述
+- 世界观通过角色的日常互动自然展现，不集中灌输
+
+## 关联文件
+
+- **anti-ai.md** — 文风控制：句式混合、禁用AI高频词、反模式化表达
+- **style-reference.md** — 个性化风格：叙述视角、语言风格、节奏偏好（由 /specify 生成）
+```
+
+**Step 2: 运行测试验证**
+
+Run: `npx jest --config jest.config.cjs tests/integration/template-validation.test.ts -v`
+Expected: 全部 PASS（测试只检查文件存在且非空）
+
+Run: `npx jest --config jest.config.cjs tests/integration/init-project.test.ts -v`
+Expected: 全部 PASS（测试只检查 constitution.md 存在）
+
+**Step 3: Commit**
+
+```bash
+git add templates/resources/constitution.md
+git commit -m "refactor(constitution): rewrite as AI failure-mode guardrails
+
+Replace generic writing advice (140 lines) with layered constitution:
+- Hard rules: character differentiation, anti-formula plot, consistency checks, tension maintenance
+- Soft guidance: formatting, chapter structure, show-not-tell
+- Cross-references to anti-ai.md and style-reference.md"
+```
