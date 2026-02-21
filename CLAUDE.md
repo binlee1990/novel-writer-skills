@@ -70,6 +70,17 @@
 - **禁止使用 vitest** 运行测试，会因 `describe is not defined` 全部失败
 - 单文件测试：`npx jest --config jest.config.cjs <test-file-path>`
 
+## 发布流程
+
+- 发布通过 GitHub Actions 自动完成（`.github/workflows/publish.yml`）
+- 触发方式：打 tag 推送
+  ```bash
+  git tag v5.2.0
+  git push origin v5.2.0
+  ```
+- workflow 会自动：运行测试 → 构建 → 发布到 npm → 创建 GitHub Release
+- 也支持手动触发：GitHub Actions 页面 → Publish → Run workflow
+
 ## 项目结构
 
 - 计划文档存放在 `docs/plans/` 下，按阶段分目录
