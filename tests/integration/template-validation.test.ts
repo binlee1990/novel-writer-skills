@@ -87,4 +87,18 @@ describe('Template Files Validation', () => {
       }
     });
   });
+
+  describe('Volume Summary Template', () => {
+    it('should have volume-summary.md template', () => {
+      expect(fs.existsSync(path.join(TEMPLATES_DIR, 'volume-summary.md'))).toBe(true);
+    });
+
+    it('should have non-empty volume-summary template', () => {
+      const content = fs.readFileSync(
+        path.join(TEMPLATES_DIR, 'volume-summary.md'),
+        'utf-8'
+      );
+      expect(content.trim().length).toBeGreaterThan(0);
+    });
+  });
 });
