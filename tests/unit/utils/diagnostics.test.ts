@@ -28,9 +28,9 @@ describe('utils/diagnostics.ts', () => {
     await fs.ensureDir(path.join(tmpDir, 'stories'));
   }
 
-  /** 创建 tracking 文件 */
+  /** 创建卷级 tracking 文件 */
   async function createTrackingFiles(valid = true) {
-    const trackingDir = path.join(tmpDir, 'tracking');
+    const trackingDir = path.join(tmpDir, 'stories', 'test-story', 'volumes', 'vol-001', 'tracking');
     await fs.ensureDir(trackingDir);
     const files = ['character-state.json', 'plot-tracker.json', 'timeline.json', 'relationships.json'];
     for (const file of files) {
@@ -59,43 +59,41 @@ describe('utils/diagnostics.ts', () => {
   });
 
   describe('checkTrackingFiles', () => {
-    it('should pass when all tracking files exist', async () => {
+    it('should pass when all tracking files exist in volume', async () => {
       await createTrackingFiles();
       const result = await diagnostics.checkTrackingFiles(tmpDir);
       expect(result.passed).toBe(true);
     });
 
-    it('should fail when tracking dir is missing', async () => {
+    it('should pass when no stories dir exists (tracking created on demand)', async () => {
       const result = await diagnostics.checkTrackingFiles(tmpDir);
-      expect(result.passed).toBe(false);
-      expect(result.fix).toBe('novelws init');
+      expect(result.passed).toBe(true);
     });
 
-    it('should report missing tracking files', async () => {
-      const trackingDir = path.join(tmpDir, 'tracking');
-      await fs.ensureDir(trackingDir);
-      await fs.writeJson(path.join(trackingDir, 'character-state.json'), {});
+    it('should fail when volume tracking JSON is corrupted', async () => {
+      await createTrackingFiles(false);
       const result = await diagnostics.checkTrackingFiles(tmpDir);
       expect(result.passed).toBe(false);
-      expect(result.message).toContain('plot-tracker.json');
+      expect(result.message).toContain('JSON 格式损坏');
     });
   });
 
   describe('checkFileIntegrity', () => {
-    it('should pass when all JSON files are valid', async () => {
-      await createTrackingFiles(true);
+    it('should pass when config.json is valid', async () => {
+      await createMinimalProject();
       const result = await diagnostics.checkFileIntegrity(tmpDir);
       expect(result.passed).toBe(true);
     });
 
-    it('should fail when JSON files are corrupted', async () => {
-      await createTrackingFiles(false);
+    it('should fail when config.json is corrupted', async () => {
+      await fs.ensureDir(path.join(tmpDir, 'resources'));
+      await fs.writeFile(path.join(tmpDir, 'resources', 'config.json'), '{invalid', 'utf-8');
       const result = await diagnostics.checkFileIntegrity(tmpDir);
       expect(result.passed).toBe(false);
-      expect(result.message).toContain('JSON 格式损坏');
+      expect(result.message).toContain('config.json');
     });
 
-    it('should pass when no tracking dir exists', async () => {
+    it('should pass when no config exists', async () => {
       const result = await diagnostics.checkFileIntegrity(tmpDir);
       expect(result.passed).toBe(true);
     });

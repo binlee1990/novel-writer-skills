@@ -56,6 +56,7 @@ export const DIRS = {
   TEMPLATES: 'templates',
   TRACKING: 'tracking',
   RESOURCES: 'resources',
+  VOLUMES: 'volumes',
 } as const;
 
 /** 文件名常量 */
@@ -107,8 +108,6 @@ export function getProjectPaths(projectRoot: string) {
     // resources/
     resources: path.join(projectRoot, DIRS.RESOURCES),
     resourcesConfig: path.join(projectRoot, DIRS.RESOURCES, FILES.CONFIG),
-    // tracking/
-    tracking: path.join(projectRoot, DIRS.TRACKING),
     // stories/
     stories: path.join(projectRoot, DIRS.STORIES),
   };

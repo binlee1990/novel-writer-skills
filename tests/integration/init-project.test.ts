@@ -34,7 +34,6 @@ describe('novelws init', () => {
     expect(fs.existsSync(path.join(projectPath, '.claude'))).toBe(true);
     expect(fs.existsSync(path.join(projectPath, 'resources'))).toBe(true);
     expect(fs.existsSync(path.join(projectPath, 'stories'))).toBe(true);
-    expect(fs.existsSync(path.join(projectPath, 'tracking'))).toBe(true);
 
     // 验证子目录
     expect(fs.existsSync(path.join(projectPath, '.claude', 'commands'))).toBe(true);
@@ -107,27 +106,6 @@ describe('novelws init', () => {
 
     const content = fs.readFileSync(claudeMdPath, 'utf-8');
     expect(content.length).toBeGreaterThan(0);
-  });
-
-  it('should create tracking files', () => {
-    const projectName = 'tracking-test';
-
-    execSync(`node "${CLI_PATH}" init ${projectName} --no-git`, {
-      cwd: testDir,
-      stdio: 'pipe',
-    });
-
-    const trackingDir = path.join(testDir, projectName, 'tracking');
-    const requiredFiles = [
-      'character-state.json',
-      'relationships.json',
-      'plot-tracker.json',
-      'timeline.json',
-    ];
-
-    for (const file of requiredFiles) {
-      expect(fs.existsSync(path.join(trackingDir, file))).toBe(true);
-    }
   });
 
   it('should create resource files', () => {

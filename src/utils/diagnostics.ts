@@ -86,86 +86,67 @@ export class ProjectDiagnostics {
   }
 
   /**
-   * 检查 2: tracking 文件是否存在
+   * 检查 2: tracking 文件是否存在（卷级分片架构下按需创建）
    */
   async checkTrackingFiles(projectRoot: string): Promise<CheckResult> {
-    const trackingDir = getProjectPaths(projectRoot).tracking;
+    const storiesDir = path.join(projectRoot, 'stories');
 
-    if (!await fs.pathExists(trackingDir)) {
-      return {
-        name: 'Tracking 文件',
-        passed: false,
-        message: 'tracking 目录不存在',
-        fix: 'novelws init',
-      };
+    if (!await fs.pathExists(storiesDir)) {
+      return { name: 'Tracking 文件', passed: true, message: 'tracking 文件在 /write 首次执行时按需创建' };
     }
 
-    const expectedFiles = [
-      'character-state.json',
-      'plot-tracker.json',
-      'timeline.json',
-      'relationships.json',
-    ];
+    // 扫描 stories/*/volumes/*/tracking/ 是否有损坏的 JSON
+    const stories = await fs.readdir(storiesDir).catch(() => [] as string[]);
+    for (const story of stories) {
+      const volumesDir = path.join(storiesDir, story, 'volumes');
+      if (!await fs.pathExists(volumesDir)) continue;
 
-    const missing: string[] = [];
-    for (const file of expectedFiles) {
-      if (!await fs.pathExists(path.join(trackingDir, file))) {
-        missing.push(file);
-      }
-    }
+      const volumes = await fs.readdir(volumesDir).catch(() => [] as string[]);
+      for (const vol of volumes) {
+        const trackingDir = path.join(volumesDir, vol, 'tracking');
+        if (!await fs.pathExists(trackingDir)) continue;
 
-    if (missing.length === 0) {
-      return { name: 'Tracking 文件', passed: true, message: 'tracking 文件存在' };
-    }
-
-    return {
-      name: 'Tracking 文件',
-      passed: false,
-      message: `缺少 tracking 文件: ${missing.join(', ')}`,
-      fix: 'novelws init',
-    };
-  }
-
-  /**
-   * 检查 3: JSON 文件完整性
-   */
-  async checkFileIntegrity(projectRoot: string): Promise<CheckResult> {
-    const trackingDir = getProjectPaths(projectRoot).tracking;
-
-    if (!await fs.pathExists(trackingDir)) {
-      return { name: '文件完整性', passed: true, message: '无 tracking 文件需要验证' };
-    }
-
-    const jsonFiles = [
-      'character-state.json',
-      'plot-tracker.json',
-      'timeline.json',
-      'relationships.json',
-    ];
-
-    const corrupted: string[] = [];
-    for (const file of jsonFiles) {
-      const filePath = path.join(trackingDir, file);
-      if (await fs.pathExists(filePath)) {
-        try {
-          const content = await fs.readFile(filePath, 'utf-8');
-          JSON.parse(content);
-        } catch {
-          corrupted.push(file);
+        const jsonFiles = await fs.readdir(trackingDir).catch(() => [] as string[]);
+        for (const file of jsonFiles.filter(f => f.endsWith('.json'))) {
+          try {
+            const content = await fs.readFile(path.join(trackingDir, file), 'utf-8');
+            JSON.parse(content);
+          } catch {
+            return {
+              name: 'Tracking 文件',
+              passed: false,
+              message: `JSON 格式损坏: ${story}/volumes/${vol}/tracking/${file}`,
+              fix: '手动修复损坏的 JSON 文件',
+            };
+          }
         }
       }
     }
 
-    if (corrupted.length === 0) {
-      return { name: '文件完整性', passed: true, message: 'JSON 文件格式正确' };
+    return { name: 'Tracking 文件', passed: true, message: 'tracking 文件正常' };
+  }
+
+  /**
+   * 检查 3: JSON 文件完整性（已合并到检查 2 的卷级扫描中）
+   */
+  async checkFileIntegrity(projectRoot: string): Promise<CheckResult> {
+    const configPath = path.join(projectRoot, 'resources', 'config.json');
+
+    if (await fs.pathExists(configPath)) {
+      try {
+        const content = await fs.readFile(configPath, 'utf-8');
+        JSON.parse(content);
+      } catch {
+        return {
+          name: '文件完整性',
+          passed: false,
+          message: 'config.json 格式损坏',
+          fix: '手动修复 resources/config.json',
+        };
+      }
     }
 
-    return {
-      name: '文件完整性',
-      passed: false,
-      message: `JSON 格式损坏: ${corrupted.join(', ')}`,
-      fix: '手动修复损坏的 JSON 文件',
-    };
+    return { name: '文件完整性', passed: true, message: '配置文件格式正确' };
   }
 
   /**

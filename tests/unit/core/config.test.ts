@@ -18,6 +18,7 @@ describe('core/config.ts', () => {
       expect(DIRS.TEMPLATES).toBe('templates');
       expect(DIRS.TRACKING).toBe('tracking');
       expect(DIRS.RESOURCES).toBe('resources');
+      expect(DIRS.VOLUMES).toBe('volumes');
     });
   });
 
@@ -68,7 +69,6 @@ describe('core/config.ts', () => {
       expect(paths.claude).toBe(path.join(projectRoot, '.claude'));
       expect(paths.commands).toBe(path.join(projectRoot, '.claude', 'commands'));
       expect(paths.stories).toBe(path.join(projectRoot, 'stories'));
-      expect(paths.tracking).toBe(path.join(projectRoot, 'tracking'));
     });
   });
 

@@ -53,7 +53,6 @@ export function registerInitCommand(program: Command): void {
           paths.claude,
           paths.commands,
           paths.resources,
-          paths.tracking,
           paths.stories,
         ];
 
@@ -96,11 +95,6 @@ export function registerInitCommand(program: Command): void {
         if (await fs.pathExists(templates.resources)) {
           await fs.copy(templates.resources, paths.resources);
           spinner.text = '已安装资源文件...';
-        }
-
-        // 复制 tracking/ 模板（4 个 JSON 文件）
-        if (await fs.pathExists(templates.tracking)) {
-          await fs.copy(templates.tracking, paths.tracking);
         }
 
         // Git 初始化
