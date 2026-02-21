@@ -1,7 +1,7 @@
 ---
 description: 定义故事规格，明确要创造什么样的作品
 argument-hint: [故事描述]
-allowed-tools: Read(//stories/**/specification.md), Write(//stories/**/specification.md), Read(//resources/constitution.md), Write(//resources/style-reference.md), Bash(ls:*), Bash(mkdir:*)
+allowed-tools: Read(//stories/**/specification.md), Write(//stories/**/specification.md), Read(//resources/constitution.md), Read(//resources/anti-ai.md), Write(//resources/style-reference.md), Bash(ls:*), Bash(mkdir:*)
 ---
 
 用户输入：$ARGUMENTS
@@ -70,7 +70,11 @@ allowed-tools: Read(//stories/**/specification.md), Write(//stories/**/specifica
 
 ### 4. 生成风格参考
 
-如果 `resources/style-reference.md` 仍是模板默认内容（含 `[第一人称/第三人称有限/第三人称全知]`），根据用户的风格偏好自动填充。
+如果 `resources/style-reference.md` 仍是模板默认内容（含 `[第一人称/第三人称有限/第三人称全知]`），根据用户的风格偏好自动填充：
+
+- 在「故事类型」字段填入步骤 2 中确定的类型
+- 参考模板中的 HTML 注释提示，为每个维度选择符合该类型的默认值（用户未明确指定时）
+- 读取 `resources/anti-ai.md` 的「类型特有禁用词」段落，将对应类型的禁用词追加到「风格禁忌」字段
 
 ### 5. 后续建议
 

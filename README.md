@@ -101,9 +101,9 @@ novelws init my-novel --model claude-sonnet-4-5-20250929
 
 | 文件 | 用途 | 加载阶段 |
 |------|------|---------|
-| `resources/constitution.md` | 创作宪法，定义最高创作原则 | /specify |
-| `resources/style-reference.md` | 风格参考，叙述视角/语言/节奏 | /expand |
-| `resources/anti-ai.md` | 反AI写作规范 | /expand |
+| `resources/constitution.md` | 创作宪法：4 条硬规则（角色区分、情节反套路、一致性校验、张力维持）+ 结构规范 | /specify |
+| `resources/style-reference.md` | 风格参考：9 维度风格锚点，含类型感知提示，由 /specify 自动填充 | /expand |
+| `resources/anti-ai.md` | 反AI规范：3 层防御（词汇级 ~40 禁用词 + 句段级 + 叙述级）+ 类型特有禁用词 | /specify, /expand, /analyze |
 
 ## Tracking 系统
 

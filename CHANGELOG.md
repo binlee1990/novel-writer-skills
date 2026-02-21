@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.2.0] - 2026-02-21
+
+### Changed
+
+- **constitution.md 重构** — 删除与 anti-ai.md 重叠 95% 的 "Show not Tell" 段落和无用的 "关联文件" 段落；所有违规信号改为 checklist + `→` 修正动作格式；"软指导"重命名为"结构规范"
+- **anti-ai.md 增强** — 通用禁用词从 ~25 扩充到 ~40（新增心理类、描写类）；新增类型特有禁用词段落（玄幻/都市/言情/悬疑各 ~10 词），通过 /specify 注入 style-reference.md；新增 2 个完整正面段落示例；用 HTML 注释标记 /expand 加载区和 /specify 参考区边界
+- **style-reference.md 增强** — 新增"故事类型"字段；每个维度添加类型推荐的 HTML 注释提示；"参考锚点"和"风格禁忌"添加具体示例值
+- **specify.md 联动** — 新增读取 anti-ai.md 权限，步骤 4 添加类型禁用词自动注入到 style-reference.md 风格禁忌字段的逻辑
+- **analyze.md 联动** — 新增读取 anti-ai.md 权限，AI味检测改为对照禁用词表精确检查
+
+### Added
+
+- **类型套路警示** — constitution.md 新增玄幻/都市/言情/悬疑四类型常见套路示例
+- **类型特有禁用词** — anti-ai.md 新增按故事类型分组的 AI 味词汇（由 /specify 注入 style-reference.md）
+- **正面段落示例** — anti-ai.md 新增场景展开和对话的完整正面示例段落
+
+---
+
 ## [5.1.0] - 2026-02-20
 
 ### Added

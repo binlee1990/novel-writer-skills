@@ -2,7 +2,7 @@
 description: 质量检查：对比概要与正文，检测一致性和AI味
 argument-hint: [章节号] [--range start-end]
 recommended-model: claude-sonnet-4-5-20250929
-allowed-tools: Read(//stories/**), Bash(ls:*)
+allowed-tools: Read(//stories/**), Read(//resources/anti-ai.md), Bash(ls:*)
 ---
 
 用户输入：$ARGUMENTS
@@ -62,11 +62,11 @@ allowed-tools: Read(//stories/**), Bash(ls:*)
 评分：✅ / ⚠️ / ❌
 
 ### 5. AI味检测
-检查常见AI写作痕迹：
-- AI高频词使用（然而、殊不知、缓缓、深邃等）
-- 句式重复度
+读取 `resources/anti-ai.md` 的禁用词表，对照正文检查：
+- AI高频词使用（对照禁用词汇清单逐项检查）
+- 句式重复度（连续相同结构、段落开头重复）
 - 空洞描写比例
-- 段落结构单一性
+- 段落结构单一性（是否全部 3-4 句等长段落）
 
 评分：✅ 自然 / ⚠️ 轻微AI味 / ❌ 明显AI味
 
