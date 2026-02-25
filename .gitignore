@@ -54,3 +54,7 @@ other/
 
 # docs
 .docs
+
+# Dashboard
+dist/dashboard/
+dashboard/node_modules/
