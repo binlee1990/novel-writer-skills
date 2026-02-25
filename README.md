@@ -15,6 +15,8 @@
 - **自动 Tracking** — 4 个 JSON 文件自动追踪角色状态、关系、情节线、时间线
 - **精准上下文加载** — 每个命令只加载最小必要上下文，控制 token 消耗
 - **质量检查** — 概要符合度、角色一致性、伏笔完整性、连贯性、AI味检测
+- **Web Dashboard** — 可视化创作仪表盘，角色管理、关系网络、时间线、情节追踪、主角成长
+- **DB 增强模式** — PostgreSQL 数据库支持，含主角技能/道具/修炼进度追踪
 
 ## 快速开始
 
@@ -167,7 +169,56 @@ novelws check
 
 # 升级项目（更新命令和资源文件）
 novelws upgrade
+
+# 启动可视化仪表盘
+novelws dashboard
+novelws dashboard --port 8080 --no-open
 ```
+
+## Web Dashboard
+
+可视化创作仪表盘，基于 Vue 3 + Element Plus + ECharts：
+
+```bash
+novelws dashboard
+```
+
+浏览器自动打开 `http://localhost:3210`，包含 7 个视图：
+
+| 页面 | 功能 |
+|------|------|
+| 仪表盘 | 总字数、章节数、卷数、角色数、情节线、伏笔统计 + 各卷字数/章节图表 |
+| 角色管理 | 角色列表、状态、修为弧线 |
+| 主角成长 | 技能列表（按类别折叠）、道具背包、修炼曲线图 |
+| 关系网络 | 力导向关系图 |
+| 时间线 | 章节事件时间轴 |
+| 情节追踪 | 情节线状态、伏笔矩阵 |
+| 章节浏览 | 章节列表、字数统计 |
+
+支持双数据源：PostgreSQL（DB 增强模式）或文件系统（自动降级）。
+
+## DB 增强模式
+
+可选的 PostgreSQL 数据库支持，提供更精确的上下文查询和主角追踪：
+
+```bash
+# 1. 配置数据库连接
+# 编辑 resources/config.json 中的 database 配置
+
+# 2. 安装依赖
+pip install -r scripts/requirements.txt
+
+# 3. 初始化数据库
+python scripts/phase_a_init_db.py
+
+# 4. 初始化主角数据表（可选）
+python scripts/db_init_protagonist.py
+```
+
+DB 模式下，`/write`、`/expand`、`/analyze` 命令自动获取：
+- 精确的角色状态、伏笔、关系、时间线数据
+- 主角修炼进度、技能清单、道具状态
+- 一致性校验基准（技能习得时间线 + 道具持有状态）
 
 ## 贡献
 

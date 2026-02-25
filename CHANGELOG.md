@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.3.0] - 2026-02-26
+
+### Added
+
+- **Web Dashboard** — 基于 Vue 3 + Element Plus + ECharts 的可视化创作仪表盘
+  - 6 个视图页面：仪表盘、角色管理、关系网络、时间线、情节追踪、章节浏览
+  - `novelws dashboard` CLI 子命令，支持 `--port`、`--dev`、`--no-open` 选项
+  - Express 后端 + 双数据源（PostgreSQL / 文件系统自动降级）
+- **主角成长系统** — protagonist 5 张表（技能、技能事件、道具、道具事件、修炼进度）+ 3 个视图
+  - `db_init_protagonist.py` — 建表 + 首次数据导入脚本
+  - `db_context.py` — write/expand/analyze/dashboard 四模式追加主角数据段
+  - `db_volume_switch.py` — 卷切换摘要追加主角状态段
+  - 命令文件 write.md/expand.md/analyze.md 追加 DB 增强模式主角描述
+- **Dashboard 主角成长页面** — 统计卡片 + 技能列表（按类别折叠）+ 道具背包表格 + 修炼曲线图
+  - 仪表盘首页追加「主角修为」「技能/道具」统计卡片
+  - 4 个 REST API 端点：overview / skills / inventory / cultivation
+  - TypeScript 类型定义：ProtagonistSkill、ProtagonistItem、CultivationNode、ProtagonistOverview
+- **Dashboard 可视化测试指南** — Playwright MCP + Mock 数据的浏览器验证方案（`docs/guide/dashboard-visual-test.md`）
+
+### Changed
+
+- **`db_sync.py`** — 追加 protagonist 表的同步支持
+- **`phase_a_init_db.py`** — 追加 protagonist 5 张表的 DDL
+- **DataSource 接口** — 新增 4 个 protagonist 方法，DB 实现查询视图，FS 返回空值
+- **测试** — 新增 protagonist 路由测试、DB 数据源 protagonist 测试，template-validation 更新为 5 个脚本
+
+### Technical
+
+- 23 suites，124 个测试全部通过
+- Dashboard 前端构建零错误
+- TypeScript 编译产物正常生成
+
+---
+
 ## [5.2.0] - 2026-02-21
 
 ### Changed
