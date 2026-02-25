@@ -60,6 +60,33 @@ stories/<story>/
 - /write 完成后自动更新卷级 tracking 骨架
 - /expand 完成后补充卷级 tracking 细节
 
+## DB 增强（可选）
+
+项目支持 PostgreSQL 双轨并行模式：DB 可用时增强上下文精度，不可用时回退到纯文件系统流程。
+
+### 配置
+
+编辑 `resources/config.json` 中的 `database` 字段：
+- `enabled: true` 启用 DB 模式
+- 配置 host、port、dbname、user、password
+- schema 默认为 `novelws`
+
+### scripts/ 目录
+
+| 脚本 | 用途 |
+|------|------|
+| `phase_a_init_db.py` | 初始化数据库（建表 + 视图） |
+| `db_sync.py` | 文件系统 tracking → DB 同步（幂等） |
+| `db_context.py` | 从 DB 生成精确上下文（write/expand/analyze 模式） |
+| `db_volume_switch.py` | 从 DB 生成 volume-summary.md（卷切换） |
+
+### 双轨机制
+
+- /write、/expand、/analyze 命令会检测 `database.enabled`
+- DB 可用时：用 `db_context.py` 生成精确上下文，完成后用 `db_sync.py` 同步
+- DB 不可用或脚本执行失败时：自动回退到纯文件系统流程，不影响正常创作
+- 文件系统 tracking 始终是主数据源，DB 是增强层
+
 ## 会话级资源复用
 
 不同命令的资源复用策略不同：

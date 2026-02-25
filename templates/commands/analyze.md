@@ -2,7 +2,7 @@
 description: 质量检查：对比概要与正文，检测一致性和AI味
 argument-hint: [章节号] [--range start-end]
 recommended-model: claude-sonnet-4-5-20250929
-allowed-tools: Read(//stories/**), Read(//resources/anti-ai.md), Bash(ls:*)
+allowed-tools: Read(//stories/**), Read(//resources/anti-ai.md), Bash(ls:*), Bash(python:scripts/*)
 ---
 
 用户输入：$ARGUMENTS
@@ -25,6 +25,14 @@ allowed-tools: Read(//stories/**), Read(//resources/anti-ai.md), Bash(ls:*)
 - 目标章节正文：`stories/<story>/volumes/vol-XXX/content/chapter-YYY.md`
 - 对应概要：`stories/<story>/volumes/vol-XXX/content/chapter-YYY-synopsis.md`
 - 卷级 tracking：`stories/<story>/volumes/vol-XXX/tracking/character-state.json`、`stories/<story>/volumes/vol-XXX/tracking/plot-tracker.json`
+
+**DB 增强模式**：如果 `resources/config.json` 中 `database.enabled = true`，可用 DB 上下文替代 tracking 文件读取：
+
+```
+python scripts/db_context.py --chapter <全局章节号> --mode analyze
+```
+
+输出包含本章伏笔检查清单、角色状态基准、时间线连续性和一致性警告。
 
 ## 检查项（5项）
 

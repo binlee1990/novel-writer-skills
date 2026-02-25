@@ -2,7 +2,7 @@
 description: 将章节概要扩写为 3000-5000 字正文
 argument-hint: [章节号] [--batch N]
 recommended-model: claude-opus-4-6
-allowed-tools: Read(//stories/**), Write(//stories/**/content/**), Read(//stories/**/tracking/**), Write(//stories/**/tracking/**), Read(//resources/style-reference.md), Read(//resources/anti-ai.md), Read(//resources/constitution.md), Bash(ls:*)
+allowed-tools: Read(//stories/**), Write(//stories/**/content/**), Read(//stories/**/tracking/**), Write(//stories/**/tracking/**), Read(//resources/style-reference.md), Read(//resources/anti-ai.md), Read(//resources/constitution.md), Bash(ls:*), Bash(python:scripts/*)
 ---
 
 用户输入：$ARGUMENTS
@@ -37,6 +37,14 @@ allowed-tools: Read(//stories/**), Write(//stories/**/content/**), Read(//storie
 ## 资源加载（3 层结构，从文件系统重新加载）
 
 所有资源必须从文件系统读取，不复用对话中的缓存。总上下文控制在 3500 字以内。
+
+**DB 增强模式**：如果 `resources/config.json` 中 `database.enabled = true`，可用 DB 上下文替代第 3 层的 tracking 文件读取：
+
+```
+python scripts/db_context.py --chapter <全局章节号> --mode expand
+```
+
+输出包含本章伏笔、活跃角色状态、角色关系、前序衔接，直接替代手动读取 tracking JSON。第 1、2 层仍从文件系统加载。
 
 ### 第 1 层 — 全局视角
 
@@ -100,13 +108,21 @@ allowed-tools: Read(//stories/**), Write(//stories/**/content/**), Read(//storie
 - 对话中透露的新信息 → 更新 `volumes/vol-XXX/tracking/` 中的 character-state 或 relationships
 - 新的场景细节 → 如有重要设定变化，更新相关 tracking
 
-### 5. 批量模式
+### 5. DB 同步（可选）
+
+如果 `resources/config.json` 中 `database.enabled = true`，在 tracking 更新完成后运行：
+
+```
+python scripts/db_sync.py --vol <当前卷号>
+```
+
+### 6. 批量模式
 
 如果指定了 `--batch N`，重复步骤 2-4 共 N 次。每章完成后输出进度和字数。
 
 **批量模式资源隔离**：每章都必须重新从文件系统加载所有资源。批量模式中每章视为独立的扩写任务。如果批量过程中跨卷，需要切换到下一卷的 tracking 和 content 目录。
 
-### 6. 后续建议
+### 7. 后续建议
 
 单章完成：「第X章扩写完成（XXXX字，vol-XXX）。继续 /expand [X+1] 或使用 /analyze X 检查质量。」
 

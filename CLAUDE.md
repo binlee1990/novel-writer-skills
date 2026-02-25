@@ -16,9 +16,14 @@
 ### Bash 工具（Windows 环境）
 - 本项目运行在 **Windows** 平台上，Bash 通过兼容层执行
 - Windows 路径末尾的反斜杠 `\` 会与引号冲突，使用正斜杠 `/` 代替
-  - ✅ `ls D:/repository/cursor/novel-writer-skills/docs/plans/`
-  - ❌ `ls "D:\repository\cursor\novel-writer-skills\docs\plans\"`
+  - ✅ `ls D:/repository/novel-writer-skills/docs/plans/`
+  - ❌ `ls "D:\repository\novel-writer-skills\docs\plans\"`
 - 路径中包含空格时使用双引号，但避免路径以 `\` 结尾再紧跟 `"`
+- **WSL 冲突问题**：`npx` 和 `npm` 命令可能触发 WSL 而非 MSYS bash，导致 `execvpe(/bin/bash) failed` 错误
+  - **解决方案**：直接用 `node` 调用 JS 入口，绕过 shell 脚本包装
+  - ✅ `node node_modules/jest-cli/bin/jest.js --config jest.config.cjs`
+  - ❌ `npx jest --config jest.config.cjs`（可能触发 WSL 错误）
+  - 如果 `npx`/`npm` 命令报 WSL 错误，一律改用 `node` 直接调用对应的 JS 入口文件
 
 ### Glob 工具使用优化
 - Glob 工具**不会自动排除** `node_modules`、`dist`、`.git` 等目录，搜索 `**/*.md` 这类宽泛 pattern 时结果会被淹没
@@ -32,43 +37,12 @@
   - ✅ `Glob pattern="*.md" path="D:/repository/cursor/novel-writer-skills/docs"` （限定子目录）
   - ❌ `Glob pattern="**/README.md"` （会扫描 node_modules，结果被淹没）
 
-### Bash 最小化原则
-- **禁止用 Bash 执行文件读写操作**，必须使用专用工具替代：
-  - 读取文件：用 `Read` 工具，**禁止** `cat`/`head`/`tail`
-  - 编辑文件：用 `Edit` 工具，**禁止** `sed`/`awk`
-  - 创建文件：用 `Write` 工具，**禁止** `echo >`/`cat <<EOF`
-  - 搜索文件：用 `Grep`/`Glob` 工具，**禁止** `grep`/`find`/`rg`
-- Bash **仅限**以下场景使用：
-  - `git` 命令（commit、add、status、log 等）
-  - `npx jest` / `npm test`（运行测试）
-  - `npm` / `npx` 命令（包管理、脚本执行）
-  - 其他必须在 shell 中执行的系统命令
-- **Subagent / 后台 agent 同样遵守此规则**：在 subagent prompt 中必须明确指出使用 Read/Edit/Write 替代 Bash 文件操作，避免产生不必要的终端确认请求
-
-### Skill Subagent 写文件限制
-- **Skill subagent 内禁止写大文件**：当 subagent 上下文已经很长（读取了大量文件）时，生成 Write 工具调用的参数可能被截断为空，导致 `file_path` 和 `content` 缺失报错
-- **解决方案**：如果 skill subagent 需要生成大文件（如实现计划），应让 subagent 只返回内容，由主线程执行 Write
-- 或者直接在主线程完成文件写入，不委托给 skill subagent
-- 如果必须在 subagent 内写文件，确保 subagent 上下文尽量精简，不要预先读取大量无关文件
-
-### 并发编辑规则
-- **禁止多个 agent 同时编辑同一文件**：当使用后台 agent 并行处理时，必须确保每个文件只分配给一个 agent
-- 如果主线程和后台 agent 都需要编辑同一文件，由 agent 完成后主线程再 Read + Edit
-- Edit 前必须 Read，且两次操作之间该文件不能被其他 agent 修改
-
-### 并行任务与共享文件的执行策略
-- 当多个任务各自修改不同文件、但都需要修改同一个共享文件（如测试文件）时，**将共享文件的修改从 subagent 中剥离**：
-  1. 并行派发 subagent，每个只负责修改各自独立的文件并 git commit
-  2. 所有 subagent 完成后，由主线程统一修改共享文件（如一次性添加所有测试用例）
-  3. 主线程提交共享文件的修改、运行测试验证
-- **禁止**将共享文件分配给某一个 subagent 修改后再让其他 subagent 串行等待
-- 这样既保证了并行效率，又避免了文件编辑冲突
-
 ### 测试框架
 - 本项目使用 **Jest**（配置文件：`jest.config.cjs`）
-- 运行测试：`npm test`（等价于 `jest --config jest.config.cjs`）
+- 运行测试（推荐，避免 WSL 问题）：`node node_modules/jest-cli/bin/jest.js --config jest.config.cjs`
+- 备选：`npm test`（等价于 `jest --config jest.config.cjs`，但可能触发 WSL 错误）
 - **禁止使用 vitest** 运行测试，会因 `describe is not defined` 全部失败
-- 单文件测试：`npx jest --config jest.config.cjs <test-file-path>`
+- 单文件测试：`node node_modules/jest-cli/bin/jest.js --config jest.config.cjs <test-file-path>`
 
 ## 发布流程
 
@@ -100,6 +74,12 @@ my-novel/
 │   ├── constitution.md
 │   ├── style-reference.md
 │   └── anti-ai.md
+├── scripts/            # DB 工具脚本（可选）
+│   ├── requirements.txt
+│   ├── phase_a_init_db.py
+│   ├── db_sync.py
+│   ├── db_context.py
+│   └── db_volume_switch.py
 ├── stories/
 │   └── <story>/
 │       ├── specification.md

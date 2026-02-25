@@ -1,15 +1,15 @@
 ---
-description: 逐章生成剧情概要（200-500字），同步更新 tracking
+description: 逐章生成剧情概要（200-500字），严格控制字数，同步更新 tracking
 argument-hint: [章节号] [--batch N]
 recommended-model: claude-opus-4-6
-allowed-tools: Read(//stories/**), Write(//stories/**), Bash(ls:*), Bash(mkdir:*)
+allowed-tools: Read(//stories/**), Write(//stories/**), Bash(ls:*), Bash(mkdir:*), Bash(python:scripts/*)
 ---
 
 用户输入：$ARGUMENTS
 
 ## 目标
 
-为指定章节生成 200-500 字的纯剧情概要，同步生成 tracking 骨架数据。
+为指定章节生成 200-500 字的纯剧情概要（严格控制字数），同步生成 tracking 骨架数据。
 
 ## 参数解析
 
@@ -37,6 +37,12 @@ allowed-tools: Read(//stories/**), Write(//stories/**), Bash(ls:*), Bash(mkdir:*
 
 当目标章节属于新卷时（上一卷已完成）：
 
+**路径 A — DB 模式**（`resources/config.json` 中 `database.enabled = true`）：
+
+运行 `python scripts/db_volume_switch.py --vol <新卷号>` 自动生成 volume-summary.md。
+
+**路径 B — 文件模式**（默认）：
+
 1. 读取上一卷 `volumes/vol-NNN/tracking/` 的 4 个 JSON 文件
 2. 读取上一卷最后一章 synopsis 的章末钩子
 3. 读取 `creative-plan.md` 中下一卷的大纲段落
@@ -46,7 +52,7 @@ allowed-tools: Read(//stories/**), Write(//stories/**), Bash(ls:*), Bash(mkdir:*
    - 活跃伏笔：从 plot-tracker.json 提取 status=planted/hinted 的条目
    - 关键关系：从 relationships.json 提取活跃角色间的关系
    - 待续悬念：上一卷末章的章末钩子
-5. volume-summary.md 控制在 500-1000 字
+5. volume-summary.md 控制在 500-2000 字（严格控制字数）
 
 ## 资源加载（卷级）
 
@@ -74,7 +80,7 @@ allowed-tools: Read(//stories/**), Write(//stories/**), Bash(ls:*), Bash(mkdir:*
 
 ### 4. 生成概要
 
-为当前章节生成 200-500 字纯剧情概要，包含：
+为当前章节生成 200-500 字纯剧情概要（严格控制字数），包含：
 
 - **本章标题**：简短的章节标题
 - **核心事件**：本章发生的主要事件（1-3个）
@@ -105,11 +111,21 @@ allowed-tools: Read(//stories/**), Write(//stories/**), Bash(ls:*), Bash(mkdir:*
 **timeline.json**：
 - 添加本章事件到 events（chapter, time, event）
 
-### 6. 批量模式
+### 6. DB 同步（可选）
+
+如果 `resources/config.json` 中 `database.enabled = true`，在 tracking 更新完成后运行：
+
+```
+python scripts/db_sync.py --vol <当前卷号>
+```
+
+将本卷 tracking 数据同步到 PostgreSQL。
+
+### 7. 批量模式
 
 如果指定了 `--batch N`，重复步骤 3-5 共 N 次。如果批量过程中跨卷，自动触发卷切换。
 
-### 7. 后续建议
+### 8. 后续建议
 
 单章完成：「第X章概要已生成（vol-XXX）。继续 /write [X+1] 或 /write --batch 20 批量生成。」
 

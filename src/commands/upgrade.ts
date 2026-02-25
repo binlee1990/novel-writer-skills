@@ -18,6 +18,7 @@ export function registerUpgradeCommand(program: Command): void {
   program
     .command('upgrade')
     .option('--commands', '更新命令文件')
+    .option('--scripts', '更新 DB 工具脚本')
     .option('--model <name>', '指定命令使用的 AI 模型')
     .option('--all', '更新所有内容')
     .option('-y, --yes', '跳过确认提示')
@@ -88,7 +89,31 @@ export function registerUpgradeCommand(program: Command): void {
           await fs.copy(templates.resources, paths.resources, { overwrite: true });
         }
 
+        // 更新 scripts
+        spinner.text = '更新 DB 工具脚本...';
+        if (await fs.pathExists(templates.scripts)) {
+          await fs.ensureDir(paths.scripts);
+          await fs.copy(templates.scripts, paths.scripts, { overwrite: true });
+        }
+
         config.version = getVersion();
+
+        // 向后兼容：补充新字段
+        if (!config.story) {
+          config.story = '';
+        }
+        if (!config.database) {
+          config.database = {
+            enabled: false,
+            host: '127.0.0.1',
+            port: 5432,
+            dbname: 'postgres',
+            user: 'postgres',
+            password: '',
+            schema: 'novelws',
+          };
+        }
+
         await fs.writeJson(paths.resourcesConfig, config, { spaces: 2 });
 
         spinner.succeed(chalk.green('升级完成！\n'));
@@ -97,6 +122,7 @@ export function registerUpgradeCommand(program: Command): void {
         console.log('  • Slash Commands 已更新');
         console.log('  • CLAUDE.md 已更新');
         console.log('  • 资源文件已更新');
+        console.log('  • DB 工具脚本已更新');
         console.log(`  • 版本号: ${projectVersion} → ${getVersion()}`);
       } catch (error) {
         console.error(chalk.red('\n❌ 升级失败:'), error);

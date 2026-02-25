@@ -19,6 +19,7 @@ describe('core/config.ts', () => {
       expect(DIRS.TRACKING).toBe('tracking');
       expect(DIRS.RESOURCES).toBe('resources');
       expect(DIRS.VOLUMES).toBe('volumes');
+      expect(DIRS.SCRIPTS).toBe('scripts');
     });
   });
 
@@ -69,6 +70,7 @@ describe('core/config.ts', () => {
       expect(paths.claude).toBe(path.join(projectRoot, '.claude'));
       expect(paths.commands).toBe(path.join(projectRoot, '.claude', 'commands'));
       expect(paths.stories).toBe(path.join(projectRoot, 'stories'));
+      expect(paths.scripts).toBe(path.join(projectRoot, 'scripts'));
     });
   });
 
@@ -81,6 +83,7 @@ describe('core/config.ts', () => {
       expect(templates.dotClaude).toBe(path.join(templatesDir, 'dot-claude'));
       expect(templates.resources).toBe(path.join(templatesDir, 'resources'));
       expect(templates.tracking).toBe(path.join(templatesDir, 'tracking'));
+      expect(templates.scripts).toBe(path.join(templatesDir, 'scripts'));
       expect(templates.all).toBe(templatesDir);
     });
   });

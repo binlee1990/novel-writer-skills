@@ -66,6 +66,16 @@ export function registerInitCommand(program: Command): void {
           type: 'novel',
           version: getVersion(),
           created: new Date().toISOString(),
+          story: '',
+          database: {
+            enabled: false,
+            host: '127.0.0.1',
+            port: 5432,
+            dbname: 'postgres',
+            user: 'postgres',
+            password: '',
+            schema: 'novelws',
+          },
         };
 
         await fs.writeJson(paths.resourcesConfig, config, { spaces: 2 });
@@ -95,6 +105,12 @@ export function registerInitCommand(program: Command): void {
         if (await fs.pathExists(templates.resources)) {
           await fs.copy(templates.resources, paths.resources);
           spinner.text = '已安装资源文件...';
+        }
+
+        // 复制 scripts/ 模板（DB 工具脚本）
+        if (await fs.pathExists(templates.scripts)) {
+          await fs.copy(templates.scripts, paths.scripts);
+          spinner.text = '已安装 DB 工具脚本...';
         }
 
         // Git 初始化
@@ -130,6 +146,11 @@ export function registerInitCommand(program: Command): void {
         console.log(`     ${chalk.cyan('/analyze')}  - 质量检查`);
 
         console.log('\n' + chalk.dim('提示: 斜杠命令在 Claude Code 内部使用，不是在终端中'));
+
+        console.log('\n' + chalk.yellow('     🗄️  DB 增强（可选）:'));
+        console.log(`     编辑 ${chalk.white('resources/config.json')} 中的 database 配置`);
+        console.log(`     运行 ${chalk.white('pip install -r scripts/requirements.txt')}`);
+        console.log(`     运行 ${chalk.white('python scripts/phase_a_init_db.py')} 初始化数据库`);
       } catch (error) {
         spinner.fail(chalk.red('项目初始化失败'));
         console.error(error);
