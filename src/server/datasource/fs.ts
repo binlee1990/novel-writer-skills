@@ -136,23 +136,195 @@ export class FsDataSource implements DataSource {
     return chapters.sort((a, b) => a.globalNumber - b.globalNumber);
   }
 
-  // --- 以下方法将在 Task 7 实现 ---
+  // --- Tracking 辅助方法 ---
 
-  async getCharacters(_story: string, _vol?: number): Promise<Character[]> { return []; }
-  async getCharacterArc(_story: string, _name: string): Promise<CharacterState[]> { return []; }
-  async getRelationships(_story: string, _vol?: number): Promise<RelationshipGraph> { return { nodes: [], edges: [] }; }
-  async getRelationshipHistory(_story: string): Promise<RelationshipEvent[]> { return []; }
-  async getTimeline(_story: string, _vol?: number): Promise<TimelineEvent[]> { return []; }
-  async getPlotThreads(_story: string): Promise<PlotThread[]> { return []; }
-  async getForeshadowing(_story: string): Promise<Foreshadow[]> { return []; }
-  async getForeshadowingMatrix(_story: string): Promise<ForeshadowMatrix> { return { chapters: [], rows: [] }; }
+  private async findLatestVolume(story: string): Promise<number | null> {
+    const volumes = await this.getVolumes(story);
+    return volumes.length > 0 ? volumes[volumes.length - 1].number : null;
+  }
+
+  private trackingDir(story: string, vol: number): string {
+    return path.join(this.volumeDir(story, vol), 'tracking');
+  }
+
+  private async readTrackingJson<T>(story: string, vol: number, filename: string, fallback: T): Promise<T> {
+    const filePath = path.join(this.trackingDir(story, vol), filename);
+    if (!await fs.pathExists(filePath)) return fallback;
+    try {
+      return await fs.readJson(filePath);
+    } catch {
+      return fallback;
+    }
+  }
+
+  private async collectFromAllVolumes<T>(
+    story: string,
+    filename: string,
+    fallback: T,
+    vol?: number,
+  ): Promise<Array<{ vol: number; data: T }>> {
+    if (vol) {
+      const data = await this.readTrackingJson<T>(story, vol, filename, fallback);
+      return [{ vol, data }];
+    }
+    const volumes = await this.getVolumes(story);
+    const results: Array<{ vol: number; data: T }> = [];
+    for (const v of volumes) {
+      const data = await this.readTrackingJson<T>(story, v.number, filename, fallback);
+      results.push({ vol: v.number, data });
+    }
+    return results;
+  }
+
+  // --- Tracking 数据方法 ---
+
+  async getCharacters(story: string, vol?: number): Promise<Character[]> {
+    const results = await this.collectFromAllVolumes(
+      story, 'character-state.json', { characters: [] }, vol
+    );
+    const charMap = new Map<string, Character>();
+    for (const { data } of results) {
+      for (const c of (data as any).characters || []) {
+        if (!charMap.has(c.name)) {
+          charMap.set(c.name, {
+            name: c.name,
+            aliases: c.aliases || [],
+            role: c.role || '',
+            firstVolume: c.firstVolume || 0,
+            firstChapter: c.firstChapter || 0,
+            cultivation: c.cultivation || '',
+            faction: c.faction || '',
+            status: c.status || '活跃',
+          });
+        }
+      }
+    }
+    return [...charMap.values()];
+  }
+
+  async getCharacterArc(story: string, name: string): Promise<CharacterState[]> {
+    const volumes = await this.getVolumes(story);
+    const states: CharacterState[] = [];
+    for (const v of volumes) {
+      const data = await this.readTrackingJson<any>(story, v.number, 'character-state.json', { characters: [] });
+      const char = (data.characters || []).find((c: any) => c.name === name);
+      if (char) {
+        states.push({
+          volume: v.number,
+          cultivation: char.cultivation || '',
+          location: char.location || '',
+          summary: char.summary || '',
+          lastChapter: char.lastChapter || 0,
+        });
+      }
+    }
+    return states;
+  }
+
+  async getRelationships(story: string, vol?: number): Promise<RelationshipGraph> {
+    const targetVol = vol || await this.findLatestVolume(story);
+    if (!targetVol) return { nodes: [], edges: [] };
+
+    const charData = await this.readTrackingJson<any>(story, targetVol, 'character-state.json', { characters: [] });
+    const relData = await this.readTrackingJson<any>(story, targetVol, 'relationships.json', { relationships: [] });
+
+    const nodes = (charData.characters || []).map((c: any) => ({
+      id: c.name,
+      name: c.name,
+      faction: c.faction || '',
+      role: c.role || '',
+      appearances: 0,
+    }));
+
+    const edges = (relData.relationships || []).map((r: any) => ({
+      source: r.source,
+      target: r.target,
+      type: r.type || '',
+      status: r.status || '',
+      lastChapter: r.lastChapter || 0,
+    }));
+
+    return { nodes, edges };
+  }
+
+  async getRelationshipHistory(_story: string): Promise<RelationshipEvent[]> {
+    return [];
+  }
+
+  async getTimeline(story: string, vol?: number): Promise<TimelineEvent[]> {
+    const results = await this.collectFromAllVolumes(
+      story, 'timeline.json', { events: [] }, vol
+    );
+    const events: TimelineEvent[] = [];
+    for (const { data } of results) {
+      for (const e of (data as any).events || []) {
+        events.push({
+          id: e.id || events.length,
+          chapter: e.chapter || 0,
+          storyTime: e.storyTime || '',
+          location: e.location || '',
+          description: e.description || '',
+          tags: e.tags || [],
+        });
+      }
+    }
+    return events;
+  }
+
+  async getPlotThreads(story: string): Promise<PlotThread[]> {
+    const results = await this.collectFromAllVolumes(
+      story, 'plot-tracker.json', { plotlines: [], foreshadowing: [] }
+    );
+    const plotMap = new Map<string, PlotThread>();
+    for (const { data } of results) {
+      for (const p of (data as any).plotlines || []) {
+        plotMap.set(p.name, {
+          name: p.name,
+          type: p.type || '',
+          status: p.status || 'active',
+          description: p.description || '',
+          keyEvents: p.keyEvents || [],
+        });
+      }
+    }
+    return [...plotMap.values()];
+  }
+
+  async getForeshadowing(story: string): Promise<Foreshadow[]> {
+    const results = await this.collectFromAllVolumes(
+      story, 'plot-tracker.json', { plotlines: [], foreshadowing: [] }
+    );
+    const fsMap = new Map<string, Foreshadow>();
+    for (const { data } of results) {
+      for (const f of (data as any).foreshadowing || []) {
+        fsMap.set(f.code, {
+          code: f.code,
+          description: f.description || '',
+          plantedChapter: f.plantedChapter || 0,
+          hintedChapters: f.hintedChapters || [],
+          resolvedChapter: f.resolvedChapter || null,
+          status: f.status || 'planted',
+          importance: f.importance || 'normal',
+        });
+      }
+    }
+    return [...fsMap.values()];
+  }
+
+  async getForeshadowingMatrix(_story: string): Promise<ForeshadowMatrix> {
+    return { chapters: [], rows: [] };
+  }
+
   async getDashboardStats(story: string): Promise<DashboardStats> {
     const overview = await this.getOverview(story);
+    const characters = await this.getCharacters(story);
+    const plots = await this.getPlotThreads(story);
+    const foreshadowing = await this.getForeshadowing(story);
     return {
       ...overview,
-      totalCharacters: 0,
-      activePlotThreads: 0,
-      unresolvedForeshadowing: 0,
+      totalCharacters: characters.length,
+      activePlotThreads: plots.filter(p => p.status === 'active').length,
+      unresolvedForeshadowing: foreshadowing.filter(f => !f.resolvedChapter).length,
       volumeStats: (await this.getVolumes(story)).map(v => ({
         volume: v.number, title: v.title, words: v.words, chapters: v.chapters, progress: v.progress,
       })),
