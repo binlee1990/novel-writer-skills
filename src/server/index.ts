@@ -42,7 +42,12 @@ export function createApp(projectRoot: string, ds?: DataSource) {
   }
 
   // 静态文件服务（生产模式）
-  const dashboardDir = path.resolve(__dirname, '..', 'dashboard');
+  // 在 CJS 环境 (Jest/tsc 编译后) __dirname 可用
+  // 在 ESM 环境 (tsx 直接运行) 需要从 dashboardDir 参数或 dist 目录推断
+  const dashboardDir = path.resolve(
+    typeof __dirname !== 'undefined' ? __dirname : process.cwd(),
+    typeof __dirname !== 'undefined' ? path.join('..', 'dashboard') : path.join('dist', 'dashboard')
+  );
   app.use(express.static(dashboardDir));
 
   // SPA fallback：非 /api 路由返回 index.html
