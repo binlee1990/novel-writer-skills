@@ -78,8 +78,5 @@
   "homepage": "https://github.com/binlee1990/novel-writer-skills#readme",
   "bugs": {
     "url": "https://github.com/binlee1990/novel-writer-skills/issues"
-  },
-  "overrides": {
-    "yoctocolors-cjs": "2.1.2"
   }
 }
