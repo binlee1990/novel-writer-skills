@@ -1,11 +1,11 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import type { DataSource } from '../types.js';
 
 export function createTimelineRouter(ds: DataSource): Router {
   const router = Router({ mergeParams: true });
 
   // GET /api/stories/:story/timeline?vol=X
-  router.get('/', async (req, res) => {
+  router.get('/', async (req: Request<{ story: string }>, res: Response) => {
     try {
       const vol = req.query.vol ? parseInt(req.query.vol as string, 10) : undefined;
       const events = await ds.getTimeline(req.params.story, vol);

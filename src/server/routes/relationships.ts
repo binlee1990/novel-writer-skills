@@ -1,11 +1,11 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import type { DataSource } from '../types.js';
 
 export function createRelationshipsRouter(ds: DataSource): Router {
   const router = Router({ mergeParams: true });
 
   // GET /api/stories/:story/relationships?vol=X
-  router.get('/', async (req, res) => {
+  router.get('/', async (req: Request<{ story: string }>, res: Response) => {
     try {
       const vol = req.query.vol ? parseInt(req.query.vol as string, 10) : undefined;
       const graph = await ds.getRelationships(req.params.story, vol);
@@ -16,7 +16,7 @@ export function createRelationshipsRouter(ds: DataSource): Router {
   });
 
   // GET /api/stories/:story/relationships/history
-  router.get('/history', async (req, res) => {
+  router.get('/history', async (req: Request<{ story: string }>, res: Response) => {
     try {
       const history = await ds.getRelationshipHistory(req.params.story);
       res.json(history);

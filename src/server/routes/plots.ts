@@ -1,11 +1,11 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import type { DataSource } from '../types.js';
 
 export function createPlotsRouter(ds: DataSource): Router {
   const router = Router({ mergeParams: true });
 
   // GET /api/stories/:story/plots
-  router.get('/plots', async (req, res) => {
+  router.get('/plots', async (req: Request<{ story: string }>, res: Response) => {
     try {
       const plots = await ds.getPlotThreads(req.params.story);
       res.json(plots);
@@ -15,7 +15,7 @@ export function createPlotsRouter(ds: DataSource): Router {
   });
 
   // GET /api/stories/:story/foreshadowing
-  router.get('/foreshadowing', async (req, res) => {
+  router.get('/foreshadowing', async (req: Request<{ story: string }>, res: Response) => {
     try {
       const items = await ds.getForeshadowing(req.params.story);
       res.json(items);
@@ -25,7 +25,7 @@ export function createPlotsRouter(ds: DataSource): Router {
   });
 
   // GET /api/stories/:story/foreshadowing/matrix
-  router.get('/foreshadowing/matrix', async (req, res) => {
+  router.get('/foreshadowing/matrix', async (req: Request<{ story: string }>, res: Response) => {
     try {
       const matrix = await ds.getForeshadowingMatrix(req.params.story);
       res.json(matrix);
