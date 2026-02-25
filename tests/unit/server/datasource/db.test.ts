@@ -110,4 +110,71 @@ describe('DbDataSource', () => {
       expect(matrix.chapters.length).toBe(10);
     });
   });
+
+  describe('getProtagonistOverview', () => {
+    it('returns cultivation level and skill/item counts', async () => {
+      mockQuery
+        .mockResolvedValueOnce({ rows: [{ level: '段1·炼气前期', progress_pct: 37.8 }] })
+        .mockResolvedValueOnce({ rows: [{ total: '11', active: '11' }] })
+        .mockResolvedValueOnce({ rows: [{ total: '15', held: '10' }] });
+
+      const ov = await ds.getProtagonistOverview('my-novel');
+      expect(ov.currentLevel).toBe('段1·炼气前期');
+      expect(ov.currentProgress).toBe(37.8);
+      expect(ov.totalSkills).toBe(11);
+      expect(ov.activeSkills).toBe(11);
+      expect(ov.totalItems).toBe(15);
+      expect(ov.heldItems).toBe(10);
+    });
+  });
+
+  describe('getProtagonistSkills', () => {
+    it('returns skills from skill_overview view', async () => {
+      mockQuery.mockResolvedValue({
+        rows: [
+          { skill_name: '账本脑', skill_category: '账本脑', skill_level: '入门', status: 'active', description: '数据化思维', acquired_chapter: 1, use_count: 0 },
+          { skill_name: '定身符', skill_category: '符', skill_level: '入门', status: 'active', description: '3秒静止', acquired_chapter: 68, use_count: 0 },
+        ],
+      });
+
+      const skills = await ds.getProtagonistSkills('my-novel');
+      expect(skills.length).toBe(2);
+      expect(skills[0].name).toBe('账本脑');
+      expect(skills[1].category).toBe('符');
+    });
+  });
+
+  describe('getProtagonistInventory', () => {
+    it('returns items from protagonist_inventory', async () => {
+      mockQuery.mockResolvedValue({
+        rows: [
+          { item_name: '短刃', item_type: '装备', quantity: 1, quality: '普通', description: '来自补给点', acquired_chapter: 30, status: 'held' },
+        ],
+      });
+
+      const items = await ds.getProtagonistInventory('my-novel');
+      expect(items.length).toBe(1);
+      expect(items[0].name).toBe('短刃');
+      expect(items[0].type).toBe('装备');
+    });
+  });
+
+  describe('getCultivationCurve', () => {
+    it('returns cultivation nodes ordered by chapter', async () => {
+      mockQuery.mockResolvedValue({
+        rows: [
+          { chapter_number: 1, level: '段0', progress_pct: '0.0', breakthrough_type: 'major', trigger: '铜盘觉醒' },
+          { chapter_number: 68, level: '段1·炼气前期', progress_pct: '0.0', breakthrough_type: 'major', trigger: '修炼突破' },
+          { chapter_number: 300, level: '段1·炼气前期', progress_pct: '37.8', breakthrough_type: null, trigger: '卷3完结状态' },
+        ],
+      });
+
+      const curve = await ds.getCultivationCurve('my-novel');
+      expect(curve.length).toBe(3);
+      expect(curve[0].chapter).toBe(1);
+      expect(curve[0].breakthroughType).toBe('major');
+      expect(curve[2].progressPct).toBe(37.8);
+      expect(curve[2].detail).toBe('卷3完结状态');
+    });
+  });
 });

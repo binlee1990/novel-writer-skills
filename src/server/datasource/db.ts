@@ -4,6 +4,7 @@ import type {
   DataSource, Story, StoryOverview, Volume, Chapter,
   Character, CharacterState, RelationshipGraph, RelationshipEvent,
   TimelineEvent, PlotThread, Foreshadow, ForeshadowMatrix, DashboardStats,
+  ProtagonistOverview, ProtagonistSkill, ProtagonistItem, CultivationNode,
 } from '../types.js';
 
 interface DbConfig {
@@ -307,5 +308,68 @@ export class DbDataSource implements DataSource {
         volume: v.number, title: v.title, words: v.words, chapters: v.chapters, progress: v.progress,
       })),
     };
+  }
+
+  async getProtagonistOverview(_story: string): Promise<ProtagonistOverview> {
+    const [cult] = await this.query<{ level: string; progress_pct: number }>(
+      'SELECT level, progress_pct FROM cultivation_curve ORDER BY chapter_number DESC LIMIT 1'
+    );
+    const [skillCounts] = await this.query<{ total: string; active: string }>(
+      "SELECT COUNT(*) as total, COUNT(*) FILTER (WHERE status = 'active') as active FROM protagonist_skills"
+    );
+    const [itemCounts] = await this.query<{ total: string; held: string }>(
+      "SELECT COUNT(*) as total, COUNT(*) FILTER (WHERE status = 'held') as held FROM protagonist_inventory"
+    );
+    return {
+      currentLevel: cult?.level || '',
+      currentProgress: cult?.progress_pct || 0,
+      totalSkills: parseInt(skillCounts?.total || '0', 10),
+      activeSkills: parseInt(skillCounts?.active || '0', 10),
+      totalItems: parseInt(itemCounts?.total || '0', 10),
+      heldItems: parseInt(itemCounts?.held || '0', 10),
+    };
+  }
+
+  async getProtagonistSkills(_story: string): Promise<ProtagonistSkill[]> {
+    const rows = await this.query(
+      'SELECT skill_name, skill_category, skill_level, status, description, acquired_chapter, use_count FROM skill_overview ORDER BY acquired_chapter'
+    );
+    return rows.map(r => ({
+      name: r.skill_name,
+      category: r.skill_category,
+      level: r.skill_level || '',
+      description: r.description || '',
+      acquiredChapter: r.acquired_chapter || 0,
+      useCount: r.use_count || 0,
+      status: r.status || 'active',
+    }));
+  }
+
+  async getProtagonistInventory(_story: string): Promise<ProtagonistItem[]> {
+    const rows = await this.query(
+      'SELECT item_name, item_type, quantity, quality, description, acquired_chapter, status FROM protagonist_inventory ORDER BY item_type, item_name'
+    );
+    return rows.map(r => ({
+      name: r.item_name,
+      type: r.item_type,
+      quantity: r.quantity || 0,
+      quality: r.quality || '',
+      description: r.description || '',
+      acquiredChapter: r.acquired_chapter || 0,
+      status: r.status || 'held',
+    }));
+  }
+
+  async getCultivationCurve(_story: string): Promise<CultivationNode[]> {
+    const rows = await this.query(
+      'SELECT chapter_number, level, progress_pct, breakthrough_type, trigger FROM cultivation_curve ORDER BY chapter_number'
+    );
+    return rows.map(r => ({
+      chapter: r.chapter_number,
+      level: r.level,
+      progressPct: parseFloat(r.progress_pct) || 0,
+      breakthroughType: r.breakthrough_type || null,
+      detail: r.trigger || '',
+    }));
   }
 }

@@ -7,6 +7,7 @@ import { createRelationshipsRouter } from './routes/relationships.js';
 import { createTimelineRouter } from './routes/timeline.js';
 import { createPlotsRouter } from './routes/plots.js';
 import { createStatsRouter } from './routes/stats.js';
+import { createProtagonistRouter } from './routes/protagonist.js';
 
 /**
  * 创建 Express 应用
@@ -38,6 +39,7 @@ export function createApp(projectRoot: string, ds?: DataSource) {
     app.use('/api/stories/:story/relationships', createRelationshipsRouter(ds));
     app.use('/api/stories/:story/timeline', createTimelineRouter(ds));
     app.use('/api/stories/:story', createPlotsRouter(ds));
+    app.use('/api/stories/:story/protagonist', createProtagonistRouter(ds));
     app.use('/api/stats', createStatsRouter(ds));
   }
 

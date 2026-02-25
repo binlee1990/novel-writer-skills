@@ -170,6 +170,37 @@ def context_write(cur, global_ch):
             print(f"- ch-{r[0]:03d} [{r[1]}]: {r[2]}")
     print()
 
+    # 7. 主角状态
+    print("## 主角状态")
+    cur.execute(f"""
+        SELECT level, progress_pct FROM {SCHEMA}.cultivation_curve
+        ORDER BY chapter_number DESC LIMIT 1
+    """)
+    cult = cur.fetchone()
+    if cult:
+        print(f"- 修炼: {cult[0]} ({cult[1]}%)")
+
+    cur.execute(f"""
+        SELECT skill_name FROM {SCHEMA}.skill_overview
+        WHERE status = 'active' ORDER BY acquired_chapter
+    """)
+    skills = cur.fetchall()
+    if skills:
+        names = '、'.join(r[0] for r in skills[:4])
+        extra = f" 等 (共{len(skills)}项)" if len(skills) > 4 else ""
+        print(f"- 活跃技能: {names}{extra}")
+
+    cur.execute(f"""
+        SELECT item_name, quantity FROM {SCHEMA}.current_inventory
+        ORDER BY item_type LIMIT 5
+    """)
+    items = cur.fetchall()
+    if items:
+        item_strs = [f"{r[0]}×{r[1]}" if r[1] > 1 else r[0] for r in items]
+        extra = " 等" if len(items) >= 5 else ""
+        print(f"- 关键道具: {'、'.join(item_strs)}{extra}")
+    print()
+
 
 def context_expand(cur, global_ch):
     """生成 /expand 模式的上下文 — 更精确，只加载本章相关数据"""
@@ -263,6 +294,38 @@ def context_expand(cur, global_ch):
             print(f"- ch-{r[0]:03d} [{r[1]}]: {r[2]}")
     print()
 
+    # 5. 主角能力
+    print("## 主角能力")
+    cur.execute(f"""
+        SELECT level, progress_pct FROM {SCHEMA}.cultivation_curve
+        ORDER BY chapter_number DESC LIMIT 1
+    """)
+    cult = cur.fetchone()
+    if cult:
+        print(f"- 当前修为: {cult[0]} ({cult[1]}%)")
+
+    cur.execute(f"""
+        SELECT skill_name, skill_category, description FROM {SCHEMA}.skill_overview
+        WHERE status = 'active' ORDER BY acquired_chapter
+    """)
+    skills = cur.fetchall()
+    if skills:
+        print("- 可用技能:")
+        for s in skills:
+            print(f"  - {s[0]} [{s[1]}]: {_truncate(s[2], 40)}")
+
+    cur.execute(f"""
+        SELECT item_name, quantity FROM {SCHEMA}.current_inventory
+        ORDER BY item_type
+    """)
+    items = cur.fetchall()
+    if items:
+        print("- 可用道具:")
+        for it in items:
+            qty = f" ×{it[1]}" if it[1] > 1 else ""
+            print(f"  - {it[0]}{qty}")
+    print()
+
 
 def context_analyze(cur, global_ch):
     """生成 /analyze 模式的上下文 — 一致性校验数据"""
@@ -338,6 +401,38 @@ def context_analyze(cur, global_ch):
             print(f"- [{r[0]}] 埋设于ch-{r[2]:03d}: {r[1]}")
     else:
         print("无一致性警告")
+    print()
+
+    # 5. 主角能力基准
+    print("## 主角能力基准")
+    cur.execute(f"""
+        SELECT level FROM {SCHEMA}.cultivation_curve
+        ORDER BY chapter_number DESC LIMIT 1
+    """)
+    cult = cur.fetchone()
+    if cult:
+        print(f"- 修炼等级: {cult[0]}")
+
+    cur.execute(f"""
+        SELECT skill_name, acquired_chapter FROM {SCHEMA}.skill_overview
+        WHERE status = 'active' ORDER BY acquired_chapter
+    """)
+    skills = cur.fetchall()
+    if skills:
+        print("- 已习得技能:")
+        for s in skills:
+            print(f"  - {s[0]} (ch-{s[1]:03d})")
+
+    cur.execute(f"""
+        SELECT item_name, quantity FROM {SCHEMA}.current_inventory
+        ORDER BY item_type
+    """)
+    items = cur.fetchall()
+    if items:
+        print("- 持有道具:")
+        for it in items:
+            qty = f" ×{it[1]}" if it[1] > 1 else ""
+            print(f"  - {it[0]}{qty}")
     print()
 
 
@@ -439,6 +534,35 @@ def dashboard(cur):
             print(f"| {r[0]} | {r[1]} | vol-{r[3]:03d} ch-{r[2] or '?'} | {r[4]} |")
     else:
         print("(无角色数据)")
+    print()
+
+    # 主角成长
+    print("## 主角成长")
+    cur.execute(f"""
+        SELECT COUNT(*) FILTER (WHERE status = 'active'),
+               COUNT(*) FILTER (WHERE status = 'sealed'),
+               COUNT(*)
+        FROM {SCHEMA}.protagonist_skills
+    """)
+    sk = cur.fetchone()
+    if sk:
+        print(f"- 技能: {sk[2]} 项 (活跃 {sk[0]} / 封印 {sk[1]})")
+
+    cur.execute(f"""
+        SELECT level, progress_pct FROM {SCHEMA}.cultivation_curve
+        ORDER BY chapter_number DESC LIMIT 1
+    """)
+    cult = cur.fetchone()
+    if cult:
+        print(f"- 修炼: {cult[0]} ({cult[1]}%)")
+
+    cur.execute(f"""
+        SELECT COUNT(*) FROM {SCHEMA}.current_inventory
+    """)
+    inv = cur.fetchone()
+    if inv:
+        print(f"- 道具: {inv[0]} 件持有")
+    print()
 
 
 def _truncate(text, max_len=80):

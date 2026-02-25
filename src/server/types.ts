@@ -156,6 +156,47 @@ export interface DashboardStats {
   volumeStats: VolumeStat[];
 }
 
+/** 主角技能 */
+export interface ProtagonistSkill {
+  name: string;
+  category: string;
+  level: string;
+  description: string;
+  acquiredChapter: number;
+  useCount: number;
+  status: string;
+}
+
+/** 主角道具 */
+export interface ProtagonistItem {
+  name: string;
+  type: string;
+  quantity: number;
+  quality: string;
+  description: string;
+  acquiredChapter: number;
+  status: string;
+}
+
+/** 修炼进度节点 */
+export interface CultivationNode {
+  chapter: number;
+  level: string;
+  progressPct: number;
+  breakthroughType: string | null;
+  detail: string;
+}
+
+/** 主角总览 */
+export interface ProtagonistOverview {
+  currentLevel: string;
+  currentProgress: number;
+  totalSkills: number;
+  activeSkills: number;
+  totalItems: number;
+  heldItems: number;
+}
+
 /** 数据源抽象接口 */
 export interface DataSource {
   getStories(): Promise<Story[]>;
@@ -171,4 +212,8 @@ export interface DataSource {
   getForeshadowing(story: string): Promise<Foreshadow[]>;
   getForeshadowingMatrix(story: string): Promise<ForeshadowMatrix>;
   getDashboardStats(story: string): Promise<DashboardStats>;
+  getProtagonistOverview(story: string): Promise<ProtagonistOverview>;
+  getProtagonistSkills(story: string): Promise<ProtagonistSkill[]>;
+  getProtagonistInventory(story: string): Promise<ProtagonistItem[]>;
+  getCultivationCurve(story: string): Promise<CultivationNode[]>;
 }

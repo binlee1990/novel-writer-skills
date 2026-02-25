@@ -65,4 +65,14 @@ export const fetchForeshadowingMatrix = (story: string) =>
 export const fetchDashboardStats = (story: string) =>
   api.get('/stats/dashboard', { params: { story } }).then(r => r.data);
 
+// Protagonist
+export const fetchProtagonistOverview = (story: string) =>
+  api.get(`/stories/${story}/protagonist/overview`).then(r => r.data);
+export const fetchProtagonistSkills = (story: string) =>
+  api.get(`/stories/${story}/protagonist/skills`).then(r => r.data);
+export const fetchProtagonistInventory = (story: string) =>
+  api.get(`/stories/${story}/protagonist/inventory`).then(r => r.data);
+export const fetchCultivationCurve = (story: string) =>
+  api.get(`/stories/${story}/protagonist/cultivation`).then(r => r.data);
+
 export default api;

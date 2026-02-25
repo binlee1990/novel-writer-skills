@@ -210,6 +210,35 @@ def generate_volume_summary(cur, target_vol):
         lines.append("无活跃情节线")
     lines.append("")
 
+    # 7. 主角状态
+    lines.append("## 主角状态")
+    cur.execute(f"""
+        SELECT level, progress_pct FROM {SCHEMA}.cultivation_curve
+        ORDER BY chapter_number DESC LIMIT 1
+    """)
+    cult = cur.fetchone()
+    if cult:
+        lines.append(f"- 修炼: {cult[0]} ({cult[1]}%)")
+
+    cur.execute(f"""
+        SELECT skill_name, skill_category FROM {SCHEMA}.skill_overview
+        WHERE status = 'active' ORDER BY acquired_chapter
+    """)
+    skills = cur.fetchall()
+    if skills:
+        skill_strs = [f"{s[0]}[{s[1]}]" for s in skills]
+        lines.append(f"- 技能清单: {', '.join(skill_strs)}")
+
+    cur.execute(f"""
+        SELECT item_name, quantity FROM {SCHEMA}.current_inventory
+        ORDER BY item_type
+    """)
+    items = cur.fetchall()
+    if items:
+        item_strs = [f"{r[0]}×{r[1]}" if r[1] > 1 else r[0] for r in items]
+        lines.append(f"- 关键道具: {'、'.join(item_strs)}")
+    lines.append("")
+
     return "\n".join(lines)
 
 

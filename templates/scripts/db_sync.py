@@ -311,6 +311,75 @@ def sync_timeline(cur, vol_id, vol_number, data):
     return count
 
 
+SKILL_KEYWORDS = ["符", "阵", "丹", "傀", "器", "账本脑", "灵气感知", "伪装术", "Build", "内敛", "镜面", "镜杀"]
+CULTIVATION_KEYWORDS = ["段", "进度", "突破", "修炼", "炼气"]
+
+
+def sync_protagonist_data(cur, vol_id, vol_number, char_data):
+    """从沈账的 keyChanges 中提取技能/修炼事件写入主角数据表"""
+    if not char_data or "characters" not in char_data:
+        return 0, 0
+
+    shen_zhang = None
+    for c in char_data["characters"]:
+        if c["name"] == "沈账":
+            shen_zhang = c
+            break
+    if not shen_zhang:
+        return 0, 0
+
+    # 先清除该卷的增量同步数据（幂等）
+    cur.execute(f"""
+        DELETE FROM {SCHEMA}.protagonist_skill_events
+        WHERE volume_id = %s AND event_type != 'acquired'
+    """, (vol_id,))
+    cur.execute(f"""
+        DELETE FROM {SCHEMA}.protagonist_cultivation
+        WHERE volume_id = %s AND chapter_number NOT IN (
+            SELECT chapter_number FROM {SCHEMA}.protagonist_cultivation
+            WHERE volume_id = %s AND breakthrough_type IS NOT NULL
+        )
+    """, (vol_id, vol_id))
+
+    skill_count = 0
+    cult_count = 0
+
+    for kc in shen_zhang.get("keyChanges", []):
+        ch = kc["chapter"]
+        desc = kc["change"]
+
+        # 技能事件匹配
+        if any(kw in desc for kw in SKILL_KEYWORDS):
+            cur.execute(f"""
+                INSERT INTO {SCHEMA}.protagonist_skill_events
+                    (skill_id, chapter_number, event_type, detail, volume_id)
+                SELECT s.id, %s, 'used_utility', %s, %s
+                FROM {SCHEMA}.protagonist_skills s
+                WHERE %s LIKE '%%' || s.skill_name || '%%'
+                LIMIT 1
+            """, (ch, desc, vol_id, desc))
+            if cur.rowcount > 0:
+                skill_count += 1
+
+        # 修炼进度匹配
+        if any(kw in desc for kw in CULTIVATION_KEYWORDS):
+            pct_match = re.search(r'(\d+(?:\.\d+)?)%', desc)
+            pct = float(pct_match.group(1)) if pct_match else None
+            level_match = re.search(r'段\d+', desc)
+            level = level_match.group(0) if level_match else None
+            bt = "major" if "突破" in desc else None
+
+            if level or pct:
+                cur.execute(f"""
+                    INSERT INTO {SCHEMA}.protagonist_cultivation
+                        (chapter_number, level, progress_pct, breakthrough_type, detail, volume_id)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, (ch, level or "unknown", pct, bt, desc, vol_id))
+                cult_count += 1
+
+    return skill_count, cult_count
+
+
 def extract_synopsis_summary(fpath, max_len=120):
     """从概要文件提取摘要：标题 + 正文前N字"""
     with open(fpath, "r", encoding="utf-8") as fp:
@@ -488,6 +557,10 @@ def sync_volume(cur, vol_number, volumes_dir):
     tl_data = load_json(os.path.join(tracking_dir, "timeline.json"))
     n = sync_timeline(cur, vol_id, vol_number, tl_data)
     print(f"  时间线: {n} 条")
+
+    # 同步主角数据（从沈账 keyChanges 提取）
+    s, c = sync_protagonist_data(cur, vol_id, vol_number, char_data)
+    print(f"  主角数据: 技能事件 {s}, 修炼记录 {c}")
 
     # 同步概要/正文文件状态
     n = sync_synopsis_files(cur, vol_id, vol_number, volumes_dir)

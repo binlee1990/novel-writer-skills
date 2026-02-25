@@ -18,6 +18,10 @@
           <el-icon><User /></el-icon>
           <span>角色管理</span>
         </el-menu-item>
+        <el-menu-item index="/protagonist">
+          <el-icon><TrophyBase /></el-icon>
+          <span>主角成长</span>
+        </el-menu-item>
         <el-menu-item index="/relationships">
           <el-icon><Connection /></el-icon>
           <span>关系网络</span>
@@ -45,7 +49,7 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
 import {
-  DataBoard, User, Connection, Timer, List, Document,
+  DataBoard, User, Connection, Timer, List, Document, TrophyBase,
 } from '@element-plus/icons-vue';
 
 const route = useRoute();

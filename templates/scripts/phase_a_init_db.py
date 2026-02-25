@@ -36,7 +36,7 @@ def get_db_config(config):
 
 
 # ─────────────────────────────────────────────
-# DDL: 建 schema + 15 张核心表
+# DDL: 建 schema + 20 张核心表
 # ─────────────────────────────────────────────
 DDL = f"""
 DROP SCHEMA IF EXISTS {SCHEMA} CASCADE;
@@ -237,6 +237,81 @@ CREATE INDEX idx_rel_history_rel ON {SCHEMA}.relationship_history(relationship_i
 CREATE INDEX idx_rel_history_vol ON {SCHEMA}.relationship_history(volume_id);
 CREATE INDEX idx_plot_events_thread ON {SCHEMA}.plot_thread_events(plot_thread_id);
 CREATE INDEX idx_plot_events_vol ON {SCHEMA}.plot_thread_events(volume_id);
+
+-- 16) protagonist_skills: 主角技能主表
+CREATE TABLE {SCHEMA}.protagonist_skills (
+    id              SERIAL PRIMARY KEY,
+    skill_name      VARCHAR(100) NOT NULL UNIQUE,
+    skill_category  VARCHAR(20) NOT NULL,
+    skill_level     VARCHAR(50),
+    parent_skill_id INT REFERENCES {SCHEMA}.protagonist_skills(id),
+    description     TEXT,
+    acquired_chapter INT NOT NULL,
+    acquired_method  VARCHAR(200),
+    last_used_chapter INT,
+    use_count        INT DEFAULT 0,
+    status           VARCHAR(20) DEFAULT 'active'
+);
+
+-- 17) protagonist_skill_events: 技能时序表
+CREATE TABLE {SCHEMA}.protagonist_skill_events (
+    id              SERIAL PRIMARY KEY,
+    skill_id        INT NOT NULL REFERENCES {SCHEMA}.protagonist_skills(id),
+    chapter_number  INT NOT NULL,
+    event_type      VARCHAR(30) NOT NULL,
+    detail          TEXT,
+    volume_id       INT NOT NULL REFERENCES {SCHEMA}.volumes(id)
+);
+
+-- 18) protagonist_inventory: 装备/道具主表
+CREATE TABLE {SCHEMA}.protagonist_inventory (
+    id              SERIAL PRIMARY KEY,
+    item_name       VARCHAR(100) NOT NULL,
+    item_type       VARCHAR(30) NOT NULL,
+    quantity        INT DEFAULT 1,
+    quality         VARCHAR(30),
+    description     TEXT,
+    acquired_chapter INT NOT NULL,
+    acquired_method  VARCHAR(200),
+    status           VARCHAR(20) DEFAULT 'held',
+    UNIQUE(item_name, acquired_chapter)
+);
+
+-- 19) protagonist_inventory_events: 道具时序表
+CREATE TABLE {SCHEMA}.protagonist_inventory_events (
+    id              SERIAL PRIMARY KEY,
+    item_id         INT NOT NULL REFERENCES {SCHEMA}.protagonist_inventory(id),
+    chapter_number  INT NOT NULL,
+    event_type      VARCHAR(30) NOT NULL,
+    quantity_change  INT DEFAULT 0,
+    detail          TEXT,
+    volume_id       INT NOT NULL REFERENCES {SCHEMA}.volumes(id)
+);
+
+-- 20) protagonist_cultivation: 修炼进度表
+CREATE TABLE {SCHEMA}.protagonist_cultivation (
+    id              SERIAL PRIMARY KEY,
+    chapter_number  INT NOT NULL,
+    level           VARCHAR(50) NOT NULL,
+    progress_pct    DECIMAL(5,1),
+    breakthrough_type VARCHAR(20),
+    trigger         VARCHAR(200),
+    detail          TEXT,
+    volume_id       INT NOT NULL REFERENCES {SCHEMA}.volumes(id)
+);
+
+-- protagonist 索引
+CREATE INDEX idx_skills_category ON {SCHEMA}.protagonist_skills(skill_category);
+CREATE INDEX idx_skills_status ON {SCHEMA}.protagonist_skills(status);
+CREATE INDEX idx_skill_events_skill ON {SCHEMA}.protagonist_skill_events(skill_id);
+CREATE INDEX idx_skill_events_vol ON {SCHEMA}.protagonist_skill_events(volume_id);
+CREATE INDEX idx_skill_events_type ON {SCHEMA}.protagonist_skill_events(event_type);
+CREATE INDEX idx_inventory_type ON {SCHEMA}.protagonist_inventory(item_type);
+CREATE INDEX idx_inventory_status ON {SCHEMA}.protagonist_inventory(status);
+CREATE INDEX idx_inv_events_item ON {SCHEMA}.protagonist_inventory_events(item_id);
+CREATE INDEX idx_inv_events_vol ON {SCHEMA}.protagonist_inventory_events(volume_id);
+CREATE INDEX idx_cultivation_vol ON {SCHEMA}.protagonist_cultivation(volume_id);
+CREATE INDEX idx_cultivation_ch ON {SCHEMA}.protagonist_cultivation(chapter_number);
 """
 
 VIEWS = f"""
@@ -276,6 +351,26 @@ FROM {SCHEMA}.characters c
 LEFT JOIN {SCHEMA}.character_states cs ON c.id = cs.character_id
 LEFT JOIN {SCHEMA}.volumes v ON cs.volume_id = v.id
 ORDER BY c.name, v.vol_number;
+
+CREATE OR REPLACE VIEW {SCHEMA}.current_inventory AS
+SELECT item_name, item_type, quantity, quality, description, acquired_chapter
+FROM {SCHEMA}.protagonist_inventory
+WHERE status = 'held'
+ORDER BY item_type, item_name;
+
+CREATE OR REPLACE VIEW {SCHEMA}.skill_overview AS
+SELECT s.skill_name, s.skill_category, s.skill_level, s.status,
+       s.acquired_chapter, s.use_count,
+       COUNT(e.id) AS total_events
+FROM {SCHEMA}.protagonist_skills s
+LEFT JOIN {SCHEMA}.protagonist_skill_events e ON s.id = e.skill_id
+GROUP BY s.id
+ORDER BY s.skill_category, s.acquired_chapter;
+
+CREATE OR REPLACE VIEW {SCHEMA}.cultivation_curve AS
+SELECT chapter_number, level, progress_pct, breakthrough_type, trigger
+FROM {SCHEMA}.protagonist_cultivation
+ORDER BY chapter_number;
 """
 
 
@@ -287,7 +382,7 @@ def run():
     cur = conn.cursor()
 
     # ── Step 1: 建表 ──
-    print("[1/3] 创建 schema + 15 张表...")
+    print("[1/3] 创建 schema + 20 张表...")
     cur.execute(DDL)
     conn.commit()
     print("      ✓ 表结构创建完成")
@@ -296,7 +391,7 @@ def run():
     print("[2/3] 创建常用视图...")
     cur.execute(VIEWS)
     conn.commit()
-    print("      ✓ 3 个视图创建完成")
+    print("      ✓ 6 个视图创建完成")
 
     # ── Step 3: 验证 ──
     print("\n[3/3] 验证表结构...")

@@ -39,7 +39,7 @@ allowed-tools: Read(//stories/**), Write(//stories/**), Bash(ls:*), Bash(mkdir:*
 
 **路径 A — DB 模式**（`resources/config.json` 中 `database.enabled = true`）：
 
-运行 `python scripts/db_volume_switch.py --vol <新卷号>` 自动生成 volume-summary.md。
+运行 `python scripts/db_volume_switch.py --vol <新卷号>` 自动生成 volume-summary.md。输出还包含主角当前修炼进度、技能清单和道具状态，用于概要中主角能力描写的一致性。
 
 **路径 B — 文件模式**（默认）：
 

@@ -4,6 +4,7 @@ import type {
   DataSource, Story, StoryOverview, Volume, Chapter,
   Character, CharacterState, RelationshipGraph, RelationshipEvent,
   TimelineEvent, PlotThread, Foreshadow, ForeshadowMatrix, DashboardStats,
+  ProtagonistOverview, ProtagonistSkill, ProtagonistItem, CultivationNode,
 } from '../types.js';
 
 export class FsDataSource implements DataSource {
@@ -329,5 +330,21 @@ export class FsDataSource implements DataSource {
         volume: v.number, title: v.title, words: v.words, chapters: v.chapters, progress: v.progress,
       })),
     };
+  }
+
+  async getProtagonistOverview(_story: string): Promise<ProtagonistOverview> {
+    return { currentLevel: '', currentProgress: 0, totalSkills: 0, activeSkills: 0, totalItems: 0, heldItems: 0 };
+  }
+
+  async getProtagonistSkills(_story: string): Promise<ProtagonistSkill[]> {
+    return [];
+  }
+
+  async getProtagonistInventory(_story: string): Promise<ProtagonistItem[]> {
+    return [];
+  }
+
+  async getCultivationCurve(_story: string): Promise<CultivationNode[]> {
+    return [];
   }
 }

@@ -162,12 +162,13 @@ describe('Template Files Validation', () => {
       expect(fs.existsSync(scriptsDir)).toBe(true);
     });
 
-    it('should have all 4 Python script files', () => {
+    it('should have all 5 Python script files', () => {
       const required = [
         'phase_a_init_db.py',
         'db_sync.py',
         'db_context.py',
         'db_volume_switch.py',
+        'db_init_protagonist.py',
       ];
       for (const file of required) {
         expect(fs.existsSync(path.join(scriptsDir, file))).toBe(true);
@@ -176,7 +177,7 @@ describe('Template Files Validation', () => {
 
     it('should have non-empty Python scripts', () => {
       const pyFiles = fs.readdirSync(scriptsDir).filter(f => f.endsWith('.py'));
-      expect(pyFiles.length).toBe(4);
+      expect(pyFiles.length).toBe(5);
       for (const file of pyFiles) {
         const content = fs.readFileSync(path.join(scriptsDir, file), 'utf-8');
         expect(content.trim().length).toBeGreaterThan(0);

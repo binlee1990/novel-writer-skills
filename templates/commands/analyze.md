@@ -32,7 +32,7 @@ allowed-tools: Read(//stories/**), Read(//resources/anti-ai.md), Bash(ls:*), Bas
 python scripts/db_context.py --chapter <全局章节号> --mode analyze
 ```
 
-输出包含本章伏笔检查清单、角色状态基准、时间线连续性和一致性警告。
+输出包含本章伏笔检查清单、角色状态基准、时间线连续性和一致性警告。输出还包含主角能力基准（技能习得时间线 + 道具持有状态），用于检测正文中是否使用了尚未习得的技能或不持有的道具。
 
 ## 检查项（5项）
 

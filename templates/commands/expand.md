@@ -44,7 +44,7 @@ allowed-tools: Read(//stories/**), Write(//stories/**/content/**), Read(//storie
 python scripts/db_context.py --chapter <全局章节号> --mode expand
 ```
 
-输出包含本章伏笔、活跃角色状态、角色关系、前序衔接，直接替代手动读取 tracking JSON。第 1、2 层仍从文件系统加载。
+输出包含本章伏笔、活跃角色状态、角色关系、前序衔接，直接替代手动读取 tracking JSON。输出还包含主角当前修为、可用技能和道具清单，确保扩写中主角能力使用不超出已有设定。第 1、2 层仍从文件系统加载。
 
 ### 第 1 层 — 全局视角
 

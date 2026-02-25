@@ -57,7 +57,7 @@ import { use } from 'echarts/core';
 import { BarChart } from 'echarts/charts';
 import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { initStory, getStoryName, fetchDashboardStats } from '../api';
+import { initStory, getStoryName, fetchDashboardStats, fetchProtagonistOverview } from '../api';
 
 use([BarChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer]);
 
@@ -79,13 +79,23 @@ interface DashboardStats {
   volumeStats: VolumeStat[];
 }
 
+interface ProtagonistOverview {
+  currentLevel: string;
+  currentProgress: number;
+  totalSkills: number;
+  activeSkills: number;
+  totalItems: number;
+  heldItems: number;
+}
+
 const loading = ref(true);
 const stats = ref<DashboardStats | null>(null);
+const protagonist = ref<ProtagonistOverview | null>(null);
 
 const statCards = computed(() => {
   if (!stats.value) return [];
   const s = stats.value;
-  return [
+  const cards = [
     { label: '总字数', value: `${(s.totalWords / 10000).toFixed(1)}万` },
     { label: '总章节', value: s.totalChapters },
     { label: '总卷数', value: s.totalVolumes },
@@ -93,6 +103,12 @@ const statCards = computed(() => {
     { label: '活跃情节线', value: s.activePlotThreads },
     { label: '未解伏笔', value: s.unresolvedForeshadowing },
   ];
+  if (protagonist.value) {
+    const p = protagonist.value;
+    cards.push({ label: '主角修为', value: p.currentLevel || '-' });
+    cards.push({ label: '技能/道具', value: `${p.activeSkills}技能 / ${p.heldItems}道具` });
+  }
+  return cards;
 });
 
 const volumeChartOption = computed(() => {
@@ -128,7 +144,12 @@ onMounted(async () => {
     await initStory();
     const story = getStoryName();
     if (story) {
-      stats.value = await fetchDashboardStats(story);
+      const [s, p] = await Promise.all([
+        fetchDashboardStats(story),
+        fetchProtagonistOverview(story).catch(() => null),
+      ]);
+      stats.value = s;
+      protagonist.value = p;
     }
   } finally {
     loading.value = false;

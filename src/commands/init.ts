@@ -73,7 +73,7 @@ export function registerInitCommand(program: Command): void {
             port: 5432,
             dbname: 'postgres',
             user: 'postgres',
-            password: '',
+            password: 'admin',
             schema: 'novelws',
           },
         };
