@@ -1,11 +1,19 @@
 import express from 'express';
 import path from 'path';
+import type { DataSource } from './types.js';
+import { createStoriesRouter } from './routes/stories.js';
+import { createCharactersRouter } from './routes/characters.js';
+import { createRelationshipsRouter } from './routes/relationships.js';
+import { createTimelineRouter } from './routes/timeline.js';
+import { createPlotsRouter } from './routes/plots.js';
+import { createStatsRouter } from './routes/stats.js';
 
 /**
  * 创建 Express 应用
  * @param projectRoot 用户小说项目的根目录
+ * @param ds 可选数据源，由 startServer 注入
  */
-export function createApp(projectRoot: string) {
+export function createApp(projectRoot: string, ds?: DataSource) {
   const app = express();
 
   // JSON 解析
@@ -23,8 +31,17 @@ export function createApp(projectRoot: string) {
     res.json({ status: 'ok', project: projectRoot });
   });
 
+  // API 路由
+  if (ds) {
+    app.use('/api/stories', createStoriesRouter(ds));
+    app.use('/api/stories/:story/characters', createCharactersRouter(ds));
+    app.use('/api/stories/:story/relationships', createRelationshipsRouter(ds));
+    app.use('/api/stories/:story/timeline', createTimelineRouter(ds));
+    app.use('/api/stories/:story', createPlotsRouter(ds));
+    app.use('/api/stats', createStatsRouter(ds));
+  }
+
   // 静态文件服务（生产模式）
-  // 使用 __dirname 兼容 CJS/ESM
   const dashboardDir = path.resolve(__dirname, '..', 'dashboard');
   app.use(express.static(dashboardDir));
 
@@ -44,7 +61,10 @@ export function createApp(projectRoot: string) {
  * 启动服务器
  */
 export async function startServer(projectRoot: string, port: number) {
-  const app = createApp(projectRoot);
+  const { createDataSource } = await import('./datasource/index.js');
+  const ds = await createDataSource(projectRoot);
+  console.log(`📦 数据源: ${(ds as any).type === 'db' ? 'PostgreSQL' : '文件系统'}`);
+  const app = createApp(projectRoot, ds);
   return new Promise<ReturnType<typeof app.listen>>((resolve) => {
     const server = app.listen(port, () => {
       console.log(`🚀 Dashboard 已启动: http://localhost:${port}`);
