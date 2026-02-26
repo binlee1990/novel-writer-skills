@@ -113,6 +113,12 @@ export function registerInitCommand(program: Command): void {
           spinner.text = '已安装 DB 工具脚本...';
         }
 
+        // 复制 dashboard/ 模板（Web 仪表盘静态文件）
+        if (await fs.pathExists(templates.dashboard)) {
+          await fs.copy(templates.dashboard, paths.dashboard);
+          spinner.text = '已安装 Dashboard...';
+        }
+
         // Git 初始化
         if (options.git !== false) {
           try {
@@ -146,6 +152,9 @@ export function registerInitCommand(program: Command): void {
         console.log(`     ${chalk.cyan('/analyze')}  - 质量检查`);
 
         console.log('\n' + chalk.dim('提示: 斜杠命令在 Claude Code 内部使用，不是在终端中'));
+
+        console.log('\n' + chalk.yellow('     📊 Dashboard 可视化仪表盘:'));
+        console.log(`     运行 ${chalk.white('novelws dashboard')} 启动 Web 界面`);
 
         console.log('\n' + chalk.yellow('     🗄️  DB 增强（可选）:'));
         console.log(`     编辑 ${chalk.white('resources/config.json')} 中的 database 配置`);

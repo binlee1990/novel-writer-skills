@@ -58,6 +58,7 @@ export const DIRS = {
   RESOURCES: 'resources',
   VOLUMES: 'volumes',
   SCRIPTS: 'scripts',
+  DASHBOARD: 'dashboard',
 } as const;
 
 /** 文件名常量 */
@@ -113,6 +114,8 @@ export function getProjectPaths(projectRoot: string) {
     stories: path.join(projectRoot, DIRS.STORIES),
     // scripts/
     scripts: path.join(projectRoot, DIRS.SCRIPTS),
+    // dashboard/
+    dashboard: path.join(projectRoot, DIRS.DASHBOARD),
   };
 }
 
@@ -127,6 +130,7 @@ export function getTemplateSourcePaths() {
     resources: path.join(templatesDir, DIRS.RESOURCES),
     tracking: path.join(templatesDir, DIRS.TRACKING),
     scripts: path.join(templatesDir, DIRS.SCRIPTS),
+    dashboard: path.join(templatesDir, DIRS.DASHBOARD),
     all: templatesDir,
   };
 }

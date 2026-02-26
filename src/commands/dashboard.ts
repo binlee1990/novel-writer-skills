@@ -20,6 +20,16 @@ export function registerDashboardCommand(program: Command): void {
         process.exit(1);
       }
 
+      // 检查 dashboard 是否已安装
+      const dashboardPath = path.join(projectRoot, 'dashboard');
+      if (!await fs.pathExists(dashboardPath)) {
+        console.error(chalk.red('❌ Dashboard 未安装'));
+        console.log(chalk.yellow('\n请运行以下命令安装 Dashboard:'));
+        console.log(chalk.white('   novelws init --here'));
+        console.log(chalk.gray('   或重新初始化项目'));
+        process.exit(1);
+      }
+
       const port = parseInt(options.port, 10);
 
       console.log(chalk.cyan('📊 正在启动 Dashboard...'));
