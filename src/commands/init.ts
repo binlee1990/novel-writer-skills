@@ -119,6 +119,25 @@ export function registerInitCommand(program: Command): void {
           spinner.text = '已安装 Dashboard...';
         }
 
+        // 复制 server/ 后端代码
+        if (await fs.pathExists(templates.server)) {
+          await fs.copy(templates.server, paths.server);
+          spinner.text = '已安装 Dashboard 后端...';
+
+          // 创建 server/package.json（包含运行时依赖）
+          const serverPackageJson = {
+            name: `${name}-dashboard-server`,
+            type: 'module',
+            dependencies: {
+              express: '^5.2.1',
+              'fs-extra': '^11.2.0',
+              pg: '^8.18.0',
+              'js-yaml': '^4.1.0',
+            },
+          };
+          await fs.writeJson(path.join(paths.server, 'package.json'), serverPackageJson, { spaces: 2 });
+        }
+
         // Git 初始化
         if (options.git !== false) {
           try {

@@ -2,6 +2,7 @@ import { Command } from '@commander-js/extra-typings';
 import chalk from 'chalk';
 import path from 'path';
 import fs from 'fs-extra';
+import { execSync } from 'child_process';
 
 export function registerDashboardCommand(program: Command): void {
   program
@@ -20,14 +21,36 @@ export function registerDashboardCommand(program: Command): void {
         process.exit(1);
       }
 
-      // 检查 dashboard 是否已安装
+      // 检查 dashboard 前端是否已安装
       const dashboardPath = path.join(projectRoot, 'dashboard');
       if (!await fs.pathExists(dashboardPath)) {
-        console.error(chalk.red('❌ Dashboard 未安装'));
+        console.error(chalk.red('❌ Dashboard 前端未安装'));
         console.log(chalk.yellow('\n请运行以下命令安装 Dashboard:'));
         console.log(chalk.white('   novelws init --here'));
         console.log(chalk.gray('   或重新初始化项目'));
         process.exit(1);
+      }
+
+      // 检查 server 后端是否已安装
+      const serverPath = path.join(projectRoot, 'server');
+      if (!await fs.pathExists(serverPath)) {
+        console.error(chalk.red('❌ Dashboard 后端未安装'));
+        console.log(chalk.yellow('\n请运行以下命令安装 Dashboard:'));
+        console.log(chalk.white('   novelws init --here'));
+        console.log(chalk.gray('   或重新初始化项目'));
+        process.exit(1);
+      }
+
+      // 检查并安装依赖
+      const serverNodeModules = path.join(serverPath, 'node_modules');
+      if (!await fs.pathExists(serverNodeModules)) {
+        console.log(chalk.gray('   正在安装 Dashboard 依赖...'));
+        try {
+          execSync('npm install', { cwd: serverPath, stdio: 'inherit' });
+        } catch {
+          console.error(chalk.red('❌ 依赖安装失败'));
+          process.exit(1);
+        }
       }
 
       const port = parseInt(options.port, 10);
@@ -38,8 +61,12 @@ export function registerDashboardCommand(program: Command): void {
       console.log(chalk.gray(`   模式: ${options.dev ? '开发' : '生产'}`));
 
       try {
-        const { startServer } = await import('../server/index.js');
-        await startServer(projectRoot, port);
+        // 从用户项目的 server 目录启动后端
+        const serverIndexPath = path.join(serverPath, 'index.js');
+        // 使用 file:// URL 格式导入 ESM 模块（兼容 Windows）
+        const serverUrl = `file://${serverIndexPath.replace(/\\/g, '/')}`;
+        const serverModule = await import(serverUrl);
+        await serverModule.startServer(projectRoot, port);
 
         if (options.open !== false && !options.dev) {
           const { default: open } = await import('open');

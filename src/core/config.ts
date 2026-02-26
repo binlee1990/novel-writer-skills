@@ -59,6 +59,7 @@ export const DIRS = {
   VOLUMES: 'volumes',
   SCRIPTS: 'scripts',
   DASHBOARD: 'dashboard',
+  SERVER: 'server',
 } as const;
 
 /** 文件名常量 */
@@ -116,6 +117,8 @@ export function getProjectPaths(projectRoot: string) {
     scripts: path.join(projectRoot, DIRS.SCRIPTS),
     // dashboard/
     dashboard: path.join(projectRoot, DIRS.DASHBOARD),
+    // server/
+    server: path.join(projectRoot, DIRS.SERVER),
   };
 }
 
@@ -124,6 +127,7 @@ export function getProjectPaths(projectRoot: string) {
  */
 export function getTemplateSourcePaths() {
   const templatesDir = getTemplatesDir();
+  const packageRoot = getPackageRoot();
   return {
     commands: path.join(templatesDir, DIRS.COMMANDS),
     dotClaude: path.join(templatesDir, 'dot-claude'),
@@ -131,6 +135,8 @@ export function getTemplateSourcePaths() {
     tracking: path.join(templatesDir, DIRS.TRACKING),
     scripts: path.join(templatesDir, DIRS.SCRIPTS),
     dashboard: path.join(templatesDir, DIRS.DASHBOARD),
+    // server/ 后端代码（从编译后的 dist/server 拷贝）
+    server: path.join(packageRoot, 'dist', 'server'),
     all: templatesDir,
   };
 }
