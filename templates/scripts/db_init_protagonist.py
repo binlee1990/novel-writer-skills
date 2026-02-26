@@ -36,88 +36,111 @@ def get_db_config(config):
 
 
 DDL = f"""
+-- ============================================================
+-- 主角相关表结构（5张表）
+-- Schema: {SCHEMA}
+-- ============================================================
+
 -- 主角技能主表
+-- 说明：记录主角学会的所有技能
 CREATE TABLE IF NOT EXISTS {SCHEMA}.protagonist_skills (
-    id              SERIAL PRIMARY KEY,
-    skill_name      VARCHAR(100) NOT NULL UNIQUE,
-    skill_category  VARCHAR(20) NOT NULL,
-    skill_level     VARCHAR(50),
-    parent_skill_id INT REFERENCES {SCHEMA}.protagonist_skills(id),
-    description     TEXT,
-    acquired_chapter INT NOT NULL,
-    acquired_method  VARCHAR(200),
-    last_used_chapter INT,
-    use_count        INT DEFAULT 0,
-    status           VARCHAR(20) DEFAULT 'active'
+    id                      SERIAL PRIMARY KEY,
+    skill_name              VARCHAR(100) NOT NULL UNIQUE,  -- 技能名称（唯一）
+    skill_category          VARCHAR(20) NOT NULL,           -- 技能分类：账本脑/符/阵/被动/功法等
+    skill_level             VARCHAR(50),                   -- 技能等级：入门/固化/小成/大成
+    parent_skill_id         INT REFERENCES {SCHEMA}.protagonist_skills(id),  -- 父技能ID（技能树）
+    description             TEXT,                          -- 技能描述/效果说明
+    acquired_chapter        INT NOT NULL,                  -- 获得章节号
+    acquired_method         VARCHAR(200),                  -- 获得方式：自悟/修炼突破/副本掉落/交易等
+    last_used_chapter      INT,                           -- 最后使用章节号
+    use_count               INT DEFAULT 0,                -- 使用次数
+    status                  VARCHAR(20) DEFAULT 'active'   -- 状态：active(可用)/locked(锁定)/forgotten(遗忘)
 );
 
 -- 技能时序表
+-- 说明：记录技能的每次使用/变化事件
 CREATE TABLE IF NOT EXISTS {SCHEMA}.protagonist_skill_events (
-    id              SERIAL PRIMARY KEY,
-    skill_id        INT NOT NULL REFERENCES {SCHEMA}.protagonist_skills(id),
-    chapter_number  INT NOT NULL,
-    event_type      VARCHAR(30) NOT NULL,
-    detail          TEXT,
-    volume_id       INT NOT NULL REFERENCES {SCHEMA}.volumes(id)
+    id                      SERIAL PRIMARY KEY,
+    skill_id                INT NOT NULL REFERENCES {SCHEMA}.protagonist_skills(id),        -- 技能ID
+    chapter_number          INT NOT NULL,                  -- 事件发生章节号
+    event_type              VARCHAR(30) NOT NULL,           -- 事件类型：acquired(获得)/upgraded(升级)/used(使用)/forgotten(遗忘)
+    detail                  TEXT,                          -- 事件详情
+    volume_id               INT NOT NULL REFERENCES {SCHEMA}.volumes(id)                 -- 所属卷ID
 );
 
--- 装备/道具主表
+-- 主角装备/道具主表
+-- 说明：记录主角当前拥有的所有物品
 CREATE TABLE IF NOT EXISTS {SCHEMA}.protagonist_inventory (
-    id              SERIAL PRIMARY KEY,
-    item_name       VARCHAR(100) NOT NULL,
-    item_type       VARCHAR(30) NOT NULL,
-    quantity        INT DEFAULT 1,
-    quality         VARCHAR(30),
-    description     TEXT,
-    acquired_chapter INT NOT NULL,
-    acquired_method  VARCHAR(200),
-    status           VARCHAR(20) DEFAULT 'held',
-    UNIQUE(item_name, acquired_chapter)
+    id                      SERIAL PRIMARY KEY,
+    item_name               VARCHAR(100) NOT NULL,          -- 物品名称
+    item_type               VARCHAR(30) NOT NULL,           -- 物品类型：装备/材料/消耗品/工具
+    quantity                INT DEFAULT 1,                 -- 数量
+    quality                 VARCHAR(30),                   -- 品质：普通/稀有/精良/史诗/传说
+    description             TEXT,                          -- 物品描述
+    acquired_chapter        INT NOT NULL,                  -- 获得章节号
+    acquired_method         VARCHAR(200),                  -- 获得方式：拾取/交易/制作/副本掉落
+    status                  VARCHAR(20) DEFAULT 'held',     -- 状态：held(持有)/consumed(已消耗)/equipped(装备中)
+    UNIQUE(item_name, acquired_chapter)                 -- 同一物品同名只能有一条记录
 );
 
 -- 道具时序表
+-- 说明：记录物品的获取、使用、消耗等事件
 CREATE TABLE IF NOT EXISTS {SCHEMA}.protagonist_inventory_events (
-    id              SERIAL PRIMARY KEY,
-    item_id         INT NOT NULL REFERENCES {SCHEMA}.protagonist_inventory(id),
-    chapter_number  INT NOT NULL,
-    event_type      VARCHAR(30) NOT NULL,
-    quantity_change  INT DEFAULT 0,
-    detail          TEXT,
-    volume_id       INT NOT NULL REFERENCES {SCHEMA}.volumes(id)
+    id                      SERIAL PRIMARY KEY,
+    item_id                 INT NOT NULL REFERENCES {SCHEMA}.protagonist_inventory(id),      -- 物品ID
+    chapter_number          INT NOT NULL,                  -- 事件发生章节号
+    event_type              VARCHAR(30) NOT NULL,           -- 事件类型：acquired(获得)/used(使用)/lost(丢失)/given(赠予)
+    quantity_change         INT DEFAULT 0,                 -- 数量变化（正数增加，负数减少）
+    detail                  TEXT,                          -- 事件详情
+    volume_id               INT NOT NULL REFERENCES {SCHEMA}.volumes(id)                 -- 所属卷ID
 );
 
 -- 修炼进度表
+-- 说明：记录主角的修炼突破历程
 CREATE TABLE IF NOT EXISTS {SCHEMA}.protagonist_cultivation (
-    id              SERIAL PRIMARY KEY,
-    chapter_number  INT NOT NULL,
-    level           VARCHAR(50) NOT NULL,
-    progress_pct    DECIMAL(5,1),
-    breakthrough_type VARCHAR(20),
-    trigger         VARCHAR(200),
-    detail          TEXT,
-    volume_id       INT NOT NULL REFERENCES {SCHEMA}.volumes(id)
+    id                      SERIAL PRIMARY KEY,
+    chapter_number          INT NOT NULL,                  -- 记录发生的章节号
+    level                   VARCHAR(50) NOT NULL,          -- 修炼等级/境界（如：段1·炼气前期）
+    progress_pct            DECIMAL(5,1),                  -- 进度百分比（0-100）
+    breakthrough_type       VARCHAR(20),                   -- 突破类型：major(大境界突破)/minor(小境界提升)
+    trigger                 VARCHAR(200),                  -- 触发原因：修炼突破/副本战斗/特殊事件
+    detail                  TEXT,                          -- 详情描述
+    volume_id               INT NOT NULL REFERENCES {SCHEMA}.volumes(id)                 -- 所属卷ID
 );
 
--- 索引
-CREATE INDEX IF NOT EXISTS idx_skills_category ON {SCHEMA}.protagonist_skills(skill_category);
-CREATE INDEX IF NOT EXISTS idx_skills_status ON {SCHEMA}.protagonist_skills(status);
-CREATE INDEX IF NOT EXISTS idx_skill_events_skill ON {SCHEMA}.protagonist_skill_events(skill_id);
-CREATE INDEX IF NOT EXISTS idx_skill_events_vol ON {SCHEMA}.protagonist_skill_events(volume_id);
-CREATE INDEX IF NOT EXISTS idx_skill_events_type ON {SCHEMA}.protagonist_skill_events(event_type);
-CREATE INDEX IF NOT EXISTS idx_inventory_type ON {SCHEMA}.protagonist_inventory(item_type);
-CREATE INDEX IF NOT EXISTS idx_inventory_status ON {SCHEMA}.protagonist_inventory(status);
-CREATE INDEX IF NOT EXISTS idx_inv_events_item ON {SCHEMA}.protagonist_inventory_events(item_id);
-CREATE INDEX IF NOT EXISTS idx_inv_events_vol ON {SCHEMA}.protagonist_inventory_events(volume_id);
-CREATE INDEX IF NOT EXISTS idx_cultivation_vol ON {SCHEMA}.protagonist_cultivation(volume_id);
-CREATE INDEX IF NOT EXISTS idx_cultivation_ch ON {SCHEMA}.protagonist_cultivation(chapter_number);
+-- ============================================================
+-- 索引（提升查询性能）
+-- ============================================================
 
--- 视图
+-- 技能相关索引
+CREATE INDEX IF NOT EXISTS idx_skills_category ON {SCHEMA}.protagonist_skills(skill_category);             -- 按技能分类查询
+CREATE INDEX IF NOT EXISTS idx_skills_status ON {SCHEMA}.protagonist_skills(status);                   -- 按状态查询技能
+CREATE INDEX IF NOT EXISTS idx_skill_events_skill ON {SCHEMA}.protagonist_skill_events(skill_id);       -- 按技能查询事件
+CREATE INDEX IF NOT EXISTS idx_skill_events_vol ON {SCHEMA}.protagonist_skill_events(volume_id);         -- 按卷查询技能事件
+CREATE INDEX IF NOT EXISTS idx_skill_events_type ON {SCHEMA}.protagonist_skill_events(event_type);      -- 按事件类型查询
+
+-- 背包相关索引
+CREATE INDEX IF NOT EXISTS idx_inventory_type ON {SCHEMA}.protagonist_inventory(item_type);               -- 按物品类型查询
+CREATE INDEX IF NOT EXISTS idx_inventory_status ON {SCHEMA}.protagonist_inventory(status);                 -- 按状态查询背包
+CREATE INDEX IF NOT EXISTS idx_inv_events_item ON {SCHEMA}.protagonist_inventory_events(item_id);        -- 按物品查询事件
+CREATE INDEX IF NOT EXISTS idx_inv_events_vol ON {SCHEMA}.protagonist_inventory_events(volume_id);        -- 按卷查询背包事件
+
+-- 修炼进度索引
+CREATE INDEX IF NOT EXISTS idx_cultivation_vol ON {SCHEMA}.protagonist_cultivation(volume_id);            -- 按卷查询修炼进度
+CREATE INDEX IF NOT EXISTS idx_cultivation_ch ON {SCHEMA}.protagonist_cultivation(chapter_number);         -- 按章节查询修炼进度
+
+-- ============================================================
+-- 视图（常用查询）
+-- ============================================================
+
+-- 当前持有物品视图：显示主角当前背包中的所有物品
 CREATE OR REPLACE VIEW {SCHEMA}.current_inventory AS
 SELECT item_name, item_type, quantity, quality, description, acquired_chapter
 FROM {SCHEMA}.protagonist_inventory
 WHERE status = 'held'
 ORDER BY item_type, item_name;
 
+-- 技能总览视图：显示所有技能的概览信息及使用统计
 CREATE OR REPLACE VIEW {SCHEMA}.skill_overview AS
 SELECT s.skill_name, s.skill_category, s.skill_level, s.status,
        s.acquired_chapter, s.use_count,
@@ -127,10 +150,102 @@ LEFT JOIN {SCHEMA}.protagonist_skill_events e ON s.id = e.skill_id
 GROUP BY s.id
 ORDER BY s.skill_category, s.acquired_chapter;
 
+-- 修炼进度曲线视图：按章节展示修炼进度变化
 CREATE OR REPLACE VIEW {SCHEMA}.cultivation_curve AS
 SELECT chapter_number, level, progress_pct, breakthrough_type, trigger
 FROM {SCHEMA}.protagonist_cultivation
 ORDER BY chapter_number;
+
+-- ============================================================
+-- 表和字段的中文注释（COMMENT ON）
+-- ============================================================
+
+-- protagonist_skills 表注释
+COMMENT ON TABLE {SCHEMA}.protagonist_skills IS '主角技能主表：记录主角学会的所有技能';
+COMMENT ON COLUMN {SCHEMA}.protagonist_skills.id IS '主键ID';
+COMMENT ON COLUMN {SCHEMA}.protagonist_skills.skill_name IS '技能名称';
+COMMENT ON COLUMN {SCHEMA}.protagonist_skills.skill_category IS '技能分类：账本脑/符/阵/被动/功法等';
+COMMENT ON COLUMN {SCHEMA}.protagonist_skills.skill_level IS '技能等级：入门/固化/小成/大成';
+COMMENT ON COLUMN {SCHEMA}.protagonist_skills.parent_skill_id IS '父技能ID（技能树）';
+COMMENT ON COLUMN {SCHEMA}.protagonist_skills.description IS '技能描述/效果说明';
+COMMENT ON COLUMN {SCHEMA}.protagonist_skills.acquired_chapter IS '获得章节号';
+COMMENT ON COLUMN {SCHEMA}.protagonist_skills.acquired_method IS '获得方式：自悟/修炼突破/副本掉落/交易等';
+COMMENT ON COLUMN {SCHEMA}.protagonist_skills.last_used_chapter IS '最后使用章节号';
+COMMENT ON COLUMN {SCHEMA}.protagonist_skills.use_count IS '使用次数';
+COMMENT ON COLUMN {SCHEMA}.protagonist_skills.status IS '状态：active(可用)/locked(锁定)/forgotten(遗忘)';
+
+-- protagonist_skill_events 表注释
+COMMENT ON TABLE {SCHEMA}.protagonist_skill_events IS '技能时序表：记录技能的每次使用/变化事件';
+COMMENT ON COLUMN {SCHEMA}.protagonist_skill_events.id IS '主键ID';
+COMMENT ON COLUMN {SCHEMA}.protagonist_skill_events.skill_id IS '技能ID';
+COMMENT ON COLUMN {SCHEMA}.protagonist_skill_events.chapter_number IS '事件发生章节号';
+COMMENT ON COLUMN {SCHEMA}.protagonist_skill_events.event_type IS '事件类型：acquired(获得)/upgraded(升级)/used(使用)/forgotten(遗忘)';
+COMMENT ON COLUMN {SCHEMA}.protagonist_skill_events.detail IS '事件详情';
+COMMENT ON COLUMN {SCHEMA}.protagonist_skill_events.volume_id IS '所属卷ID';
+
+-- protagonist_inventory 表注释
+COMMENT ON TABLE {SCHEMA}.protagonist_inventory IS '主角装备/道具主表：记录主角当前拥有的所有物品';
+COMMENT ON COLUMN {SCHEMA}.protagonist_inventory.id IS '主键ID';
+COMMENT ON COLUMN {SCHEMA}.protagonist_inventory.item_name IS '物品名称';
+COMMENT ON COLUMN {SCHEMA}.protagonist_inventory.item_type IS '物品类型：装备/材料/消耗品/工具';
+COMMENT ON COLUMN {SCHEMA}.protagonist_inventory.quantity IS '数量';
+COMMENT ON COLUMN {SCHEMA}.protagonist_inventory.quality IS '品质：普通/稀有/精良/史诗/传说';
+COMMENT ON COLUMN {SCHEMA}.protagonist_inventory.description IS '物品描述';
+COMMENT ON COLUMN {SCHEMA}.protagonist_inventory.acquired_chapter IS '获得章节号';
+COMMENT ON COLUMN {SCHEMA}.protagonist_inventory.acquired_method IS '获得方式：拾取/交易/制作/副本掉落';
+COMMENT ON COLUMN {SCHEMA}.protagonist_inventory.status IS '状态：held(持有)/consumed(已消耗)/equipped(装备中)';
+
+-- protagonist_inventory_events 表注释
+COMMENT ON TABLE {SCHEMA}.protagonist_inventory_events IS '道具时序表：记录物品的获取、使用、消耗等事件';
+COMMENT ON COLUMN {SCHEMA}.protagonist_inventory_events.id IS '主键ID';
+COMMENT ON COLUMN {SCHEMA}.protagonist_inventory_events.item_id IS '物品ID';
+COMMENT ON COLUMN {SCHEMA}.protagonist_inventory_events.chapter_number IS '事件发生章节号';
+COMMENT ON COLUMN {SCHEMA}.protagonist_inventory_events.event_type IS '事件类型：acquired(获得)/used(使用)/lost(丢失)/given(赠予)';
+COMMENT ON COLUMN {SCHEMA}.protagonist_inventory_events.quantity_change IS '数量变化（正数增加，负数减少）';
+COMMENT ON COLUMN {SCHEMA}.protagonist_inventory_events.detail IS '事件详情';
+COMMENT ON COLUMN {SCHEMA}.protagonist_inventory_events.volume_id IS '所属卷ID';
+
+-- protagonist_cultivation 表注释
+COMMENT ON TABLE {SCHEMA}.protagonist_cultivation IS '修炼进度表：记录主角的修炼突破历程';
+COMMENT ON COLUMN {SCHEMA}.protagonist_cultivation.id IS '主键ID';
+COMMENT ON COLUMN {SCHEMA}.protagonist_cultivation.chapter_number IS '记录发生的章节号';
+COMMENT ON COLUMN {SCHEMA}.protagonist_cultivation.level IS '修炼等级/境界（如：段1·炼气前期）';
+COMMENT ON COLUMN {SCHEMA}.protagonist_cultivation.progress_pct IS '进度百分比（0-100）';
+COMMENT ON COLUMN {SCHEMA}.protagonist_cultivation.breakthrough_type IS '突破类型：major(大境界突破)/minor(小境界提升)';
+COMMENT ON COLUMN {SCHEMA}.protagonist_cultivation.trigger IS '触发原因：修炼突破/副本战斗/特殊事件';
+COMMENT ON COLUMN {SCHEMA}.protagonist_cultivation.detail IS '详情描述';
+COMMENT ON COLUMN {SCHEMA}.protagonist_cultivation.volume_id IS '所属卷ID';
+
+-- ============================================================
+-- 视图的中文注释（COMMENT ON）
+-- ============================================================
+
+-- current_inventory 视图注释
+COMMENT ON VIEW {SCHEMA}.current_inventory IS '当前背包：显示主角当前持有的物品';
+COMMENT ON COLUMN {SCHEMA}.current_inventory.item_name IS '物品名称';
+COMMENT ON COLUMN {SCHEMA}.current_inventory.item_type IS '物品类型';
+COMMENT ON COLUMN {SCHEMA}.current_inventory.quantity IS '数量';
+COMMENT ON COLUMN {SCHEMA}.current_inventory.quality IS '品质';
+COMMENT ON COLUMN {SCHEMA}.current_inventory.description IS '物品描述';
+COMMENT ON COLUMN {SCHEMA}.current_inventory.acquired_chapter IS '获得章节';
+
+-- skill_overview 视图注释
+COMMENT ON VIEW {SCHEMA}.skill_overview IS '技能总览：显示所有技能的概览信息及使用统计';
+COMMENT ON COLUMN {SCHEMA}.skill_overview.skill_name IS '技能名称';
+COMMENT ON COLUMN {SCHEMA}.skill_overview.skill_category IS '技能分类';
+COMMENT ON COLUMN {SCHEMA}.skill_overview.skill_level IS '技能等级';
+COMMENT ON COLUMN {SCHEMA}.skill_overview.status IS '技能状态';
+COMMENT ON COLUMN {SCHEMA}.skill_overview.acquired_chapter IS '获得章节';
+COMMENT ON COLUMN {SCHEMA}.skill_overview.use_count IS '使用次数';
+COMMENT ON COLUMN {SCHEMA}.skill_overview.total_events IS '事件总数';
+
+-- cultivation_curve 视图注释
+COMMENT ON VIEW {SCHEMA}.cultivation_curve IS '修炼进度曲线：按章节展示修炼进度变化';
+COMMENT ON COLUMN {SCHEMA}.cultivation_curve.chapter_number IS '章节号';
+COMMENT ON COLUMN {SCHEMA}.cultivation_curve.level IS '修炼等级';
+COMMENT ON COLUMN {SCHEMA}.cultivation_curve.progress_pct IS '进度百分比';
+COMMENT ON COLUMN {SCHEMA}.cultivation_curve.breakthrough_type IS '突破类型';
+COMMENT ON COLUMN {SCHEMA}.cultivation_curve.trigger IS '触发原因';
 """
 
 # ── 技能数据（vol-001~003） ──
