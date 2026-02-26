@@ -39,6 +39,8 @@ novelws init --here
 novelws init my-novel --model claude-sonnet-4-5-20250929
 ```
 
+初始化完成后，新项目已自动包含 Dashboard 静态文件，可直接运行 `novelws dashboard` 启动 Web 仪表盘。
+
 ### 3. 在 Claude Code 中开始创作
 
 在 Claude Code 中打开项目，使用斜杠命令：

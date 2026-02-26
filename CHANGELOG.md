@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.4.0] - 2026-02-26
+
+### Added
+
+- **Dashboard 模板集成** — `novelws init` 初始化时自动安装 Dashboard 静态文件
+  - 新项目可直接运行 `novelws dashboard` 启动 Web 仪表盘
+  - Dashboard 模板存储在 `templates/dashboard/`
+- **Dashboard 安装检查** — `novelws dashboard` 命令添加 dashboard 目录存在性检测
+  - 未安装时给出友好错误提示和解决方案
+
+### Technical
+
+- TypeScript 编译产物正常生成
+- 124 个测试全部通过
+
+---
+
 ## [5.3.0] - 2026-02-26
 
 ### Added
